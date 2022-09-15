@@ -1,73 +1,80 @@
-//
-// Created by Legu on 2022-09-13.
-//
-
 #ifndef WARZONE_ORDER_H
 #define WARZONE_ORDER_H
 
+class OrderList;
+
+class Order;
 
 #include <vector>
 #include <string>
 #include <ostream>
+#include <queue>
+#include <list>
 #include "../Map/Map.h"
 
+class InvalidOrderException : public std::runtime_error {
+public:
+    explicit InvalidOrderException(const std::string &arg);
+};
+
+// Todo implement all orders
+// TODO implement a way to issue orders without card
 class Order {
 public:
     const std::string name;
     const std::string description;
+    Player *issuer;
 
-    Order(std::string name, std::string description);
+    Order(Player *issuer, std::string name, std::string description);
 
-    virtual bool valid() = 0;
-
-    virtual void execute() = 0;
+    /// Throws InvalidOrderException if the order no longer makes sense (due to previous orders)
+    virtual void execute() noexcept(false) = 0;
 
     friend std::ostream &operator<<(std::ostream &os, const Order &order);
+
+    virtual ~Order();
 };
 
 class DeployOrder : public Order {
 public:
-    inline DeployOrder(int reinforcements, Territory *target)
-            : Order("Deploy", "Moving " + std::to_string(reinforcements) + " armies to " + target->name),
-              reinforcements(reinforcements), target(target) {}
+    DeployOrder(Player *issuer, int reinforcements, Territory *target);
 
 private:
-    bool valid() override;
-
-    void execute() override;
+    inline void execute() override {};
 
 private:
     const int reinforcements;
     Territory *target;
+public:
+    virtual ~DeployOrder();
 };
 
 class AdvanceOrder : public Order {
 public:
-    inline AdvanceOrder(int armies, Territory *source, Territory *target)
-            : Order("Advance",
-                    "Advancing " + std::to_string(armies) + " armies from " + source->name + " to " + target->name),
-              armies(armies), source(source), target(target) {}
+    AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target);
 
 private:
-    bool valid() override;
-
-    void execute() override;
+    inline void execute() override {};
 
 private:
     const int armies;
+public:
+    virtual ~AdvanceOrder();
+
+private:
     Territory *source;
     Territory *target;
 };
 
 class BombOrder : public Order {
 public:
-    inline explicit BombOrder(Territory *target)
-            : Order("Bomb", "Bombing " + target->name),
-              target(target) {}
+    explicit BombOrder(Player *issuer, Territory *target);
 
 private:
-    bool valid() override;
+public:
+    virtual ~BombOrder();
 
+private:
     void execute() override;
 
 private:
@@ -76,14 +83,10 @@ private:
 
 class BlockadeOrder : public Order {
 public:
-    inline explicit BlockadeOrder(Territory *target)
-            : Order("Blockade", "Blockading " + target->name),
-              target(target) {}
+    explicit BlockadeOrder(Player *issuer, Territory *target);
 
 private:
-    bool valid() override;
-
-    void execute() override;
+    inline void execute() override {};
 
 private:
     Territory *target;
@@ -91,46 +94,39 @@ private:
 
 class AirliftOrder : public Order {
 public:
-    inline AirliftOrder(int armies, Territory *source, Territory *target)
-            : Order("Airlift",
-                    "Airlifting " + std::to_string(armies) + " armies from " + source->name + " to " + target->name),
-              armies(armies), source(source), target(target) {}
+    AirliftOrder(Player *issuer, int armies, Territory *source, Territory *target);
 
 private:
-    bool valid() override;
-
-    void execute() override;
+    inline void execute() override {};
 
 private:
     const int armies;
-    Territory *const source;
-    Territory *const target;
+    Territory *source;
+    Territory *target;
 };
 
 class NegotiateOrder : public Order {
 public:
-    inline explicit NegotiateOrder(const Player *target)
-            : Order("Negotiate", "Negotiating with " + target->name),
-              target(target) {}
+    explicit NegotiateOrder(Player *issuer, const Player *target);
 
 private:
-    bool valid() override;
-
-    void execute() override;
+    inline void execute() override {};
 
 private:
     const Player *const target;
 };
 
-class OrdersList {
+class OrderList {
 public:
     void remove(int index);
 
     void move(int a, int b);
 
-private:
-    // May be better as a queue?
-    std::vector<Order> orders;
+    std::unique_ptr<Order> pop();
+
+    void push(std::unique_ptr<Order> order);
+
+    std::list<std::unique_ptr<Order>> orders = {};
 };
 
 

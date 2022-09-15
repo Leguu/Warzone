@@ -1,7 +1,3 @@
-//
-// Created by Legu on 2022-09-14.
-//
-
 #ifndef WARZONE_UTILS_H
 #define WARZONE_UTILS_H
 
@@ -10,9 +6,9 @@
 
 class Utils {
 public:
-    static std::string getInputString(const std::string& prompt);
+    static std::string getInputString(const std::string &prompt);
 
-    static int getInputInt(const std::string& prompt);
+    static int getInputInt(const std::string &prompt);
 };
 
 

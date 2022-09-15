@@ -1,21 +1,19 @@
-//
-// Created by Legu on 2022-09-13.
-//
-
 #ifndef WARZONE_CARD_H
 #define WARZONE_CARD_H
+
+class CardManager;
 
 #include <vector>
 #include <string>
 #include <ostream>
-#include "../Orders/Order.h"
+#include "../Player/Player.h"
 
 class Card {
 public:
     const std::string name;
     const std::string description;
 
-    virtual void play() const = 0;
+    virtual void play(Player *issuer) const = 0;
 
     Card(std::string name, std::string description);
 
@@ -27,28 +25,28 @@ class BombCard : public Card {
 public:
     inline BombCard() : Card("Bomb", "Use to destroy half of an enemy territory's army") {}
 
-    void play() const override;
+    void play(Player *issuer) const override;
 };
 
 class BlockadeCard : public Card {
 public:
     inline BlockadeCard() : Card("Blockade", "Use to lose control of a territory but triple its army size") {}
 
-    void play() const override;
+    void play(Player *issuer) const override;
 };
 
 class AirliftCard : public Card {
 public:
     inline AirliftCard() : Card("Airlift", "Use to move armies from any territory to any other") {}
 
-    void play() const override;
+    void play(Player *issuer) const override;
 };
 
 class NegotiateCard : public Card {
 public:
     inline NegotiateCard() : Card("Negotiate", "Use to prevent attacks between you and another player") {}
 
-    void play() const override;
+    void play(Player *issuer) const override;
 };
 
 class Hand {
@@ -60,7 +58,6 @@ public:
 
 class Deck {
 public:
-    /// TODO
     const Card *draw();
 
     /// TODO
@@ -79,7 +76,7 @@ public:
     void listDeck();
 
     /// TODO: Play a card from hand (maybe use the name of the card?), put it in deck
-    void play();
+    void play(std::string name);
 
     void draw();
 

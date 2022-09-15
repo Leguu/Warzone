@@ -1,11 +1,8 @@
-//
-// Created by Legu on 2022-09-13.
-//
-
 #include <iostream>
 #include <utility>
+#include <memory>
 #include "Card.h"
-#include "../GameEngine.h"
+#include "../GameEngine/GameEngine.h"
 #include "../Utils/Utils.h"
 
 std::ostream &operator<<(std::ostream &os, const Hand &hand) {
@@ -48,7 +45,7 @@ std::ostream &operator<<(std::ostream &os, const Card &card) {
 
 Card::Card(std::string name, std::string description) : name(std::move(name)), description(std::move(description)) {}
 
-void BombCard::play() const {
+void BombCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
     auto territoryId = Utils::getInputInt("Please input the ID of the territory you will bomb");
     auto territory = ge->map->findById(territoryId);
@@ -56,6 +53,6 @@ void BombCard::play() const {
         std::cout << "Error: this territory does not exist!" << std::endl;
         return;
     }
-    const auto order = new BombOrder(territory);
-    ge->orders.push(order);
+    auto order = std::make_unique<BombOrder>(issuer, territory);
+    issuer->orders->push(std::move(order));
 }
