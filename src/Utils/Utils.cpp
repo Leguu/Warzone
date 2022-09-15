@@ -1,7 +1,3 @@
-//
-// Created by Legu on 2022-09-14.
-//
-
 #include <iostream>
 #include "Utils.h"
 

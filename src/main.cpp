@@ -1,6 +1,6 @@
 #include <iostream>
 #include "Cards/Card.h"
-#include "GameEngine.h"
+#include "GameEngine/GameEngine.h"
 
 int main() {
     auto ge = new GameEngine("assets/Moon.map");
@@ -9,9 +9,12 @@ int main() {
 
     auto territory = ge->map->findById(0);
 
+    ge->players.push_back(std::make_unique<Player>("Bob"));
+
+
     std::cout << "Armies of " + territory->name + " before: " << territory->armies << std::endl;
 
-    bombCard->play();
+    bombCard->play(ge->players[0].get());
 
     ge->executeOrders();
 
