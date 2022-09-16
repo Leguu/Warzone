@@ -7,7 +7,7 @@
 
 std::ostream &operator<<(std::ostream &os, const Hand &hand) {
     os << "You have " << hand.cards.size() << " cards in your hand." << std::endl;
-    for (auto card: hand.cards) {
+    for (auto &card: hand.cards) {
         os << card << std::endl;
     }
     return os;
@@ -15,13 +15,13 @@ std::ostream &operator<<(std::ostream &os, const Hand &hand) {
 
 std::ostream &operator<<(std::ostream &os, const Deck &deck) {
     os << "You have " << deck.cards.size() << " cards in your deck." << std::endl;
-    for (auto card: deck.cards) {
+    for (auto &card: deck.cards) {
         os << card << std::endl;
     }
     return os;
 }
 
-const Card *Deck::draw() {
+std::unique_ptr<Card> Deck::draw() {
     return nullptr;
 }
 
@@ -35,7 +35,7 @@ void CardManager::listDeck() {
 
 void CardManager::draw() {
     auto card = this->deck.draw();
-    this->hand.cards.push_back(card);
+    this->hand.cards.push_back(std::move(card));
 }
 
 std::ostream &operator<<(std::ostream &os, const Card &card) {
@@ -44,6 +44,8 @@ std::ostream &operator<<(std::ostream &os, const Card &card) {
 }
 
 Card::Card(std::string name, std::string description) : name(std::move(name)), description(std::move(description)) {}
+
+Card::~Card() = default;
 
 void BombCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
@@ -55,4 +57,24 @@ void BombCard::play(Player *issuer) const {
     }
     auto order = std::make_unique<BombOrder>(issuer, territory);
     issuer->orders->push(std::move(order));
+}
+
+BombCard::~BombCard() = default;
+
+BlockadeCard::~BlockadeCard() = default;
+
+AirliftCard::~AirliftCard() = default;
+
+NegotiateCard::~NegotiateCard() = default;
+
+void BlockadeCard::play(Player *issuer) const {
+
+}
+
+void AirliftCard::play(Player *issuer) const {
+
+}
+
+void NegotiateCard::play(Player *issuer) const {
+
 }

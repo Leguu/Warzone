@@ -32,6 +32,8 @@ public:
     // TODO: Ask every player to issue an order, or play some cards.
     inline void issueOrders() {}
 
+    void listOrders() {}
+
     bool executeOrders();
 
 private:

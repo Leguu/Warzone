@@ -11,7 +11,6 @@ int main() {
 
     ge->players.push_back(std::make_unique<Player>("Bob"));
 
-
     std::cout << "Armies of " + territory->name + " before: " << territory->armies << std::endl;
 
     bombCard->play(ge->players[0].get());

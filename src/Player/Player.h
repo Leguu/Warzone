@@ -13,14 +13,12 @@ class Player;
 class Player {
 public:
     const std::string name;
-    std::unique_ptr<OrderList> orders;
-    std::unique_ptr<CardManager> cardManager;
-    std::vector<Territory *> ownedTerritories;
+    std::unique_ptr<OrderList> orders = std::make_unique<OrderList>();
+    std::unique_ptr<CardManager> cardManager = std::make_unique<CardManager>();
+    std::vector<Territory *> ownedTerritories = {};
     int reinforcements = 0;
 
-    inline explicit Player(std::string name) : name(std::move(name)) {
-        orders = std::make_unique<OrderList>();
-    }
+    inline explicit Player(std::string name) : name(std::move(name)) {}
 
     const std::vector<Territory *> toAttack();
 

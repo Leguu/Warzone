@@ -18,6 +18,7 @@ public:
     Continent(std::string name, int bonus);
 
 protected:
+    /// TODO list of references? also for Territory::adjacentTerritories
     std::vector<Territory *> territories = {};
 
     friend class MapLoader;
@@ -43,6 +44,7 @@ protected:
     static int idIncrement;
 
     std::vector<Territory *> adjacentTerritories;
+    /// Todo is this really necessary?
     Continent *continent = nullptr;
 
     friend class MapLoader;
@@ -50,12 +52,14 @@ protected:
 
 class Map {
 public:
+    // TODO Map owns these pointers, they should be destructed properly.
+    // Could probably be unique_ptrs to make that clear
     const std::vector<Continent *> continents;
     const std::vector<Territory *> allTerritories;
 
     Map(std::vector<Continent *> continents, std::vector<Territory *> territories);
 
-    /// Do all continents have an owner?
+    /// Figure out whether every continents have an owner?
     inline bool allContinentsOwned() { return false; }
 
     [[nodiscard]] Territory *findById(int id) const;

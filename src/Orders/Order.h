@@ -10,18 +10,20 @@ class Order;
 #include <ostream>
 #include <queue>
 #include <list>
-#include "../Map/Map.h"
+#include "../Player/Player.h"
 
+/// Thrown when an order can not be executed due to invalid state
 class InvalidOrderException : public std::runtime_error {
 public:
     explicit InvalidOrderException(const std::string &arg);
 };
 
 // Todo implement all orders
-// TODO implement a way to issue orders without card
+// TODO implement a way to issue orders without card... maybe an order manager? yeah... order manager owned by gameengine (should be in GameEngine.h)
 class Order {
 public:
     const std::string name;
+    // TODO: maybe this should be a function... maybe the number of people changes between when an order is created and it is executed
     const std::string description;
     Player *issuer;
 
@@ -39,29 +41,25 @@ class DeployOrder : public Order {
 public:
     DeployOrder(Player *issuer, int reinforcements, Territory *target);
 
-private:
     inline void execute() override {};
+
+    ~DeployOrder() override;
 
 private:
     const int reinforcements;
     Territory *target;
-public:
-    virtual ~DeployOrder();
 };
 
 class AdvanceOrder : public Order {
 public:
     AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target);
 
-private:
     inline void execute() override {};
+
+    ~AdvanceOrder() override;
 
 private:
     const int armies;
-public:
-    virtual ~AdvanceOrder();
-
-private:
     Territory *source;
     Territory *target;
 };
@@ -70,14 +68,13 @@ class BombOrder : public Order {
 public:
     explicit BombOrder(Player *issuer, Territory *target);
 
-private:
-public:
-    virtual ~BombOrder();
-
-private:
     void execute() override;
 
+    ~BombOrder() override;
+
 private:
+    // TODO All these Territory * could maybe be references?
+    // They should definitely not be nullable.
     Territory *target;
 };
 
@@ -96,7 +93,6 @@ class AirliftOrder : public Order {
 public:
     AirliftOrder(Player *issuer, int armies, Territory *source, Territory *target);
 
-private:
     inline void execute() override {};
 
 private:
@@ -109,7 +105,6 @@ class NegotiateOrder : public Order {
 public:
     explicit NegotiateOrder(Player *issuer, const Player *target);
 
-private:
     inline void execute() override {};
 
 private:
