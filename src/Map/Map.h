@@ -96,6 +96,11 @@ class MapLoader {
 public:
     // TODO
     // TODO Throws InvalidMapFileException or InvalidGameMapException
+    // Throw when:
+    // - territories doubly adjacent
+    // - territories are adjacent to at least one thing
+    // - territories have a continent
+    // - continents have at least one territory
     static std::unique_ptr<Map> importMap(const std::string &path) noexcept(false);
 };
 

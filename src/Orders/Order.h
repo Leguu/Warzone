@@ -121,6 +121,7 @@ public:
 
     void push(std::unique_ptr<Order> order);
 
+private:
     std::list<std::unique_ptr<Order>> orders = {};
 };
 

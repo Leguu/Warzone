@@ -2,6 +2,7 @@
 #include "Cards/Card.h"
 #include "GameEngine/GameEngine.h"
 
+// TODO Test functions
 int main() {
     auto ge = new GameEngine("assets/Moon.map");
 

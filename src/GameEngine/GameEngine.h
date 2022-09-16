@@ -19,6 +19,9 @@ public:
         return _instance;
     }
 
+    // TODO
+    Player *findPlayerByName(std::string name);
+
     explicit GameEngine(const std::string &mapPath);
 
     void play();
@@ -32,6 +35,7 @@ public:
     // TODO: Ask every player to issue an order, or play some cards.
     inline void issueOrders() {}
 
+    /// This is a command
     void listOrders() {}
 
     bool executeOrders();
