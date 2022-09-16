@@ -17,6 +17,8 @@ public:
 
     Card(std::string name, std::string description);
 
+    virtual ~Card();
+
 private:
     friend std::ostream &operator<<(std::ostream &os, const Card &card);
 };
@@ -26,6 +28,8 @@ public:
     inline BombCard() : Card("Bomb", "Use to destroy half of an enemy territory's army") {}
 
     void play(Player *issuer) const override;
+
+    ~BombCard() override;
 };
 
 class BlockadeCard : public Card {
@@ -33,6 +37,8 @@ public:
     inline BlockadeCard() : Card("Blockade", "Use to lose control of a territory but triple its army size") {}
 
     void play(Player *issuer) const override;
+
+    ~BlockadeCard() override;
 };
 
 class AirliftCard : public Card {
@@ -40,6 +46,8 @@ public:
     inline AirliftCard() : Card("Airlift", "Use to move armies from any territory to any other") {}
 
     void play(Player *issuer) const override;
+
+    ~AirliftCard() override;
 };
 
 class NegotiateCard : public Card {
@@ -47,18 +55,23 @@ public:
     inline NegotiateCard() : Card("Negotiate", "Use to prevent attacks between you and another player") {}
 
     void play(Player *issuer) const override;
+
+    ~NegotiateCard() override;
 };
 
 class Hand {
 public:
-    std::vector<const Card *> cards;
+    std::vector<std::unique_ptr<Card>> cards;
+
+    /// TODO: remove by name
+    std::unique_ptr<Card> remove(std::string name);
 
     friend std::ostream &operator<<(std::ostream &os, const Hand &hand);
 };
 
 class Deck {
 public:
-    const Card *draw();
+    std::unique_ptr<Card> draw();
 
     /// TODO
     void put(Card *);
@@ -66,7 +79,7 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const Deck &deck);
 
 private:
-    std::vector<Card *> cards;
+    std::vector<std::unique_ptr<Card>> cards;
 };
 
 class CardManager {

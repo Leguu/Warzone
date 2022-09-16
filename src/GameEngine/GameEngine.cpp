@@ -8,7 +8,7 @@ GameEngine::GameEngine(const std::string &mp) {
     _instance = this;
 }
 
-/// @returns bool Game Over
+/// @returns Game Over
 bool GameEngine::executeOrders() {
     std::cout << std::endl << "Executing orders..." << std::endl;
     for (auto &player: this->players) {
@@ -36,8 +36,9 @@ void GameEngine::play() {
 
         issueOrders();
 
+        auto gameOver = executeOrders();
         // If the game is over
-        if (executeOrders()) {
+        if (gameOver) {
             break;
         }
     }
