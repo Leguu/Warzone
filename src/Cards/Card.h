@@ -20,6 +20,7 @@ public:
     virtual ~Card();
 
 private:
+    //to print all the cards
     friend std::ostream &operator<<(std::ostream &os, const Card &card);
 };
 
@@ -61,6 +62,7 @@ public:
 
 class Hand {
 public:
+
     std::vector<std::unique_ptr<Card>> cards;
 
     /// TODO: remove by name

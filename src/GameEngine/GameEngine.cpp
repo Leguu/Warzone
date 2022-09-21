@@ -28,6 +28,15 @@ bool GameEngine::executeOrders() {
     return false;
 }
 
+
+//Player *GameEngine::findPlayerByName(std::string name) {
+//    for (auto &eachPlayer: this->players) {
+//        if (eachPlayer->name == name) {
+//            return std::make_unique<Player>(eachPlayer);
+//        }
+//    }
+//}
+
 void GameEngine::play() {
     initialisePlayers();
 
