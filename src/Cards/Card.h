@@ -65,17 +65,17 @@ public:
 
     std::vector<Card*> cards;
 
-    /// TODO: remove by name
-    Card* remove(std::string name);
-
     friend std::ostream &operator<<(std::ostream &os, const Hand &hand);
 };
 
 class Deck {
 public:
+
+    explicit Deck(std::vector<Card*> cardCollection);
+    std::vector<Card*> cardCollection;
+
     Card* draw();
 
-    /// TODO
     void put(Card* card);
 
     friend std::ostream &operator<<(std::ostream &os, const Deck &deck);
@@ -86,15 +86,16 @@ private:
 
 class CardManager {
 public:
-    explicit CardManager(Player* playerManaged);
+    CardManager(Player *playerManaged, Hand *hand, Deck *deck);
     void listHand();
 
     void listDeck();
 
-    /// TODO: Play a card from hand (maybe use the name of the card?), put it in deck
-    // should be done
     void play(std::string &name);
 
+    int remove(const std::string& name);
+
+    // TODO
     void draw();
 
 private:
