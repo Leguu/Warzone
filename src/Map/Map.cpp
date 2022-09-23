@@ -1,9 +1,72 @@
-#include "Map.h"
 #include <string>
-#include <utility>
 #include <vector>
-#include <utility>
 #include <iostream>
+#include "Map.h"
+
+
+int Territory::idIncrement = 0;
+
+Territory::Territory() {
+
+}
+
+Territory::Territory(std::string name, std::string continentName)
+        : name(std::move(name)), continentName(std::move(continentName)) {}
+
+Territory::Territory(const Territory &orgTerritory) {
+    this->id = orgTerritory.id;
+    this->name = orgTerritory.name;
+    this->continentName = orgTerritory.continentName;
+    this->owner = orgTerritory.owner;
+    this->adjacentTerritories = orgTerritory.adjacentTerritories;
+    this->armies = orgTerritory.armies;
+
+}
+
+Territory &Territory::operator=(const Territory &territory) {
+    this->id = territory.id;
+    this->name = territory.name;
+    this->continentName = territory.continentName;
+    this->owner = territory.owner;
+    this->adjacentTerritories = territory.adjacentTerritories;
+    this->armies = territory.armies;
+    return *this;
+}
+
+
+std::ostream &operator<<(std::ostream &os, const Territory &territory) {
+    os << "ID of territory: " << territory.id << "\n"
+       << "Name of territory: " << territory.name << "\n"
+       << "Continent it belongs to: " << territory.continentName << "\n"
+       << "Owner of territory: " << territory.owner << "\n"
+       << "Number of armies: " << territory.armies << "\n"
+       << "List of neighbors" << "\n";
+
+    for (auto p : territory.adjacentTerritories) {
+        os << p->name << "\n";
+    }
+
+    return os;
+}
+
+/*std::string Territory::toString() const {
+    std::string str;
+    str += "[" + std::to_string(id) + "] ";
+    str += name;
+    if (owner) {
+        str += " (" + std::to_string(armies) + ", " + owner->name + ")";
+    } else {
+        str += " (" + std::to_string(armies) + ")";
+    }
+    return str;
+}*/
+
+Territory::~Territory() {
+    delete owner;
+    for (auto p: adjacentTerritories) {
+        delete p;
+    }
+}
 
 Continent::Continent() : bonus(0) {}
 
@@ -18,7 +81,6 @@ Continent::Continent(const Continent &orgContinent) {
     this->ownedTerritories = orgContinent.ownedTerritories;
 }
 
-// Should we go with intellisense and make = default?
 Continent &Continent::operator=(const Continent &continent) {
     this->name = continent.name;
     this->bonus = continent.bonus;
@@ -27,19 +89,26 @@ Continent &Continent::operator=(const Continent &continent) {
 }
 
 std::ostream &operator<<(std::ostream &os, const Continent &continent) {
-    std::cout << "Name of continent: " << continent.name << "\n"
-              << "Bonus: " << continent.bonus << std::endl;
+    os << "Name of continent: " << continent.name << "\n"
+              << "Bonus: " << continent.bonus << "\n"
+              << "Owned territories: " << "\n";
+
+    for (auto p : continent.ownedTerritories) {
+        os << p->name << "\n";
+    }
+    return os;
 }
 
 Continent::~Continent() {
-    for (auto p : ownedTerritories) {
+    for (auto p: ownedTerritories) {
         delete p;
     }
+
 }
 
-Player *Continent::owner() {
+/*Player *Continent::owner() {
     return nullptr;
-}
+}*/
 
 void Continent::addTerritory(Territory *territory) {
     ownedTerritories.push_back(territory);
@@ -74,59 +143,6 @@ std::unique_ptr<Map> MapLoader::importMap(const std::string &path) {
 }
 */
 
-
-int Territory::idIncrement = 0;
-
-Territory::Territory() {
-
-}
-
-Territory::Territory(std::string name, std::string continentName)
-: name(std::move(name)), continentName(std::move(continentName)) {}
-
-Territory::Territory(const Territory &orgTerritory) {
-    this->id = orgTerritory.id;
-    this->name = orgTerritory.name;
-    this->continentName = orgTerritory.continentName;
-    this->owner = orgTerritory.owner;
-    this->adjacentTerritories = orgTerritory.adjacentTerritories;
-    this->armies = orgTerritory.armies;
-
-}
-
-Territory &Territory::operator=(const Territory &territory) {
-    this->id = territory.id;
-    this->name = territory.name;
-    this->continentName = territory.continentName;
-    this->owner = territory.owner;
-    this->adjacentTerritories = territory.adjacentTerritories;
-    this->armies = territory.armies;
-    return *this;
-}
-
-
-std::ostream &operator<<(std::ostream &os, const Territory &territory) {
-    os << territory.toString();
-    return os;
-}
-
-std::string Territory::toString() const {
-    std::string str;
-    str += "[" + std::to_string(id) + "] ";
-    str += name;
-    if (owner) {
-        str += " (" + std::to_string(armies) + ", " + owner->name + ")";
-    } else {
-        str += " (" + std::to_string(armies) + ")";
-    }
-    return str;
-}
-
-Territory::~Territory() {
-
-}
-
-
 Territory *Map::findById(int id) const {
     for (auto territory: allTerritories) {
         if (territory->id == id) {
@@ -136,15 +152,50 @@ Territory *Map::findById(int id) const {
     return nullptr;
 }
 
-Map::Map(std::vector<Continent *> continents, std::vector<Territory *> territories) : continents(std::move(
+Map::Map() {}
+
+Map::Map(std::string name, std::vector<Continent *> continents, std::vector<Territory *> territories) :
+        name(std::move(name)), continents(std::move(
         continents)), allTerritories(std::move(territories)) {}
 
+Map::Map(const Map &orgMap) {
+    this->name = orgMap.name;
+    this->continents = orgMap.continents;
+    this->allTerritories = orgMap.allTerritories;
+}
+
+Map &Map::operator=(const Map &map) {
+    this->name = map.name;
+    this->continents = map.continents;
+    this->allTerritories = map.allTerritories;
+    return *this;
+}
+
+
 std::ostream &operator<<(std::ostream &os, const Map &map) {
+    os << "Name of map:\n" << map.name << "\n"
+        << "List of Continents in map:" << "\n";
+    for (auto p : map.continents) {
+        os << p->name << "\n";
+    }
+
+    os << "List of all territories in map" <<  "\n";
+    for (auto p : map.allTerritories) {
+        os << p->name << "\n";
+    }
     return os;
 }
 
 Map::~Map() {
+    for (auto p: continents) {
+        delete p;
+    }
+
+    for (auto p: allTerritories) {
+        delete p;
+    }
 }
+
 
 const char *InvalidMapFileException::what() const noexcept {
     return "This map file has an invalid format or cannot be read.";

@@ -11,50 +11,11 @@ class Territory;
 using std::string;
 using std::vector;
 
-
-class Continent {
-public:
-     string name;
-     int bonus;
-    vector<Territory *> ownedTerritories;
-
-    // TODO: Calculate the owner
-    Player *owner();
-
-    // Default constructor
-    Continent();
-
-    // Constructor with necessary name and optional bonus
-    explicit Continent(string name, int bonus );
-
-    // Constructor with name, list of pointers to territories and an optional bonus
-    Continent(string name, vector<Territory *> territories, int bonus);
-
-    // Copy constructor
-    Continent(const Continent &orgContinent);
-
-    // Assigment constructor
-    Continent &operator=(const Continent &continent);
-
-    // Insertion operator
-    friend std::ostream &operator<<(std::ostream &os, const Continent &continent);
-
-    // Destructor
-    virtual ~Continent();
-
-    // A method to add a territory to a continent
-    void addTerritory(Territory *);
-
-
-protected:
-    friend class MapLoader;
-};
-
 class Territory {
 public:
-     int id = idIncrement++;
-     string name;
-     string continentName;
+    int id = idIncrement++;
+    string name;
+    string continentName;
     Player *owner = nullptr;
     vector<Territory *> adjacentTerritories;
     int armies = 10;
@@ -78,7 +39,7 @@ public:
     virtual ~Territory();
 
     // To string method
-    [[nodiscard]] string toString() const;
+   // [[nodiscard]] string toString() const;
 
 
 protected:
@@ -86,26 +47,63 @@ protected:
     /// The ids for allTerritories need to be globally unique, so this can be static.
     static int idIncrement;
 
-    /// Todo is this really necessary?
-    Continent *continent = nullptr;
+    // Todo is this really necessary? Not for now, will come back later
+   // Continent *continent = nullptr;
 
     friend class MapLoader;
 };
 
+
+class Continent {
+public:
+     string name;
+     int bonus;
+    vector<Territory*> ownedTerritories;
+
+    // TODO: Calculate the owner
+//    Player *owner();
+
+    // Default constructor
+    Continent();
+
+    // Constructor with necessary name and optional bonus
+    explicit Continent(string name, int bonus );
+
+    // Constructor with name, list of pointers to territories and an optional bonus
+    Continent(string name, vector<Territory*> territories, int bonus);
+
+    // Copy constructor
+    Continent(const Continent &orgContinent);
+
+    // Assigment constructor
+    Continent &operator=(const Continent &continent);
+
+    // Insertion operator
+    friend std::ostream &operator<<(std::ostream &os, const Continent &continent);
+
+    // Destructor
+    virtual ~Continent();
+
+    // A method to add a territory to a continent
+    void addTerritory(Territory* territory);
+
+protected:
+    friend class MapLoader;
+};
+
+
 class Map {
 public:
     // TODO Map owns these pointers, they should be destructed properly.
-    // Could probably be unique_ptrs to make that clear
-    // no unique pointers will be used
-    const string name;
-    const std::vector<Continent *> continents;
-    const std::vector<Territory *> allTerritories;
+     string name;
+     std::vector<Continent *> continents;
+     std::vector<Territory *> allTerritories;
 
     // Default Constructors
     Map();
 
     // Constructor with necessary parameters
-    Map(std::vector<Continent *> continents, std::vector<Territory *> territories);
+    Map(std::string name, std::vector<Continent *> continents, std::vector<Territory *> territories);
 
     // Copy Constructor
     Map(const Map &orgMap);
@@ -116,8 +114,26 @@ public:
     // Insertion operator
     friend std::ostream &operator<<(std::ostream &os, const Map &map);
 
+    // A method to add a territory
+    void addTerritory(Territory* territory);
+
+    // A method to connect territories
+    void connectNeighbors (Territory* firstTerr, Territory* secondTerr);
+
+    // A method to add a continent
+    void addContinent (Continent* continent);
+
+    // A method to add a territory to a continent
+    void addTerritoryToContinent (Continent* continent, Territory* territory);
+
     // A method that validates maps
     bool validate();
+
+    // A method to check if a territory has one continent
+    bool uniqueContinent();
+
+    // A method to check if all territories are connected
+    bool areTerritoriesConnected();
 
     /// Figure out whether every continents have an owner?
     inline bool allContinentsOwned() { return false; }
@@ -133,7 +149,6 @@ public:
     // Territory2: adjacent, adjacent, adjacent
     friend std::ostream &operator<<(std::ostream &os, const Map &map);
 
-    // todo
     virtual ~Map();
 
 private:
