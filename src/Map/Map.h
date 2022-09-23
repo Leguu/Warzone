@@ -14,8 +14,8 @@ using std::vector;
 
 class Continent {
 public:
-    const string name;
-    const int bonus;
+     string name;
+     int bonus;
     vector<Territory *> ownedTerritories;
 
     // TODO: Calculate the owner
@@ -25,10 +25,10 @@ public:
     Continent();
 
     // Constructor with necessary name and optional bonus
-    Continent(string name, int bonus = 0);
+    explicit Continent(string name, int bonus );
 
     // Constructor with name, list of pointers to territories and an optional bonus
-    Continent(string name, vector<Territory *> territories, int bonus = 0);
+    Continent(string name, vector<Territory *> territories, int bonus);
 
     // Copy constructor
     Continent(const Continent &orgContinent);
@@ -42,24 +42,28 @@ public:
     // Destructor
     virtual ~Continent();
 
+    // A method to add a territory to a continent
+    void addTerritory(Territory *);
+
+
 protected:
     friend class MapLoader;
 };
 
 class Territory {
 public:
-    const int id = idIncrement++;
-    const string name;
-    const string continentName;
+     int id = idIncrement++;
+     string name;
+     string continentName;
     Player *owner = nullptr;
     vector<Territory *> adjacentTerritories;
-    // int armies = 10;
+    int armies = 10;
 
     // Default constructor
     Territory();
 
     // Constructor with necessary parameters
-    Territory(int id, string name, string continentName);
+    Territory( string name, string continentName);
 
     // Copy constructor
     Territory(const Territory &orgTerritory);
@@ -111,6 +115,9 @@ public:
 
     // Insertion operator
     friend std::ostream &operator<<(std::ostream &os, const Map &map);
+
+    // A method that validates maps
+    bool validate();
 
     /// Figure out whether every continents have an owner?
     inline bool allContinentsOwned() { return false; }

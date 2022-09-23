@@ -1,15 +1,51 @@
 #include "Map.h"
-
+#include <string>
 #include <utility>
+#include <vector>
+#include <utility>
+#include <iostream>
+
+Continent::Continent() : bonus(0) {}
 
 Continent::Continent(std::string name, int bonus) : name(std::move(name)), bonus(bonus) {}
+
+Continent::Continent(string name, vector<Territory *> territories, int bonus)
+        : name(std::move(name)), ownedTerritories(std::move(territories)), bonus(bonus) {}
+
+Continent::Continent(const Continent &orgContinent) {
+    this->name = orgContinent.name;
+    this->bonus = orgContinent.bonus;
+    this->ownedTerritories = orgContinent.ownedTerritories;
+}
+
+// Should we go with intellisense and make = default?
+Continent &Continent::operator=(const Continent &continent) {
+    this->name = continent.name;
+    this->bonus = continent.bonus;
+    this->ownedTerritories = continent.ownedTerritories;
+    return *this;
+}
+
+std::ostream &operator<<(std::ostream &os, const Continent &continent) {
+    std::cout << "Name of continent: " << continent.name << "\n"
+              << "Bonus: " << continent.bonus << std::endl;
+}
+
+Continent::~Continent() {
+    for (auto p : ownedTerritories) {
+        delete p;
+    }
+}
 
 Player *Continent::owner() {
     return nullptr;
 }
 
-int Territory::idIncrement = 0;
+void Continent::addTerritory(Territory *territory) {
+    ownedTerritories.push_back(territory);
+}
 
+/*
 std::unique_ptr<Map> MapLoader::importMap(const std::string &path) {
     auto allTerritories = std::vector<Territory *>{};
 
@@ -36,8 +72,38 @@ std::unique_ptr<Map> MapLoader::importMap(const std::string &path) {
 
     return map;
 }
+*/
 
-Territory::Territory(std::string name) : name(std::move(name)) {}
+
+int Territory::idIncrement = 0;
+
+Territory::Territory() {
+
+}
+
+Territory::Territory(std::string name, std::string continentName)
+: name(std::move(name)), continentName(std::move(continentName)) {}
+
+Territory::Territory(const Territory &orgTerritory) {
+    this->id = orgTerritory.id;
+    this->name = orgTerritory.name;
+    this->continentName = orgTerritory.continentName;
+    this->owner = orgTerritory.owner;
+    this->adjacentTerritories = orgTerritory.adjacentTerritories;
+    this->armies = orgTerritory.armies;
+
+}
+
+Territory &Territory::operator=(const Territory &territory) {
+    this->id = territory.id;
+    this->name = territory.name;
+    this->continentName = territory.continentName;
+    this->owner = territory.owner;
+    this->adjacentTerritories = territory.adjacentTerritories;
+    this->armies = territory.armies;
+    return *this;
+}
+
 
 std::ostream &operator<<(std::ostream &os, const Territory &territory) {
     os << territory.toString();
@@ -55,6 +121,11 @@ std::string Territory::toString() const {
     }
     return str;
 }
+
+Territory::~Territory() {
+
+}
+
 
 Territory *Map::findById(int id) const {
     for (auto territory: allTerritories) {
