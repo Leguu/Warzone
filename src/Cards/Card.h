@@ -63,41 +63,44 @@ public:
 class Hand {
 public:
 
-    std::vector<std::unique_ptr<Card>> cards;
+    std::vector<Card*> cards;
 
     /// TODO: remove by name
-    std::unique_ptr<Card> remove(std::string name);
+    Card* remove(std::string name);
 
     friend std::ostream &operator<<(std::ostream &os, const Hand &hand);
 };
 
 class Deck {
 public:
-    std::unique_ptr<Card> draw();
+    Card* draw();
 
     /// TODO
-    void put(Card *);
+    void put(Card* card);
 
     friend std::ostream &operator<<(std::ostream &os, const Deck &deck);
 
 private:
-    std::vector<std::unique_ptr<Card>> cards;
+    std::vector<Card*> cards;
 };
 
 class CardManager {
 public:
+    explicit CardManager(Player* playerManaged);
     void listHand();
 
     void listDeck();
 
     /// TODO: Play a card from hand (maybe use the name of the card?), put it in deck
-    void play(std::string name);
+    // should be done
+    void play(std::string &name);
 
     void draw();
 
 private:
-    Hand hand;
-    Deck deck;
+    Hand* hand;
+    Deck* deck;
+    Player* player;
 };
 
 

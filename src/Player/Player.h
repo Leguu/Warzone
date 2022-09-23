@@ -14,7 +14,7 @@ class Player {
 public:
     const std::string name;
     std::unique_ptr<OrderList> orders = std::make_unique<OrderList>();
-    std::unique_ptr<CardManager> cardManager = std::make_unique<CardManager>();
+    std::unique_ptr<CardManager> cardManager = std::make_unique<CardManager>(this);
     std::vector<Territory *> ownedTerritories = {};
     int reinforcements = 0;
 

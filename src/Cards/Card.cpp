@@ -4,6 +4,7 @@
 #include "Card.h"
 #include "../GameEngine/GameEngine.h"
 #include "../Utils/Utils.h"
+#include "../Player/Player.h"
 
 /**
  * Function to print to console the content's of one's hand
@@ -37,7 +38,7 @@ std::ostream &operator<<(std::ostream &os, const Deck &deck) {
  * Draw a card from the deck
  * @return The card that has been drawn
  */
-std::unique_ptr<Card> Deck::draw() {
+Card* Deck::draw() {
     return nullptr;
 }
 
@@ -59,8 +60,35 @@ void CardManager::listDeck() {
  * Draw a card from the deck and add it to your hand
  */
 void CardManager::draw() {
-    auto card = this->deck.draw();
-    this->hand.cards.push_back(std::move(card));
+    auto card = this->deck->draw();
+    this->hand->cards.push_back(std::move(card));
+}
+
+/**
+ * CardManager object constructor
+ * @param playerManaged The Player the CardManager will overlook
+ */
+CardManager::CardManager(Player *playerManaged) {
+    this->player = playerManaged;
+}
+
+
+/**
+ * Play a card from the deck and add it to the deck
+ * @param name The name of the card
+ */
+void CardManager::play(std::string &name) {
+    Card* cardToPlay = nullptr;
+    for (auto &card: this->hand->cards) {
+        if(card->name == name){
+            cardToPlay = card;
+        }
+    }
+    if(typeid(cardToPlay) == typeid(std::string) || typeid(cardToPlay).name() == "AirliftCard"){
+        cardToPlay->play(this->player);
+    }
+    this->deck->put(cardToPlay);
+    this->hand->cards.push_back(std::move(cardToPlay));
 }
 
 /**
@@ -91,8 +119,6 @@ Card::~Card() = default;
  * @param issuer The player playing the card
  */
 void BombCard::play(Player *issuer) const {
-    //keep it simple, caller will do verifications to make sure that a valid territory has been chosen by making sure return is not null
-    //maybe ask for the Territory ID prior to calling the card and pass it as a param
     auto ge = GameEngine::instance();
     auto territoryId = Utils::getInputInt("Please input the ID of the territory you will bomb");
     auto territory = ge->map->findById(territoryId);
@@ -150,6 +176,23 @@ void BlockadeCard::play(Player *issuer) const {
 }
 
 /**
+ * Remove a card from a player's hand
+ * @param name  The name of the card
+ * @return The card that will be removed
+ */
+Card* Hand::remove(std::string name){
+
+}
+
+/**
+ * Put a card in the deck
+ * @param card The card that will be added to the deck
+ */
+void Deck::put(Card* card){
+
+}
+
+/**
  * Playing the airlift card
  * @param issuer The player playing the card
  */
@@ -180,8 +223,9 @@ void AirliftCard::play(Player *issuer) const {
 //        std::cout << "Error: Please make sure the target territory belongs to you!" << std::endl;
 //        return;
 //    }
-    auto order = std::make_unique<AirliftOrder>(issuer, armiesSize, territoryPlayer, territoryTarget);
-    issuer->orders->push(std::move(order));
+//    auto order = std::make_unique<AirliftOrder>(issuer, armiesSize, territoryPlayer, territoryTarget);
+//    issuer->orders->push(std::move(order));
+      issuer->cardManager->play((std::string &) "AirliftCard");
 }
 
 /**
@@ -196,6 +240,7 @@ void NegotiateCard::play(Player *issuer) const {
         std::cout << "Error: this player does not exist!" << std::endl;
         return;
     }
-    auto order = std::make_unique<NegotiateOrder>(issuer, player);
-    issuer->orders->push(std::move(order));
+    //auto order = std::make_unique<NegotiateOrder>(issuer, player);
+    //issuer->orders->push(std::move(order));
+    issuer->cardManager->play((std::string &) "NegotiateCard");
 }
