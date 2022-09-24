@@ -118,11 +118,10 @@ void BlockadeCard::play(Player *issuer) const {
         std::cout << "Error: this territory does not exist!" << std::endl;
         return;
     }
-    if (territory->owner == issuer) {
+    if (territory->owner != issuer) {
         std::cout << "Error: Cannot blockade your own territory!" << std::endl;
         return;
     }
-
     auto order = std::make_unique<BlockadeOrder>(issuer, territory);
     issuer->orders->push(std::move(order));
 }
@@ -176,9 +175,8 @@ void AirliftCard::play(Player *issuer) const {
 //        std::cout << "Error: Please make sure the target territory belongs to you!" << std::endl;
 //        return;
 //    }
-//    auto order = std::make_unique<AirliftOrder>(issuer, armiesSize, territoryPlayer, territoryTarget);
-//    issuer->orders->push(std::move(order));
-      issuer->play((std::string &) "AirliftCard");
+    auto order = std::make_unique<AirliftOrder>(issuer, armiesSize, territoryPlayer, territoryTarget);
+    issuer->orders->push(std::move(order));
 }
 
 /**
@@ -193,7 +191,16 @@ void NegotiateCard::play(Player *issuer) const {
         std::cout << "Error: this player does not exist!" << std::endl;
         return;
     }
-    //auto order = std::make_unique<NegotiateOrder>(issuer, player);
-    //issuer->orders->push(std::move(order));
-    issuer->play((std::string &) "NegotiateCard");
+    auto order = std::make_unique<NegotiateOrder>(issuer, player);
+    issuer->orders->push(std::move(order));
+}
+
+/**
+ * Draw a card from the deck
+ * @return The card that has been drawn
+ */
+Card* Deck::draw() {
+    auto* card = this->cardCollection.back();
+    this->cardCollection.pop_back();
+    return card;
 }

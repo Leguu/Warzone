@@ -16,9 +16,7 @@ void Player::play(std::string &name) {
         }
     }
     if (cardToPlay != nullptr){
-        if(cardToPlay->name == "AirliftCard" || cardToPlay->name == "NegotiateCard"){
-            cardToPlay->play(this);
-        }
+        cardToPlay->play(this);
         ge->deck->put(cardToPlay);
         this->hand->cards.push_back(cardToPlay);
     }else{
@@ -32,15 +30,15 @@ void Player::play(std::string &name) {
  * @param name  The name of the card
  * @return 1 if removed correctly, 0 if not removed
  */
-int Player::remove(const std::string& name){
+bool Player::remove(const std::string& name){
     auto ge = GameEngine::instance();
     for(auto &card : this->hand->cards){
         if (card->name == name){
             ge->deck->put(card);
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 
 /**

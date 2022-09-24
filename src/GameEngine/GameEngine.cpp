@@ -37,15 +37,6 @@ bool GameEngine::executeOrders() {
 //    }
 //}
 
-/**
- * Draw a card from the deck
- * @return The card that has been drawn
- */
-Card* Deck::draw() {
-    auto* card = this->cardCollection.back();
-    this->cardCollection.pop_back();
-    return card;
-}
 
 void GameEngine::play() {
     initialisePlayers();

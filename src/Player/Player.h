@@ -15,8 +15,8 @@ class Hand;
 class Player {
 public:
     const std::string name;
-    OrderList* orders = nullptr;
-    Hand* hand = nullptr;
+    OrderList* orders = new OrderList();
+    Hand* hand = new Hand();
     std::vector<Territory *> ownedTerritories = {};
     int reinforcements = 0;
 
@@ -28,7 +28,7 @@ public:
 
     void play(std::string &name);
 
-    int remove(const std::string& name);
+    bool remove(const std::string& name);
 
     void draw();
 };

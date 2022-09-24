@@ -8,21 +8,6 @@ class GameEngine;
 #include "../Player/Player.h"
 #include "../Orders/Order.h"
 
-class Deck {
-public:
-
-    explicit Deck(std::vector<Card*> cardCollection);
-    std::vector<Card*> cardCollection;
-
-    Card* draw();
-
-    void put(Card* card);
-
-    friend std::ostream &operator<<(std::ostream &os, const Deck &deck);
-
-private:
-    std::vector<Card*> cards;
-};
 
 class GameEngine {
 public:
