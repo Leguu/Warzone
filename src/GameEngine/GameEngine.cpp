@@ -43,7 +43,6 @@ bool GameEngine::executeOrders() {
  */
 Card* Deck::draw() {
     auto* card = this->cardCollection.back();
-    //not sure if this will destroy card's reference
     this->cardCollection.pop_back();
     return card;
 }
