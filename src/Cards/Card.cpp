@@ -37,73 +37,10 @@ std::ostream &operator<<(std::ostream &os, const Deck &deck) {
 }
 
 /**
- * Draw a card from the deck
- * @return The card that has been drawn
- */
-Card* Deck::draw() {
-    auto* card = this->cardCollection.back();
-    //not sure if this will destroy card's reference
-    this->cardCollection.pop_back();
-    return card;
-}
-
-/**
  * List the contents of the hand
  */
-void CardManager::listHand() {
-    std::cout << this->hand << std::endl;
-}
-
-/**
- * List the contents of the deck
- */
-void CardManager::listDeck() {
-    std::cout << this->deck << std::endl;
-}
-
-/**
- * Draw a card from the deck and add it to your hand
- */
-void CardManager::draw() {
-    auto card = this->deck->draw();
-    this->hand->cards.push_back(card);
-}
-
-/**
- * CardManager object constructor
- * @param playerManaged The Player the CardManager will overlook
- * @param Hand The hand the cardManager will manage
- * @param Deck The Deck the cardManager will use
- */
-CardManager::CardManager(Player *playerManaged, Hand *hand, Deck *deck) {
-    this->player = playerManaged;
-    this->hand = hand;
-    this->deck = deck;
-}
-
-
-/**
- * Play a card from the deck and add it to the deck
- * @param name The name of the card
- */
-void CardManager::play(std::string &name) {
-    Card* cardToPlay = nullptr;
-    for (auto &card: this->hand->cards) {
-        if(card->name == name){
-            cardToPlay = card;
-            break;
-        }
-    }
-    if (cardToPlay != nullptr){
-        if(cardToPlay->name == "AirliftCard" || cardToPlay->name == "NegotiateCard"){
-            cardToPlay->play(this->player);
-        }
-        this->deck->put(cardToPlay);
-        this->hand->cards.push_back(cardToPlay);
-    }else{
-        std::cout << "Error playing Card. No card of this name were found" << std::endl;
-    }
-
+void Hand::listHand() {
+    std::cout << this << std::endl;
 }
 
 /**
@@ -191,23 +128,6 @@ void BlockadeCard::play(Player *issuer) const {
 }
 
 /**
- * Remove a card from a player's hand
- * @param name  The name of the card
- * @return The card that will be removed
- */
-int CardManager::remove(const std::string& name){
-    for(auto &card : this->hand->cards){
-        if (card->name == name){
-            this->deck->put(card);
-            delete(card);
-            card = nullptr;
-            return 1;
-        }
-    }
-    return 0;
-}
-
-/**
  * Put a card in the deck
  * @param card The card that will be added to the deck
  */
@@ -258,7 +178,7 @@ void AirliftCard::play(Player *issuer) const {
 //    }
 //    auto order = std::make_unique<AirliftOrder>(issuer, armiesSize, territoryPlayer, territoryTarget);
 //    issuer->orders->push(std::move(order));
-      issuer->cardManager->play((std::string &) "AirliftCard");
+      issuer->play((std::string &) "AirliftCard");
 }
 
 /**
@@ -275,5 +195,5 @@ void NegotiateCard::play(Player *issuer) const {
     }
     //auto order = std::make_unique<NegotiateOrder>(issuer, player);
     //issuer->orders->push(std::move(order));
-    issuer->cardManager->play((std::string &) "NegotiateCard");
+    issuer->play((std::string &) "NegotiateCard");
 }

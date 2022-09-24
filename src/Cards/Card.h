@@ -20,7 +20,6 @@ public:
     virtual ~Card();
 
 private:
-    //to print all the cards
     friend std::ostream &operator<<(std::ostream &os, const Card &card);
 };
 
@@ -64,45 +63,8 @@ class Hand {
 public:
 
     std::vector<Card*> cards;
-
+    void listHand();
     friend std::ostream &operator<<(std::ostream &os, const Hand &hand);
 };
-
-class Deck {
-public:
-
-    explicit Deck(std::vector<Card*> cardCollection);
-    std::vector<Card*> cardCollection;
-
-    Card* draw();
-
-    void put(Card* card);
-
-    friend std::ostream &operator<<(std::ostream &os, const Deck &deck);
-
-private:
-    std::vector<Card*> cards;
-};
-
-class CardManager {
-public:
-    CardManager(Player *playerManaged, Hand *hand, Deck *deck);
-    void listHand();
-
-    void listDeck();
-
-    void play(std::string &name);
-
-    int remove(const std::string& name);
-
-    // TODO
-    void draw();
-
-private:
-    Hand* hand;
-    Deck* deck;
-    Player* player;
-};
-
 
 #endif //WARZONE_CARD_H

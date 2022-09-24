@@ -37,6 +37,17 @@ bool GameEngine::executeOrders() {
 //    }
 //}
 
+/**
+ * Draw a card from the deck
+ * @return The card that has been drawn
+ */
+Card* Deck::draw() {
+    auto* card = this->cardCollection.back();
+    //not sure if this will destroy card's reference
+    this->cardCollection.pop_back();
+    return card;
+}
+
 void GameEngine::play() {
     initialisePlayers();
 
@@ -53,4 +64,11 @@ void GameEngine::play() {
     }
 
     std::cout << "Game is over!" << std::endl;
+}
+
+/**
+ * List the contents of the deck
+ */
+void GameEngine::listDeck() {
+    std::cout << this->deck << std::endl;
 }

@@ -8,12 +8,29 @@ class GameEngine;
 #include "../Player/Player.h"
 #include "../Orders/Order.h"
 
+class Deck {
+public:
+
+    explicit Deck(std::vector<Card*> cardCollection);
+    std::vector<Card*> cardCollection;
+
+    Card* draw();
+
+    void put(Card* card);
+
+    friend std::ostream &operator<<(std::ostream &os, const Deck &deck);
+
+private:
+    std::vector<Card*> cards;
+};
+
 class GameEngine {
 public:
     static const bool debug = true;
 
     std::vector<std::unique_ptr<Player>> players;
     std::unique_ptr<Map> map;
+    Deck* deck;
 
     static GameEngine *instance() {
         return _instance;
@@ -40,9 +57,13 @@ public:
 
     bool executeOrders();
 
+    void listDeck();
+
 private:
     static GameEngine *_instance;
 };
+
+
 
 
 #endif //WARZONE_GAMEENGINE_H
