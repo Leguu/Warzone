@@ -13,11 +13,13 @@ using std::vector;
 
 class Territory {
 public:
-    int id = idIncrement++;
+    int id = territoryIdIncrement++;
     string name;
+    // I feel like the continent name has no use
     string continentName;
     Player *owner = nullptr;
     vector<Territory *> adjacentTerritories;
+    bool visited;
     int armies = 10;
 
     // Default constructor
@@ -29,14 +31,14 @@ public:
     // Copy constructor
     Territory(const Territory &orgTerritory);
 
+    // Destructor
+    virtual ~Territory();
+
     // Assignment operator
     Territory &operator=(const Territory &territory);
 
     // Insertion operator
     friend std::ostream &operator<<(std::ostream &os, const Territory &territory);
-
-    // Destructor
-    virtual ~Territory();
 
     // To string method
    // [[nodiscard]] string toString() const;
@@ -45,7 +47,7 @@ public:
 protected:
     /// Global variable for assigning territory ids.
     /// The ids for allTerritories need to be globally unique, so this can be static.
-    static int idIncrement;
+    static int territoryIdIncrement;
 
     // Todo is this really necessary? Not for now, will come back later
    // Continent *continent = nullptr;
@@ -56,6 +58,7 @@ protected:
 
 class Continent {
 public:
+     int id = continentIdIncrement++;
      string name;
      int bonus;
     vector<Territory*> ownedTerritories;
@@ -75,20 +78,23 @@ public:
     // Copy constructor
     Continent(const Continent &orgContinent);
 
+    // Destructor
+    virtual ~Continent();
+
+
     // Assigment constructor
     Continent &operator=(const Continent &continent);
 
     // Insertion operator
     friend std::ostream &operator<<(std::ostream &os, const Continent &continent);
 
-    // Destructor
-    virtual ~Continent();
 
     // A method to add a territory to a continent
     void addTerritory(Territory* territory);
 
 protected:
     friend class MapLoader;
+    static int continentIdIncrement;
 };
 
 
@@ -97,7 +103,7 @@ public:
     // TODO Map owns these pointers, they should be destructed properly.
      string name;
      std::vector<Continent *> continents;
-     std::vector<Territory *> allTerritories;
+     std::vector<Territory *> territories;
 
     // Default Constructors
     Map();
@@ -108,10 +114,17 @@ public:
     // Copy Constructor
     Map(const Map &orgMap);
 
+    // Destructor
+    virtual ~Map();
+
     // Assignment operator
     Map &operator=(const Map &map);
 
     // Insertion operator
+    // Format:
+    // Territory: adjacent, adjacent, adjacent
+    // Territory1: adjacent, adjacent, adjacent
+    // Territory2: adjacent, adjacent, adjacent
     friend std::ostream &operator<<(std::ostream &os, const Map &map);
 
     // A method to add a territory
@@ -126,14 +139,20 @@ public:
     // A method to add a territory to a continent
     void addTerritoryToContinent (Continent* continent, Territory* territory);
 
-    // A method that validates maps
-    bool validate();
-
     // A method to check if a territory has one continent
     bool uniqueContinent();
 
     // A method to check if all territories are connected
-    bool areTerritoriesConnected();
+    void DfsTraverseTerritories(Territory * tp);
+
+    // Reset the visitations and increase the vector if more are added
+    void resetVisitedTerritories();
+
+    // A method to check if continent subgraphs are connected
+    bool areContinentsConnected();
+
+    // A method that validates maps
+    bool validate();
 
     /// Figure out whether every continents have an owner?
     inline bool allContinentsOwned() { return false; }
@@ -142,14 +161,6 @@ public:
 
     // TODO: find by name?
 
-    // TODO: Implement the tostring
-    // Format:
-    // Territory: adjacent, adjacent, adjacent
-    // Territory1: adjacent, adjacent, adjacent
-    // Territory2: adjacent, adjacent, adjacent
-    friend std::ostream &operator<<(std::ostream &os, const Map &map);
-
-    virtual ~Map();
 
 private:
     friend class MapLoader;
