@@ -119,7 +119,7 @@ void BlockadeCard::play(Player *issuer) const {
         return;
     }
     if (territory->owner != issuer) {
-        std::cout << "Error: Cannot blockade your own territory!" << std::endl;
+        std::cout << "Error: Cannot blockade territory you don't own!" << std::endl;
         return;
     }
     auto order = std::make_unique<BlockadeOrder>(issuer, territory);
