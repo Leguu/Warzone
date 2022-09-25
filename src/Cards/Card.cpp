@@ -99,7 +99,7 @@ void BombCard::play(Player *issuer) const {
     auto territory = ge->map->findById(territoryId);
     auto order = std::make_unique<BombOrder>(issuer, territory);
     issuer->orders->push(std::move(order));
-    issuer->hand->remove(this);
+    issuer->hand->remove((Card *) this);
 }
 
 /**
@@ -132,7 +132,7 @@ void BlockadeCard::play(Player *issuer) const {
     auto territory = ge->map->findById(territoryId);
     auto order = std::make_unique<BlockadeOrder>(issuer, territory);
     issuer->orders->push(std::move(order));
-    issuer->hand->remove(this);
+    issuer->hand->remove((Card *) this);
 }
 
 /**
@@ -166,7 +166,7 @@ void AirliftCard::play(Player *issuer) const {
     auto territoryTarget = ge->map->findById(territoryTargetId);
     auto order = std::make_unique<AirliftOrder>(issuer, armiesSize, territoryPlayer, territoryTarget);
     issuer->orders->push(std::move(order));
-    issuer->hand->remove(this);
+    issuer->hand->remove((Card *) this);
 }
 
 /**
@@ -179,7 +179,7 @@ void NegotiateCard::play(Player *issuer) const {
     Player *player = ge->findPlayerByName(playerName);
     auto order = std::make_unique<NegotiateOrder>(issuer, player);
     issuer->orders->push(std::move(order));
-    issuer->hand->remove(this);
+    issuer->hand->remove((Card *) this);
 }
 
 /**

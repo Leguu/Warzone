@@ -11,6 +11,7 @@ class Player;
 #include "../Cards/Card.h"
 
 class Hand;
+class OrderList;
 
 class Player {
 public:

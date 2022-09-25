@@ -2,10 +2,22 @@
 #define WARZONE_CARD_H
 
 class CardManager;
+class Card;
 
 #include <vector>
 #include <string>
 #include <ostream>
+
+class Hand {
+public:
+
+    void remove(Card* card);
+    void add(Card* card);
+    std::vector<Card*> cards;
+    void listHand();
+    friend std::ostream &operator<<(std::ostream &os, const Hand &hand);
+};
+
 #include "../Player/Player.h"
 
 class Card {
@@ -59,15 +71,7 @@ public:
     ~NegotiateCard() override;
 };
 
-class Hand {
-public:
 
-    void remove(Card* card);
-    void add(Card* card);
-    std::vector<Card*> cards;
-    void listHand();
-    friend std::ostream &operator<<(std::ostream &os, const Hand &hand);
-};
 
 class Deck {
 public:

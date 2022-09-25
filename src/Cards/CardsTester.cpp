@@ -91,7 +91,7 @@ void CardsTester::testHandConstructor() {
 
 void CardsTester::testListHand() {
     auto* hand = new Hand();
-    std::cout << hand << std::endl;
+    hand->listHand();
     std::cout << "Finished printing Hand" << std::endl;
 }
 

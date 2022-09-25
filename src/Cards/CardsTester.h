@@ -10,7 +10,7 @@
 
 
 class CardsTester {
-private:
+public:
     void testBombCardConstructor();
     void testBombCardPlay();
     void testBlockadeCardConstructor();
