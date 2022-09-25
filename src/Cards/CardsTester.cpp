@@ -5,6 +5,7 @@
 #include "CardsTester.h"
 #include "./Card.h"
 #include "../Player/Player.h"
+#include "../GameEngine/GameEngine.h"
 #include <iostream>
 
 
@@ -16,14 +17,15 @@ void CardsTester::testBombCardConstructor() {
 void CardsTester::testBombCardPlay() {
     auto* card = new BombCard();
     auto* player = new Player("Bob");
-    auto handSizeInitially = player->hand->cards.size();
+    auto territory = new Territory("potato");
+    auto* bombOrder = new BombOrder(player, territory);
     card->play(player);
-    auto handSizeAfterPlay = player->hand->cards.size();
-    if (handSizeInitially == handSizeAfterPlay + 1){
-        std::cout << "Successfully played the card: " << card << ". Original size of the hand: " << handSizeInitially << ", and size after card removed: " << handSizeAfterPlay <<std::endl;
+    auto order = player->orders->pop();
+    if (typeid(order).name() == typeid(bombOrder).name()){
+        std::cout << "Successfully played the card: " << card << ".Order created: " << bombOrder << std::endl;
     }
     else{
-        std::cout << "Error playing the card. Size of the hand before and after card is played is not valid" << std::endl;
+        std::cout << "Error playing the card. Last order added different from card played" << std::endl;
     }
 }
 
@@ -35,14 +37,15 @@ void CardsTester::testBlockadeCardConstructor() {
 void CardsTester::testBlockadeCardPlay() {
     auto* card = new BlockadeCard();
     auto* player = new Player("Bob");
-    auto handSizeInitially = player->hand->cards.size();
+    auto territory = new Territory("potato");
+    auto* blockadeOrder = new BlockadeOrder(player, territory);
     card->play(player);
-    auto handSizeAfterPlay = player->hand->cards.size();
-    if (handSizeInitially == handSizeAfterPlay + 1){
-        std::cout << "Successfully played the card: " << card << ". Original size of the hand: " << handSizeInitially << ", and size after card removed: " << handSizeAfterPlay <<std::endl;
+    auto order = player->orders->pop();
+    if (typeid(order).name() == typeid(blockadeOrder).name()){
+        std::cout << "Successfully played the card: " << card << ".Order created: " << blockadeOrder << std::endl;
     }
     else{
-        std::cout << "Error playing the card. Size of the hand before and after card is played is not valid" << std::endl;
+        std::cout << "Error playing the card. Last order added different from card played" << std::endl;
     }
 }
 
@@ -54,14 +57,15 @@ void CardsTester::testAirliftCardConstructor() {
 void CardsTester::testAirliftCardPlay() {
     auto* card = new AirliftCard();
     auto* player = new Player("Bob");
-    auto handSizeInitially = player->hand->cards.size();
+    auto territory = new Territory("potato");
+    auto* airliftOrder = new AirliftOrder(player, 2, territory, territory);
     card->play(player);
-    auto handSizeAfterPlay = player->hand->cards.size();
-    if (handSizeInitially == handSizeAfterPlay + 1){
-        std::cout << "Successfully played the card: " << card << ". Original size of the hand: " << handSizeInitially << ", and size after card removed: " << handSizeAfterPlay <<std::endl;
+    auto order = player->orders->pop();
+    if (typeid(order).name() == typeid(AirliftOrder).name()){
+        std::cout << "Successfully played the card: " << card << ".Order created: " << airliftOrder << std::endl;
     }
     else{
-        std::cout << "Error playing the card. Size of the hand before and after card is played is not valid" << std::endl;
+        std::cout << "Error playing the card. Last order added different from card played" << std::endl;
     }
 }
 
@@ -73,14 +77,14 @@ void CardsTester::testNegotiateCardConstructor() {
 void CardsTester::testNegotiateCardPlay() {
     auto* card = new NegotiateCard();
     auto* player = new Player("Bob");
-    auto handSizeInitially = player->hand->cards.size();
+    auto* negotiateOrder = new NegotiateOrder(player, player);
     card->play(player);
-    auto handSizeAfterPlay = player->hand->cards.size();
-    if (handSizeInitially == handSizeAfterPlay + 1){
-        std::cout << "Successfully played the card: " << card << ". Original size of the hand: " << handSizeInitially << ", and size after card removed: " << handSizeAfterPlay <<std::endl;
+    auto order = player->orders->pop();
+    if (typeid(order).name() == typeid(negotiateOrder).name()){
+        std::cout << "Successfully played the card: " << card << ".Order created: " << negotiateOrder << std::endl;
     }
     else{
-        std::cout << "Error playing the card. Size of the hand before and after card is played is not valid" << std::endl;
+        std::cout << "Error playing the card. Last order added different from card played" << std::endl;
     }
 }
 
@@ -138,15 +142,14 @@ void CardsTester::testDeckToString() {
 }
 
 void CardsTester::testHandToString() {
-    auto* bombCardOne = new BombCard();
-    auto* airliftCardOne = new AirliftCard();
-    auto* negotiateCardOne = new NegotiateCard();
-    auto* blockadeCardOne = new BlockadeCard();
+    std::vector<Card*> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard, new BlockadeCard};
+    auto* deck = new Deck(cards);
     auto* hand = new Hand();
-    hand->add(bombCardOne);
-    hand->add(airliftCardOne);
-    hand->add(negotiateCardOne);
-    hand->add(blockadeCardOne);
+    auto ge = GameEngine::instance();
+    ge->deck = deck;
+    while(!deck->cardCollection.empty()){
+        hand->draw();
+    }
     std::cout << hand << std::endl;
     std::cout << "Finished printing Hand" << std::endl;
 }
@@ -176,32 +179,20 @@ void CardsTester::testNegotiateCardToString() {
     std::cout << "Finished printing NegotiateCard" << std::endl;
 }
 
-void CardsTester::testHandAdd() {
-    auto* card = new BombCard();
-    auto* hand = new Hand();
-    int initialDeckSize = hand->cards.size();
-    hand->add(card);
-    int addedHandSize = hand->cards.size();
-    std::cout << hand << std::endl;
-    if (initialDeckSize == addedHandSize - 1){
-        std::cout << "Successfully put a card in the hand. Card added: " << card << ". Original size of the hand: " << initialDeckSize << ", and size after card added: " << addedHandSize <<std::endl;
-    }
-    else{
-        std::cout << "Error adding a card to the hand. Size of the hand before and after being added is not valid" << std::endl;
-    }
-}
-
 void CardsTester::testHandRemove() {
-    auto* card = new BombCard();
+    std::vector<Card*> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard, new BlockadeCard};
+    auto* deck = new Deck(cards);
     auto* hand = new Hand();
-    hand->add(card);
-    hand->add(card);
+    auto ge = GameEngine::instance();
+    ge->deck = deck;
+    while(!deck->cardCollection.empty()){
+        hand->draw();
+    }
     auto addedHandSize = hand->cards.size();
-    hand->remove(card);
+    hand->remove(1);
     auto removedHandSize = hand->cards.size();
-    std::cout << hand << std::endl;
     if (addedHandSize == removedHandSize + 1){
-        std::cout << "Successfully removed a card in the hand. Card removed: " << card << ". Original size of the hand: " << addedHandSize << ", and size after card removed: " << removedHandSize <<std::endl;
+        std::cout << "Successfully removed a card in the hand. Original size of the hand: " << addedHandSize << ", and size after card removed: " << removedHandSize <<std::endl;
     }
     else{
         std::cout << "Error removing a card to the hand. Size of the hand before and after being added is not valid" << std::endl;

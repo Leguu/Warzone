@@ -23,15 +23,17 @@ public:
 
     inline explicit Player(std::string name) : name(std::move(name)) {}
 
+    // TODO
     const std::vector<Territory *> toAttack();
 
+    // TODO
     const std::vector<Territory *> toDefend();
 
-    void play(std::string &name);
+    // TODO
+    void issueOrder();
 
-    bool remove(const std::string& name);
+    void play(std::string &cardName);
 
-    void draw();
 };
 
 #endif //WARZONE_PLAYER_H

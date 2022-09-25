@@ -13,8 +13,8 @@ void testCards() {
     auto* deck = new Deck(cards);
     auto* hand = new Hand();
     auto* player = new Player("bob");
-    while(deck->cardCollection.size() > 0){
-        hand->add(deck->draw());
+    while(!deck->cardCollection.empty()){
+        hand->draw();
     }
     for(auto* card: hand->cards){
         card->play(player);

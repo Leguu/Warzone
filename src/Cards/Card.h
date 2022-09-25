@@ -11,11 +11,14 @@ class Card;
 class Hand {
 public:
 
-    void remove(Card* card);
-    void add(Card* card);
+    void remove(int index);
     std::vector<Card*> cards;
     void listHand();
+    void draw();
     friend std::ostream &operator<<(std::ostream &os, const Hand &hand);
+
+private:
+    void add(Card* card);
 };
 
 #include "../Player/Player.h"

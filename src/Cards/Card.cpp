@@ -2,7 +2,6 @@
 #include <utility>
 #include <memory>
 #include "Card.h"
-//Having this as per teacher's recommendation never to have a class base its references on a reference references
 #include "../Player/Player.h"
 #include "../GameEngine/GameEngine.h"
 #include "../Utils/Utils.h"
@@ -47,15 +46,8 @@ void Hand::listHand() {
  * Remove a card from the hand
  * @param card The card that is removed
  */
-void Hand::remove(Card* card) {
-    int counter = -1;
-    for(auto* cardIterated : this->cards){
-        if (card->name == cardIterated->name){
-            this->cards.erase(this->cards.begin() + counter);
-            break;
-        }
-        counter = counter + 1;
-    }
+void Hand::remove(int index) {
+    this->cards.erase(this->cards.begin() + index);
 }
 
 /**
@@ -97,9 +89,16 @@ void BombCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
     auto territoryId = Utils::getInputInt("Please input the ID of the territory you will bomb");
     auto territory = ge->map->findById(territoryId);
+    if (!territory) {
+        std::cout << "Error: this territory does not exist!" << std::endl;
+        return;
+    }
+    if (territory->owner == issuer) {
+        std::cout << "Error: Cannot bomb your own territory!" << std::endl;
+        return;
+    }
     auto order = std::make_unique<BombOrder>(issuer, territory);
     issuer->orders->push(std::move(order));
-    issuer->hand->remove((Card *) this);
 }
 
 /**
@@ -128,11 +127,19 @@ NegotiateCard::~NegotiateCard() = default;
  */
 void BlockadeCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
-    auto territoryId = Utils::getInputInt("Please input the ID of the territory you will bomb");
+    auto territoryId = Utils::getInputInt("Please input the ID of the territory you will Blockade");
     auto territory = ge->map->findById(territoryId);
+    if (!territory) {
+        std::cout << "Error: this territory does not exist!" << std::endl;
+        return;
+    }
+    if (territory->owner != issuer) {
+        std::cout << "Error: Cannot blockade territory you don't own!" << std::endl;
+        return;
+    }
+
     auto order = std::make_unique<BlockadeOrder>(issuer, territory);
     issuer->orders->push(std::move(order));
-    issuer->hand->remove((Card *) this);
 }
 
 /**
@@ -161,12 +168,36 @@ void AirliftCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
     auto territoryPlayerId = Utils::getInputInt("Please input the ID of the territory you will airlift from");
     auto territoryPlayer = ge->map->findById(territoryPlayerId);
+    if (!territoryPlayer) {
+        std::cout << "Error: this territory does not exist!" << std::endl;
+        return;
+    }
     auto armiesSize = Utils::getInputInt("Please input the number of soldiers you wish to move");
+    if (armiesSize < 0) {
+        std::cout << "Error: Please place a positive army size!" << std::endl;
+        return;
+    }
+    if (armiesSize > territoryPlayer->armies) {
+        std::cout << "Error: Please do write a number smaller than the total army size on this territory!" << std::endl;
+        return;
+    }
     auto territoryTargetId = Utils::getInputInt("Please input the ID of the territory you will airlift to");
     auto territoryTarget = ge->map->findById(territoryTargetId);
+    if (!territoryTarget) {
+        std::cout << "Error: this territory does not exist!" << std::endl;
+        return;
+    }
     auto order = std::make_unique<AirliftOrder>(issuer, armiesSize, territoryPlayer, territoryTarget);
     issuer->orders->push(std::move(order));
-    issuer->hand->remove((Card *) this);
+}
+
+/**
+ * Draw a card from the deck and add it to your hand
+ */
+void Hand::draw() {
+    auto ge = GameEngine::instance();
+    auto card = ge->deck->draw();
+    this->add(card);
 }
 
 /**
@@ -177,9 +208,12 @@ void NegotiateCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
     auto playerName = Utils::getInputString("Please input the name of the Player you wish to negotiate with");
     Player *player = ge->findPlayerByName(playerName);
+    if (!player) {
+        std::cout << "Error: this player does not exist!" << std::endl;
+        return;
+    }
     auto order = std::make_unique<NegotiateOrder>(issuer, player);
     issuer->orders->push(std::move(order));
-    issuer->hand->remove((Card *) this);
 }
 
 /**
