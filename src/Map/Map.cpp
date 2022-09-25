@@ -282,39 +282,62 @@ void Map::connectNeighbors(int source, int dest) {
     (*pTerritories)[source - 1]->getAdjTerritories()->push_back((*pTerritories)[dest - 1]);
 }
 
-void Map::dfsTraverseTerritories(std::set<std::string> *visitedTerritories, Territory *territory, bool continentTest) {
-    if (visitedTerritories->find(territory->getTerritoryName()) == visitedTerritories->end()) {
+void Map::DFS(std::set<std::string>* visitedTerritories, Territory* territory, bool test){
+    if(visitedTerritories->find(territory->getTerritoryName()) == visitedTerritories->end()){
         visitedTerritories->insert(territory->getTerritoryName());
-        for (auto &t: *territory->getAdjTerritories()) {
-            if (!continentTest || t->getTerritoryName() == territory->getTerritoryName()) {
-                dfsTraverseTerritories(visitedTerritories, t, continentTest);
-            } else {
+       // cout << territory->getTerritoryName() << " - ";
+        for(auto& c : *territory->getAdjTerritories()) {
+            if(!test || c->getContinentID() == territory->getContinentID()){
+                DFS(visitedTerritories, c, test);
+            }else{
                 continue;
             }
         }
     }
 }
 
-bool Map::testTerritoryConnection(std::vector<Territory *> *startingPoint, bool isContinent) {
+bool Map::traverse(vector<Territory *> *startingPoint, bool isContinent) {
     auto *visitedTerritories = new std::set<std::string>;
-    dfsTraverseTerritories(visitedTerritories, startingPoint[0][0], isContinent);
-    bool connected = visitedTerritories->size() == startingPoint->size();
-    delete (visitedTerritories);
-    return connected;
+    if(!startingPoint) {
+        DFS(visitedTerritories, startingPoint[0][0], isContinent);
+        bool connected = visitedTerritories->size() == startingPoint->size();
+        delete (visitedTerritories);
+        return connected;
+    }
+    else return false;
+
 }
 
-bool Map::testConnected() {
-    if (testTerritoryConnection(this->pTerritories, false)) {
+bool Map::validate() {
+    if (traverse(this->pTerritories, false)) {
         for (auto c: *this->pContinents) {
             if (c->getOwnedTerritories()->size() == 1) {
                 continue;
-            } else if (!testTerritoryConnection(c->getOwnedTerritories(), true)) {
+            } else if (!traverse(c->getOwnedTerritories(), true)) {
                 return false;
             }
         }
         return true;
     }
     return false;
+}
+
+void Map::toStringMap() {
+    for (auto &pContinent: *this->pContinents) {
+        string currContinent = pContinent->getName();
+        vector<Map::Territory *> TerrInContinent = *pContinent->getOwnedTerritories();
+        cout << "--------------\n"
+             << "Territories owned in this continent: " << currContinent << endl;
+
+        for (auto &j: TerrInContinent) {
+            string currTerrName = j->getTerritoryName();
+
+            cout << "\t" <<currTerrName << " occupied with " << j->getArmies() << " troops "
+                 << " and is owned by " << j->getOwner() << endl;
+        }
+        cout << "--------------\n" << endl;
+    }
+
 }
 
 

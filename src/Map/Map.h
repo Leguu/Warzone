@@ -6,12 +6,15 @@
 #include <ostream>
 #include <vector>
 #include <set>
-#include "../Player/Player.h"
 
 using std::string;
 using std::vector;
 
 class Map {
+public:
+    class Territory;
+    class Continent;
+
 
     class Territory {
     public:
@@ -110,10 +113,6 @@ class Map {
 
     };
 
-public:
-    class Territory;
-
-    class Continent;
 
     // Default Constructors
     Map();
@@ -121,9 +120,9 @@ public:
     // Constructor with necessary parameters
     // Note that the vector in a vector stores Continents that
     // Store pointers that point to territories it owns
-    Map(string name, std::vector<std::vector<std::string>> continentsWithTerritories);
+    Map(string name, vector<vector<string>> continentsWithTerritories);
 
-    Map::Map(std::string &mapName, vector<Continent *> continents);
+    Map(string &mapName, vector<Continent *> continents);
 
     // Copy Constructor
     Map(const Map &orgMap);
@@ -144,7 +143,7 @@ public:
     // Getters and setters
     inline vector<Territory *> *getAllTerritories();
 
-    inline void setAllTerritories(std::vector<Territory *> *);
+    inline void setAllTerritories(vector<Territory *> *);
 
     inline vector<Continent *> *getContinents();
 
@@ -155,23 +154,19 @@ public:
     void connectNeighbors(int source, int dest);
 
     // A traversal method using DFS
-    static void dfsTraverseTerritories(set <string> *visitedTerritories, Territory *territory, bool continentTest);
+    static void DFS(std::set <string> *visitedTerritories, Territory *territory, bool test);
 
     // A method to check if all territories are connected
-    static bool testTerritoryConnection(std::vector<Territory *> *startingPoint, bool isContinent)
-
-    );
+    static bool traverse(vector<Territory *> *startingPoint, bool isContinent);
 
     // A method to check both territories and continents
-    bool testConnected();
+    bool validate();
 
     // A method to check if a territory has one continent
      bool uniqueContinent();
 
-    // A method that validates maps
-    bool validate();
-
-    void printMap();
+    // Print the map
+    void toStringMap();
 
 
     /// Figure out whether every continents have an owner?
@@ -220,7 +215,7 @@ public:
         friend std::ostream &operator<<(std::ostream &os, const MapLoader &mapLoader);
 
 
-        static std::unique_ptr<Map> importMap(const string &path) noexcept(false);
+       // static std::unique_ptr<Map> importMap(const string &path) noexcept(false);
 
         // parse the .map file
         bool parse();
@@ -229,15 +224,23 @@ public:
         Map *createMap();
 
     private:
+        bool parseContinent(string line); // parse continents block in the .map file
+        bool parseTerritory(string line); // parse territories block in the .map file
+        void convertTerritoryToInt(); // change territory name to its index in vector
+        int getTerritoryId(const string &name); // get territory index in the vector
+        vector<string> getContinentsData(int id); // return struct continentsData
+        vector<string> getTerritoriesData(int id); // return struct territoriesData
+        vector<vector<string>> getBordersData(); // return struct bordersData
 
+        vector<string> splitString(const string &line, char delim);
     };
 
 
     // private properties for Map class
 private:
     string *pName;
-    std::vector<Continent *> *pContinents;
-    std::vector<Territory *> *pTerritories;
+    vector<Continent *> *pContinents;
+    vector<Territory *> *pTerritories;
 
 
 };
