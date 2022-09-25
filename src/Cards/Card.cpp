@@ -44,6 +44,29 @@ void Hand::listHand() {
 }
 
 /**
+ * Remove a card from the hand
+ * @param card The card that is removed
+ */
+void Hand::remove(Card* card) {
+    int counter = -1;
+    for(auto* cardIterated : this->cards){
+        if (card->name == cardIterated->name){
+            this->cards.erase(this->cards.begin() + counter);
+            break;
+        }
+        counter = counter + 1;
+    }
+}
+
+/**
+ * Add a card to the hand
+ * @param card The card that is added
+ */
+void Hand::add(Card *card) {
+    this->cards.push_back(card);
+}
+
+/**
  * Function to print to console the content's of the card
  * @param os The OSStream we will be appending to
  * @param card  The card we will be examining
@@ -76,6 +99,7 @@ void BombCard::play(Player *issuer) const {
     auto territory = ge->map->findById(territoryId);
     auto order = std::make_unique<BombOrder>(issuer, territory);
     issuer->orders->push(std::move(order));
+    issuer->hand->remove(this);
 }
 
 /**
@@ -108,6 +132,7 @@ void BlockadeCard::play(Player *issuer) const {
     auto territory = ge->map->findById(territoryId);
     auto order = std::make_unique<BlockadeOrder>(issuer, territory);
     issuer->orders->push(std::move(order));
+    issuer->hand->remove(this);
 }
 
 /**
@@ -141,6 +166,7 @@ void AirliftCard::play(Player *issuer) const {
     auto territoryTarget = ge->map->findById(territoryTargetId);
     auto order = std::make_unique<AirliftOrder>(issuer, armiesSize, territoryPlayer, territoryTarget);
     issuer->orders->push(std::move(order));
+    issuer->hand->remove(this);
 }
 
 /**
@@ -153,6 +179,7 @@ void NegotiateCard::play(Player *issuer) const {
     Player *player = ge->findPlayerByName(playerName);
     auto order = std::make_unique<NegotiateOrder>(issuer, player);
     issuer->orders->push(std::move(order));
+    issuer->hand->remove(this);
 }
 
 /**
