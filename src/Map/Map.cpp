@@ -1,127 +1,182 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+#include <set>
 #include "Map.h"
 
+// ------------------ Territory ------------------------
 
-int Territory::territoryIdIncrement = 0;
-int Continent::continentIdIncrement = 0;
+using namespace std;
 
-Territory::Territory() {
+//int Territory::territoryIdIncrement = 0;
+//int Continent::continentIdIncrement = 0;
 
-}
+Map::Territory::Territory() {}
 
-Territory::Territory(std::string name, std::string continentName)
-        : name(std::move(name)), continentName(std::move(continentName)) {}
-
-Territory::Territory(const Territory &orgTerritory) {
-    this->id = orgTerritory.id;
-    this->name = orgTerritory.name;
-    this->continentName = orgTerritory.continentName;
-    this->owner = orgTerritory.owner;
-    this->adjacentTerritories = orgTerritory.adjacentTerritories;
-    this->armies = orgTerritory.armies;
-    this->visited = orgTerritory.visited;
+Map::Territory::Territory(int id, string name, int continentID) {
+    pID = new int(id);
+    pName = new string(name);
+    pOwner = new int(-1);
+    pContinentID = new int(continentID - 1);
+    pAdjacentTerritories = new vector<Territory *>;
+    pArmies = new int(0);
 
 }
 
-Territory &Territory::operator=(const Territory &territory) {
-    this->id = territory.id;
-    this->name = territory.name;
-    this->continentName = territory.continentName;
-    this->owner = territory.owner;
-    this->adjacentTerritories = territory.adjacentTerritories;
-    this->armies = territory.armies;
-    this->visited = territory.visited;
+
+Map::Territory::Territory(const Territory &orgTerritory) {
+    this->pID = new int(*orgTerritory.pID);
+    this->pName = new string(*orgTerritory.pName);
+    this->pArmies = new int(*orgTerritory.pArmies);
+    this->pContinentID = new int(*orgTerritory.pContinentID);
+    this->pOwner = new int(*orgTerritory.pOwner);
+    this->pAdjacentTerritories = new vector<Territory *>();
+    this->pAdjacentTerritories->reserve(orgTerritory.pAdjacentTerritories->size());
+    for (auto &p: *orgTerritory.pAdjacentTerritories) {
+        this->pAdjacentTerritories->push_back(new Territory(*p));
+    }
+}
+
+Map::Territory::~Territory() {
+    delete pID;
+    delete pName;
+    delete pArmies;
+    delete pContinentID;
+    delete pOwner;
+    delete pAdjacentTerritories;
+}
+
+Map::Territory &Map::Territory::operator=(const Map::Territory &territory) {
+    this->pID = territory.pID;
+    this->pName = territory.pName;
+    this->pContinentID = territory.pContinentID;
+    this->pOwner = territory.pOwner;
+    this->pArmies = territory.pArmies;
+    this->pAdjacentTerritories = territory.pAdjacentTerritories;
     return *this;
 }
 
 
-std::ostream &operator<<(std::ostream &os, const Territory &territory) {
-    os << "ID of territory: " << territory.id << "\n"
-       << "Name of territory: " << territory.name << "\n"
-       << "Continent it belongs to: " << territory.continentName << "\n"
-       << "Owner of territory: " << territory.owner << "\n"
-       << "Number of armies: " << territory.armies << "\n"
-       << "List of neighbors" << "\n";
-
-    for (auto p: territory.adjacentTerritories) {
-        os << p->name << "\n";
-    }
+ostream &operator<<(ostream &os, const Map::Territory &territory) {
+    os << "ID of territory: " << *territory.pID << "\n"
+       << "Name of territory: " << *territory.pName << "\n"
+       << "Continent ID: " << *territory.pContinentID << "\n"
+       << "Owner of territory: " << *territory.pOwner << "\n"
+       << "Number of armies: " << *territory.pArmies << "\n";
 
     return os;
 }
 
-/*std::string Territory::toString() const {
-    std::string str;
-    str += "[" + std::to_string(id) + "] ";
+
+vector<Map::Territory *> *Map::Territory::getAdjTerritories() {
+    return pAdjacentTerritories;
+}
+
+string Map::Territory::getTerritoryName() {
+    return *pName;
+}
+
+int Map::Territory::getOwner() {
+    return *pOwner;
+}
+
+void Map::Territory::setOwner(int id) {
+    *pOwner = id;
+}
+
+int Map::Territory::getArmies() {
+    return *pArmies;
+}
+
+void Map::Territory::setArmies(int armies) {
+    *pArmies = armies;
+}
+
+int Map::Territory::getContinentID() {
+    return *pContinentID;
+}
+
+int Map::Territory::getTerritoryID() {
+    return *pContinentID;
+}
+
+
+/*string Territory::toString() const {
+    string str;
+    str += "[" + to_string(id) + "] ";
     str += name;
     if (owner) {
-        str += " (" + std::to_string(armies) + ", " + owner->name + ")";
+        str += " (" + to_string(armies) + ", " + owner->name + ")";
     } else {
-        str += " (" + std::to_string(armies) + ")";
+        str += " (" + to_string(armies) + ")";
     }
     return str;
 }*/
 
-Territory::~Territory() {
-    delete owner;
-    for (auto p: adjacentTerritories) {
-        delete p;
-    }
+
+
+// ------------------ Continents ------------------------
+
+Map::Continent::Continent() {}
+
+Map::Continent::Continent(string name, int bonus) {
+    pName = new string(std::move(name));
+    pBonus = new int(bonus);
+    pOwnedTerritories = new vector<Territory *>;
 }
 
-Continent::Continent() : bonus(0) {}
-
-Continent::Continent(std::string name, int bonus) : name(std::move(name)), bonus(bonus) {}
-
-Continent::Continent(string name, vector<Territory *> territories, int bonus)
-        : name(std::move(name)), ownedTerritories(std::move(territories)), bonus(bonus) {}
-
-Continent::Continent(const Continent &orgContinent) {
-    this->id = orgContinent.id;
-    this->name = orgContinent.name;
-    this->bonus = orgContinent.bonus;
-    this->ownedTerritories = orgContinent.ownedTerritories;
+Map::Continent::Continent(const Map::Continent &orgContinent) {
+    pName = new string(*orgContinent.pName);
+    pBonus = new int(*orgContinent.pBonus);
+    pOwnedTerritories = new vector<Territory *>(*orgContinent.pOwnedTerritories);
 }
 
-Continent &Continent::operator=(const Continent &continent) {
-    this->id = continent.id;
-    this->name = continent.name;
-    this->bonus = continent.bonus;
-    this->ownedTerritories = continent.ownedTerritories;
-    return *this;
+Map::Continent::~Continent() {
+    delete pName;
+    delete pBonus;
+    delete pOwnedTerritories;
 }
 
-std::ostream &operator<<(std::ostream &os, const Continent &continent) {
-    os << "Name of continent: " << continent.name << "\n"
-       << "Bonus: " << continent.bonus << "\n"
-       << "Owned territories: " << "\n";
+Map::Continent &Map::Continent::operator=(const Map::Continent &continent) {
+    this->pName = continent.pName;
+    this->pBonus = continent.pBonus;
+    this->pOwnedTerritories = continent.pOwnedTerritories;
+}
 
-    for (auto p: continent.ownedTerritories) {
-        os << p->name << "\n";
-    }
+std::ostream &operator<<(ostream &os, const Map::Continent &continent) {
+    os << "Name of continent: " << *continent.pName << "\n"
+       << "Bonus: " << *continent.pBonus << "\n";
     return os;
 }
 
-Continent::~Continent() {
-    for (auto p: ownedTerritories) {
-        delete p;
-    }
 
+void Map::Continent::addTerritory(Map::Territory *territory) {
+    pOwnedTerritories->push_back(territory);
 }
+
+vector<Map::Territory *> *Map::Continent::getOwnedTerritories() {
+    return pOwnedTerritories;
+}
+
+string Map::Continent::getName() {
+    return *pName;
+}
+
+int Map::Continent::getBonus() {
+    return *pBonus;
+}
+
 
 /*Player *Continent::owner() {
     return nullptr;
 }*/
 
-void Continent::addTerritory(Territory *territory) {
-    ownedTerritories.push_back(territory);
-}
-
 /*
-std::unique_ptr<Map> MapLoader::importMap(const std::string &path) {
-    auto allTerritories = std::vector<Territory *>{};
+unique_ptr<Map> MapLoader::importMap(const string &path) {
+    auto allTerritories = vector<Territory *>{};
 
     auto expel = new Continent("Expel", 4);
 
@@ -133,14 +188,14 @@ std::unique_ptr<Map> MapLoader::importMap(const std::string &path) {
     arlia->adjacentTerritories = {krosse};
     krosse->adjacentTerritories = {arlia};
 
-    std::vector<Continent *> continents{expel};
+    vector<Continent *> continents{expel};
 
     allTerritories.push_back(arlia);
     allTerritories.push_back(krosse);
 
     expel->territories = allTerritories;
 
-    auto map = std::make_unique<Map>(continents, allTerritories);
+    auto map = make_unique<Map>(continents, allTerritories);
 
     // Make sure to throw an exception if the map is invalid.
 
@@ -148,6 +203,7 @@ std::unique_ptr<Map> MapLoader::importMap(const std::string &path) {
 }
 */
 
+/*
 Territory *Map::findById(int id) const {
     for (auto territory: territories) {
         if (territory->id == id) {
@@ -156,79 +212,113 @@ Territory *Map::findById(int id) const {
     }
     return nullptr;
 }
+*/
+
+// ------------------ Maps ------------------------
 
 Map::Map() {}
 
-Map::Map(std::string name, std::vector<Continent *> continents, std::vector<Territory *> territories) :
-        name(std::move(name)), continents(std::move(
-        continents)), territories(std::move(territories)) {}
+Map::Map(std::string &mapName, vector<Continent *> continents) {
+    pName = &mapName;
+    pContinents = &continents;
+    pTerritories = new vector<Territory *>();
+}
+
+Map::Map(string name, std::vector<std::vector<std::string>> continentsWithTerritories) {
+    pName = new string(name);
+    pTerritories = new vector<Territory *>;
+    pContinents = new vector<Continent *>;
+    for (auto p: continentsWithTerritories) {
+        pContinents->push_back(new Continent(p[0], std::stoi(p[1])));
+    }
+}
 
 Map::Map(const Map &orgMap) {
-    this->name = orgMap.name;
-    this->continents = orgMap.continents;
-    this->territories = orgMap.territories;
-}
-
-Map &Map::operator=(const Map &map) {
-    this->name = map.name;
-    this->continents = map.continents;
-    this->territories = map.territories;
-    return *this;
-}
-
-
-std::ostream &operator<<(std::ostream &os, const Map &map) {
-    os << "Name of map:\n" << map.name << "\n"
-       << "List of Continents in map:" << "\n";
-    for (auto p: map.continents) {
-        os << p->name << "\n";
-    }
-
-    // TODO remove last comma
-    os << "List of all territories and their neighbors in map:" << "\n";
-    for (auto p: map.territories) {
-        os << p->name << ": ";
-        for (auto pp: p->adjacentTerritories) {
-            os << pp->name << ", ";
-        }
-        os << "\n";
-    }
-    return os;
+    pName = new string(*orgMap.pName);
+    pTerritories = new vector<Territory *>(*orgMap.pTerritories);
+    pContinents = new vector<Continent *>(*orgMap.pContinents);
 }
 
 Map::~Map() {
-    for (auto p: continents) {
-        for (auto pp: p->ownedTerritories) {
-            delete pp;
+    delete pName;
+    delete pTerritories;
+    delete pContinents;
+}
+
+Map &Map::operator=(const Map &map) {
+    this->pName = map.pName;
+    this->pContinents = map.pContinents;
+    this->pTerritories = map.pTerritories;
+    return *this;
+}
+
+ostream &operator<<(ostream &os, const Map &map) {
+    os << "Name of map:\n" << *map.pName << "\n"
+       << "Number of continents: " << map.pTerritories->size() << "\n"
+       << " Number of territories: " << map.pContinents->size();
+    return os;
+}
+
+vector<Map::Territory *> *Map::getAllTerritories() {
+    return pTerritories;
+}
+
+void Map::setAllTerritories(vector<Territory *> *newT) {
+    pTerritories = newT;
+}
+
+vector<Map::Continent *> *Map::getContinents() {
+    return pContinents;
+}
+
+Map::Territory *Map::addTerritory(int id, string name, int continent) {
+    auto *newTerritory = new Territory(id, name, continent);
+    pTerritories->push_back(newTerritory);
+    (*pContinents)[continent - 1]->addTerritory(newTerritory);
+    return newTerritory;
+}
+
+void Map::connectNeighbors(int source, int dest) {
+    (*pTerritories)[source - 1]->getAdjTerritories()->push_back((*pTerritories)[dest - 1]);
+}
+
+void Map::dfsTraverseTerritories(std::set<std::string> *visitedTerritories, Territory *territory, bool continentTest) {
+    if (visitedTerritories->find(territory->getTerritoryName()) == visitedTerritories->end()) {
+        visitedTerritories->insert(territory->getTerritoryName());
+        for (auto &t: *territory->getAdjTerritories()) {
+            if (!continentTest || t->getTerritoryName() == territory->getTerritoryName()) {
+                dfsTraverseTerritories(visitedTerritories, t, continentTest);
+            } else {
+                continue;
+            }
         }
-        delete p;
     }
+}
 
-    for (auto p: territories) {
-        for (auto pp: p->adjacentTerritories) {
-            delete pp;
+bool Map::testTerritoryConnection(std::vector<Territory *> *startingPoint, bool isContinent) {
+    auto *visitedTerritories = new std::set<std::string>;
+    dfsTraverseTerritories(visitedTerritories, startingPoint[0][0], isContinent);
+    bool connected = visitedTerritories->size() == startingPoint->size();
+    delete (visitedTerritories);
+    return connected;
+}
+
+bool Map::testConnected() {
+    if (testTerritoryConnection(this->pTerritories, false)) {
+        for (auto c: *this->pContinents) {
+            if (c->getOwnedTerritories()->size() == 1) {
+                continue;
+            } else if (!testTerritoryConnection(c->getOwnedTerritories(), true)) {
+                return false;
+            }
         }
-        delete p;
+        return true;
     }
+    return false;
 }
 
-void Map::addTerritory(Territory *territory) {
-    territories.push_back(territory);
-}
 
-void Map::connectNeighbors(Territory *firstTerr, Territory *secondTerr) {
-    firstTerr->adjacentTerritories.push_back(secondTerr);
-    secondTerr->adjacentTerritories.push_back(firstTerr);
-}
-
-void Map::addContinent(Continent *continent) {
-    continents.push_back(continent);
-}
-
-void Map::addTerritoryToContinent(Continent *continent, Territory *territory) {
-    continent->ownedTerritories.push_back(territory);
-}
-
+/*
 bool Map::uniqueContinent() {
 
     int numOfContinents;
@@ -248,33 +338,133 @@ bool Map::uniqueContinent() {
     return true;
 }
 
-void Map::resetVisitedTerritories() {
-    for (auto p: territories) {
-        p->visited = false;
-    }
-}
 
-void Map::DfsTraverseTerritories(Territory *tp) {
 
-    std::cout << "Started Traversing " << tp->name << std::endl;
+void Map::dfsTraverseTerritories(Territory *tp) {
+
+    cout << "Started Traversing " << tp->name << endl;
     tp->visited = true;
-    vector<Territory *> neighbors = tp->adjacentTerritories;
 
-    for (size_t i = 0; i < neighbors.size(); i++) {
-        if (!neighbors[i]->visited) {
-            neighbors[i]->visited = true;
-            std::cout << neighbors[i]->name << " has been visited!" << std::endl;
-            DfsTraverseTerritories(neighbors[i]);
+    // checking subgraph at the same time
+    for (auto p: continents) {
+        if (tp->name == p->name) {
+            p->visited = true;
         }
     }
-    std::cout << "Finished Traversing " << tp->name << std::endl;
+
+    for (size_t i = 0; i < tp->adjacentTerritories.size(); i++) {
+        if (!tp->adjacentTerritories[i]->visited) {
+            cout << tp->adjacentTerritories[i]->name << " has been visited!" << endl;
+            dfsTraverseTerritories(tp->adjacentTerritories[i]);
+        }
+    }
+    cout << "Finished Traversing " << tp->name << endl;
+
+}
+
+bool Map::validate() {
+    resetVisitedTerritories();
+    if (!uniqueContinent())
+        return false;
+
+    dfsTraverseTerritories(territories[0]);
+
+    for (auto p: territories) {
+        if (!p->visited)
+            return false;
+    }
+    return true;
+}
+*/
+
+
+
+/*
+
+MapLoader::MapLoader(string
+                     path) {
+    mapFile = std::move(path);
+}
+
+MapLoader::MapLoader(
+        const MapLoader &orgMapLoader) {
+    mapFile = orgMapLoader.mapFile;
+}
+
+MapLoader::~MapLoader() {
+    mapFile = "";
+}
+
+MapLoader &MapLoader::operator=(const MapLoader &mapLoader) {
+    mapFile = mapLoader.mapFile;
+    return *this;
+}
+
+ostream &operator<<(ostream &os, const MapLoader &mapLoader) {
+    os << "Map loader file location: " << mapLoader.mapFile;
 }
 
 
-const char *InvalidMapFileException::what() const noexcept {
-    return "This map file has an invalid format or cannot be read.";
+bool MapLoader::parse() {
+    ifstream inputStream{mapFile};
+    if (!inputStream) {
+        cerr << "File not found" << endl;
+        return false;
+    } else {
+        int locationInMap = -100;
+        string line{};
+        while (getline(inputStream, line)) {
+            if (line.find("[Continents]") != -1) {
+                locationInMap = 0;
+                continue;
+                vector<string> continentLine = splitString(line, '=');
+            } else if (line.find("[Territories]") != -1) {
+                locationInMap = 1;
+                continue;
+            }
+
+            if (!line.empty()) {
+                switch (locationInMap) {
+                    case 0:
+                        parseContinent(line);
+                        break;
+                    case 1:
+                        break;
+                }
+
+            }
+        }
+
+    }
 }
 
-const char *InvalidGameMapException::what() const noexcept {
-    return "This map file is unwinnable!";
+vector<string> MapLoader::splitString(const string &line, char delim) {
+    vector<string> result;
+    stringstream in(line);
+    string element;
+
+    while (getline(in, element, delim)) {
+        result.push_back(element);
+    }
+    return result;
 }
+
+bool MapLoader::parseContinent(std::string line) {
+    vector<string> newLine = splitString(line, '=');
+
+    if (newLine.size() == 2) {
+
+
+        continentsLoad.name.push_back(newLine[0]);
+        int armies = std::stoi(newLine[1]);
+        continentsLoad.armies.push_back(armies);
+
+    }
+
+    return false;
+}
+
+
+*/
+
+
