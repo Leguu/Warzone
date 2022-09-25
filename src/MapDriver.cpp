@@ -6,16 +6,14 @@ using namespace std;
 int main() {
 
     string mapName = "Moon";
-    vector<vector<string>> OkContinents = {{"Sajon",     "4"},
-                                           {"Cresinion", "2"},
-                                           {"Delphot",   "2"}};
+    vector<vector<string>> OkContinents = { {"Cresinion", "2"}};
 
     vector<vector<string>> OkTerritories = {{"1", "Bay of Dew",      "1"},
                                             {"2", "Byrgius",         "1"},
                                             {"3", "Ocean of Storms", "1"},
                                             {"4", "Sea of Rains",    "1"},
                                             {"5", "Harpalus",        "1"}};
-    vector<vector<int>> validBorders = {{1, 2, 3, 4, 5},};
+    vector<vector<int>> validBorders = {{1, 2, 3, 4, 5}};
 
     Map validMap = Map(mapName, OkContinents);
 

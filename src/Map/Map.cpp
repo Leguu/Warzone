@@ -285,7 +285,7 @@ void Map::connectNeighbors(int source, int dest) {
 void Map::DFS(std::set<std::string>* visitedTerritories, Territory* territory, bool test){
     if(visitedTerritories->find(territory->getTerritoryName()) == visitedTerritories->end()){
         visitedTerritories->insert(territory->getTerritoryName());
-       // cout << territory->getTerritoryName() << " - ";
+      //  cout << territory->getTerritoryName() << " - ";
         for(auto& c : *territory->getAdjTerritories()) {
             if(!test || c->getContinentID() == territory->getContinentID()){
                 DFS(visitedTerritories, c, test);
@@ -298,7 +298,7 @@ void Map::DFS(std::set<std::string>* visitedTerritories, Territory* territory, b
 
 bool Map::traverse(vector<Territory *> *startingPoint, bool isContinent) {
     auto *visitedTerritories = new std::set<std::string>;
-    if(!startingPoint) {
+    if(startingPoint) {
         DFS(visitedTerritories, startingPoint[0][0], isContinent);
         bool connected = visitedTerritories->size() == startingPoint->size();
         delete (visitedTerritories);
