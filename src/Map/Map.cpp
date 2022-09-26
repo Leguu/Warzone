@@ -303,8 +303,12 @@ void Map::addContinent(Continent *continent) {
 }
 
 void Map::addEdge(Territory *source, Territory *dest) {
-    source->adjacentTerritories.push_back(dest);
-    dest->adjacentTerritories.push_back(source);
+    if(std::find(source->adjacentTerritories.begin(), source->adjacentTerritories.end(), dest)
+                !=source->adjacentTerritories.end()){
+        cout << "Found existing edge" << endl;
+    } else {
+        source->adjacentTerritories.push_back(dest);
+    }
 
 }
 

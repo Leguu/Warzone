@@ -40,6 +40,7 @@ int main() {
 
 
     map.addEdge(canada, us);
+    map.addEdge(canada, us);
     map.addEdge(us, mexico);
     map.addEdge(mexico, guatemala);
     map.addEdge(mexico, belize);
