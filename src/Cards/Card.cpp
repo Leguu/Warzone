@@ -184,6 +184,17 @@ void Hand::draw() {
     auto card = ge->deck->draw();
     this->add(card);
 }
+/**
+ * Hand copy constructor
+ * @param hand The hand argument
+ */
+Hand::Hand(const Hand &hand) {
+    std::vector<Card *> cards;
+    for (auto *card: hand.cards) {
+        cards.push_back(card);
+    }
+    this->cards = cards;
+}
 
 /**
  * Playing the negotiate card
@@ -207,7 +218,7 @@ void NegotiateCard::play(Player *issuer) const {
  */
 Card *Deck::draw() {
     unsigned int randomLocation = this->getRandomLocation();
-    auto* card = this->cards[randomLocation];
+    auto *card = this->cards[randomLocation];
     this->cards.erase(this->cards.begin() + randomLocation);
     return card;
 }
@@ -221,3 +232,66 @@ int Deck::getRandomLocation() {
     return rand() % deckSize;
 }
 
+/**
+ * Deck copy constructor
+ * @param deck argument
+ */
+Deck::Deck(const Deck &deck) {
+    std::vector<Card *> cards;
+    for (auto *card: deck.cards) {
+        cards.push_back(card);
+    }
+    this->cards = cards;
+}
+
+/**
+ * Operator overload for = on Hand
+ * @param hand Right hand side argument
+ * @return Deep copy of right hand side hand argument
+ */
+Hand &Hand::operator=(const Hand &hand) {
+    std::vector<Card *> cards;
+    for (auto *card: hand.cards) {
+        cards.push_back(card);
+    }
+    this->cards = cards;
+    return *this;
+}
+
+/**
+ * Operator overload for = on Deck
+ * @param deck Right hand side argument
+ * @return Deep copy of right hand side deck argument
+ */
+Deck &Deck::operator=(const Deck &deck) {
+    std::vector<Card *> cards;
+    for (auto *card: deck.cards) {
+        cards.push_back(card);
+    }
+    this->cards = cards;
+    return *this;
+}
+
+/**
+ * Hand destructor
+ */
+Hand::~Hand(){
+    int counter = 0;
+    for (auto *card: this->cards) {
+        delete(card);
+        this->cards[counter] = nullptr;
+        counter = counter + 1;
+    }
+}
+
+/**
+ * Deck destructor
+ */
+Deck::~Deck(){
+    int counter = 0;
+    for (auto *card: this->cards) {
+        delete(card);
+        this->cards[counter] = nullptr;
+        counter = counter + 1;
+    }
+}

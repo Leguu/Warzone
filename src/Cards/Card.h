@@ -5,6 +5,7 @@ class CardManager;
 
 class Card;
 
+#include <utility>
 #include <vector>
 #include <string>
 #include <ostream>
@@ -16,9 +17,14 @@ public:
 
     std::vector<Card *> cards;
 
+    Hand(const Hand& h);
+    Hand& operator=(const Hand& hand);
+
     void listHand();
 
     void draw();
+
+    ~Hand();
 
     friend std::ostream &operator<<(std::ostream &os, const Hand &hand);
 
@@ -35,7 +41,8 @@ public:
 
     virtual void play(Player *issuer) const = 0;
 
-    Card(std::string name, std::string description) : name(name), description(description){}
+    Card(std::string name, std::string description) : name(std::move(name)), description(std::move(description)){}
+
 
     virtual ~Card();
 
@@ -83,7 +90,13 @@ public:
 class Deck {
 public:
 
-    explicit Deck(std::vector<Card *> cards) : cards(cards) {}
+    explicit Deck(std::vector<Card *> cards) : cards(std::move(cards)) {}
+
+    Deck(const Deck& deck);
+
+    Deck& operator=(const Deck& deck);
+
+    ~Deck();
 
     Card *draw();
 
