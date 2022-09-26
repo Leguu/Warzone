@@ -62,3 +62,7 @@ void GameEngine::play() {
 void GameEngine::listDeck() {
     std::cout << this->deck << std::endl;
 }
+
+Player *GameEngine::findPlayerByName(std::string name) {
+    return nullptr;
+}

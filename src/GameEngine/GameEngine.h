@@ -13,8 +13,8 @@ class GameEngine {
 public:
     static const bool debug = true;
 
-    std::vector<std::unique_ptr<Player>> players;
-    std::unique_ptr<Map> map;
+    std::vector<Player*> players;
+    Map* map;
     Deck* deck;
 
     static GameEngine *instance() {

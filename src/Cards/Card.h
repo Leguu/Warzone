@@ -35,7 +35,7 @@ public:
 
     virtual void play(Player *issuer) const = 0;
 
-    Card(std::string name, std::string description);
+    Card(std::string name, std::string description) : name(name), description(description){}
 
     virtual ~Card();
 
@@ -83,7 +83,7 @@ public:
 class Deck {
 public:
 
-    explicit Deck(std::vector<Card *> cards);
+    explicit Deck(std::vector<Card *> cards) : cards(cards) {}
 
     Card *draw();
 
@@ -93,8 +93,11 @@ public:
 
     int getCardsSize();
 
+    int getRandomLocation();
+
 private:
     std::vector<Card *> cards;
 };
+
 
 #endif //WARZONE_CARD_H

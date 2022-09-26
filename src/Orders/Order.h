@@ -10,6 +10,21 @@ class Order;
 #include <ostream>
 #include <queue>
 #include <list>
+
+class OrderList {
+public:
+    void remove(int index);
+
+    void move(int a, int b);
+
+    Order* pop();
+
+    void push(Order* order);
+
+private:
+    std::list<Order*> orders = {};
+};
+
 #include "../Player/Player.h"
 
 /// Thrown when an order can not be executed due to invalid state
@@ -27,7 +42,7 @@ public:
     const std::string description;
     Player *issuer;
 
-    Order(Player *issuer, std::string name, std::string description);
+    Order(Player *issuer, std::string name, std::string description) : issuer(issuer), name(name), description(description){}
 
     /// Throws InvalidOrderException if the order no longer makes sense (due to previous orders)
     virtual void execute() noexcept(false) = 0;
@@ -109,20 +124,6 @@ public:
 
 private:
     const Player *const target;
-};
-
-class OrderList {
-public:
-    void remove(int index);
-
-    void move(int a, int b);
-
-    std::unique_ptr<Order> pop();
-
-    void push(std::unique_ptr<Order> order);
-
-private:
-    std::list<std::unique_ptr<Order>> orders = {};
 };
 
 

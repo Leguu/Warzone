@@ -3,9 +3,6 @@
 #include <utility>
 #include <iostream>
 
-Order::Order(Player *issuer, std::string name, std::string description)
-        : name(std::move(name)), description(std::move(description)), issuer(issuer) {}
-
 std::ostream &operator<<(std::ostream &os, const Order &order) {
     os << order.name << ": " << order.description;
     return os;
@@ -14,10 +11,11 @@ std::ostream &operator<<(std::ostream &os, const Order &order) {
 Order::~Order() = default;
 
 void BombOrder::execute() {
-    if (target->owner && (target->owner->name == issuer->name)) {
+    if (target->getOwner() && (target->getOwner()->name == issuer->name)) {
         throw InvalidOrderException(issuer->name + " attempts to bomb himself! What an idiot.");
     }
-    this->target->armies /= 2;
+  //  this->target->armies /= 2;
+    this->target->setArmies(this->target->getArmies()/2);
 }
 
 BombOrder::BombOrder(Player *issuer, Territory *target)
@@ -29,15 +27,15 @@ BombOrder::~BombOrder() {
 
 InvalidOrderException::InvalidOrderException(const std::string &arg) : runtime_error(arg) {}
 
-void OrderList::push(std::unique_ptr<Order> order) {
-    this->orders.push_back(std::move(order));
+void OrderList::push(Order* order) {
+    this->orders.push_back(order);
 }
 
-std::unique_ptr<Order> OrderList::pop() {
+Order* OrderList::pop() {
     if (this->orders.empty()) return nullptr;
-    auto order = std::move(this->orders.front());
+    auto order = this->orders.front();
     this->orders.pop_front();
-    return std::move(order);
+    return order;
 }
 
 DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)

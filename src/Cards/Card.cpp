@@ -30,7 +30,7 @@ std::ostream &operator<<(std::ostream &os, const Hand &hand) {
 std::ostream &operator<<(std::ostream &os, const Deck &deck) {
     os << "You have " << deck.cards.size() << " cards in your deck." << std::endl;
     for (auto &card: deck.cards) {
-        os << card << std::endl;
+        os << *card << std::endl;
     }
     return os;
 }
@@ -70,13 +70,6 @@ std::ostream &operator<<(std::ostream &os, const Card &card) {
 }
 
 /**
- * Constructor for a Card object
- * @param name The name of the card
- * @param description The description of the card
- */
-Card::Card(std::string name, std::string description) : name(std::move(name)), description(std::move(description)) {}
-
-/**
  * Destructor for the card
  */
 Card::~Card() = default;
@@ -93,12 +86,12 @@ void BombCard::play(Player *issuer) const {
         std::cout << "Error: this territory does not exist!" << std::endl;
         return;
     }
-    if (territory->owner == issuer) {
+    if (territory->getOwner() == issuer) {
         std::cout << "Error: Cannot bomb your own territory!" << std::endl;
         return;
     }
-    auto order = std::make_unique<BombOrder>(issuer, territory);
-    issuer->orders->push(std::move(order));
+    auto order = new BombOrder(issuer, territory);
+    issuer->orders->push(order);
 }
 
 /**
@@ -133,13 +126,13 @@ void BlockadeCard::play(Player *issuer) const {
         std::cout << "Error: this territory does not exist!" << std::endl;
         return;
     }
-    if (territory->owner != issuer) {
+    if (territory->getOwner() != issuer) {
         std::cout << "Error: Cannot blockade territory you don't own!" << std::endl;
         return;
     }
 
-    auto order = std::make_unique<BlockadeOrder>(issuer, territory);
-    issuer->orders->push(std::move(order));
+    auto order = new BlockadeOrder(issuer, territory);
+    issuer->orders->push(order);
 }
 
 /**
@@ -147,18 +140,10 @@ void BlockadeCard::play(Player *issuer) const {
  * @param card The card that will be added to the deck
  */
 void Deck::put(Card *card) {
-    unsigned int deckSize = this->cards.size();
-    unsigned int randomLocation = rand() % deckSize;
+    unsigned int randomLocation = this->getRandomLocation();
     this->cards.insert(this->cards.begin() + randomLocation, card);
 }
 
-/**
- * Deck constructor
- * @param cards The cards that are initially in the deck
- */
-Deck::Deck(std::vector<Card *> cards) {
-    this->cards = std::move(cards);
-}
 
 /**
  * Playing the airlift card
@@ -177,7 +162,7 @@ void AirliftCard::play(Player *issuer) const {
         std::cout << "Error: Please place a positive army size!" << std::endl;
         return;
     }
-    if (armiesSize > territoryPlayer->armies) {
+    if (armiesSize > territoryPlayer->getArmies()) {
         std::cout << "Error: Please do write a number smaller than the total army size on this territory!" << std::endl;
         return;
     }
@@ -187,8 +172,8 @@ void AirliftCard::play(Player *issuer) const {
         std::cout << "Error: this territory does not exist!" << std::endl;
         return;
     }
-    auto order = std::make_unique<AirliftOrder>(issuer, armiesSize, territoryPlayer, territoryTarget);
-    issuer->orders->push(std::move(order));
+    auto order = new AirliftOrder(issuer, armiesSize, territoryPlayer, territoryTarget);
+    issuer->orders->push(order);
 }
 
 /**
@@ -212,21 +197,27 @@ void NegotiateCard::play(Player *issuer) const {
         std::cout << "Error: this player does not exist!" << std::endl;
         return;
     }
-    auto order = std::make_unique<NegotiateOrder>(issuer, player);
-    issuer->orders->push(std::move(order));
+    auto order = new NegotiateOrder(issuer, player);
+    issuer->orders->push(order);
 }
 
 /**
- * Draw a card from the deck
+ * Draw a card randomly from the deck
  * @return The card that has been drawn
  */
 Card *Deck::draw() {
-    auto *card = this->cards.back();
-    this->cards.pop_back();
+    unsigned int randomLocation = this->getRandomLocation();
+    auto* card = this->cards[randomLocation];
+    this->cards.erase(this->cards.begin() + randomLocation);
     return card;
 }
 
 int Deck::getCardsSize() {
     return this->cards.size();
+}
+
+int Deck::getRandomLocation() {
+    unsigned int deckSize = this->getCardsSize();
+    return rand() % deckSize;
 }
 
