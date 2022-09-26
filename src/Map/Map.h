@@ -207,7 +207,7 @@ public:
     // - territories have a continent
     // - continents have at least one territory
 
-    string *pFile;
+    string mapFile;
 
     // constructor
     MapLoader(string path);
@@ -224,7 +224,6 @@ public:
     // Insertion operator
     friend std::ostream &operator<<(std::ostream &os, const MapLoader &mapLoader);
 
-
      static std::unique_ptr<Map> importMap(const string &path) noexcept(false);
 
     // parse the .map file
@@ -233,16 +232,6 @@ public:
     // create a Map obj
     Map *createMap();
 
-private:
-    bool parseContinent(string line); // parse continents block in the .map file
-    bool parseTerritory(string line); // parse territories block in the .map file
-    void convertTerritoryToInt(); // change territory name to its index in vector
-    int getTerritoryId(const string &name); // get territory index in the vector
-    vector<string> getContinentsData(int id); // return struct continentsData
-    vector<string> getTerritoriesData(int id); // return struct territoriesData
-    vector<vector<string>> getBordersData(); // return struct bordersData
-
-    vector<string> splitString(const string &line, char delim);
 };
 
 #endif //WARZONE_MAP_H
