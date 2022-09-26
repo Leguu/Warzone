@@ -35,11 +35,15 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const Territory &territory);
 
     // Method to get neighbors
+    vector<Territory *> getAdjTerritories() const;
+
     vector<Territory *> adjacentTerritories;
-    vector<Territory *> getAdjTerritories();
+    bool visited;
 
     // Getters and setters
     string getName();
+
+    int getId() const;
 
     string getContinent();
 
@@ -66,7 +70,6 @@ private:
     int armies{0};
     Player *owner = nullptr;
 
-    //  bool visited = false;
     //  friend class MapLoader;
 };
 
@@ -151,23 +154,21 @@ public:
     void addTerritoryToMap(Territory *);
 
     // A method to add a continent
-    void addContinent(Continent* continent);
+    void addContinent(Continent *continent);
 
     // A method to connect territories
-    static void connectNeighbors(Territory *source, Territory *dest);
+    void addEdge(Territory *source, Territory *dest);
 
-    // A traversal method using DFS
-    static void DFS(std::set<string> *visitedTerritories, Territory *territory, bool test);
+    void resetTerr();
 
-    // A method to check if all territories are connected
-    static bool traverse(vector<Territory *> *startingPoint, bool isContinent);
+    bool isConnected();
+    int traverseTerr(Territory *territory, int visited);
 
-    // A method to check both territories and continents
+    bool isSubgraphConnected();
+    int traverseSubgraph(Territory *territory, const string& continent, int visited);
+
+    bool isUniqueContinent();
     bool validate();
-
-    // A method to check if a territory has one continent
-    bool uniqueContinent();
-
 
     /// Figure out whether every continents have an owner?
     inline bool allContinentsOwned() { return false; }

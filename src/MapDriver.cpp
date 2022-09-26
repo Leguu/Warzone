@@ -1,66 +1,67 @@
 #include <iostream>
+#include <string>
+#include <vector>
 #include "Map/Map.h"
 
 using namespace std;
 
 int main() {
 
-    string mapName = "Moon";
-    vector<vector<string>> OkContinents = { {"Cresinion", "2"}};
 
-    vector<vector<string>> OkTerritories = {{"1", "Bay of Dew",      "1"},
-                                            {"2", "Byrgius",         "1"},
-                                            {"3", "Ocean of Storms", "1"},
-                                            {"4", "Sea of Rains",    "1"},
-                                            {"5", "Harpalus",        "1"}};
-    vector<vector<int>> validBorders = {{1, 2, 3, 4, 5}};
+    // Hardcoded map
+    vector<Territory*> neighbours;
+    vector<Continent*> continents;
 
-    Map validMap = Map(mapName, OkContinents);
+    Map map("testMap",neighbours, continents);
 
-    for (auto &i: OkTerritories) {
-        validMap.addTerritory(stoi(i[0]), i[1], stoi(i[2]));
-    }
+    auto* na = new Continent("North America", 3);
+    auto* ca = new Continent("Central America", 3);
+
+    map.addContinent(na);
+    map.addContinent(ca);
+
+    auto* canada = new Territory("Canada", "North America");
+    auto* us = new Territory("United States", "North America");
+    auto* mexico = new Territory("Mexico", "North America");
+    auto* guatemala = new Territory("Guatemala", "Central America");
+    auto* belize = new Territory("Belize", "Central America");
+    auto* elSalvador = new Territory("El Salvador", "Central America");
+    auto* honduras = new Territory("Honduras", "Central America");
+    auto* nicaragua = new Territory("Nicaragua", "Central America");
+
+    map.addTerritoryToMap(canada);
+    map.addTerritoryToMap(us);
+    map.addTerritoryToMap(mexico);
+    map.addTerritoryToMap(guatemala);
+    map.addTerritoryToMap(belize);
+    map.addTerritoryToMap(elSalvador);
+    map.addTerritoryToMap(honduras);
+    map.addTerritoryToMap(nicaragua);
 
 
-    for (auto &i: validBorders) {
-        for (unsigned int j = 1; j < i.size(); j++) {
-            validMap.connectNeighbors(i[0], i[j]);
+    map.addEdge(canada, us);
+    map.addEdge(us, mexico);
+    map.addEdge(mexico, guatemala);
+    map.addEdge(mexico, belize);
+    map.addEdge(guatemala, belize);
+    map.addEdge(guatemala, elSalvador);
+    map.addEdge(guatemala, honduras);
+    map.addEdge(belize, honduras);
+    map.addEdge(elSalvador, honduras);
+    map.addEdge(honduras, nicaragua);
+
+        for (auto p: map.getAllTerritories()) {
+            cout << "\n----------\n" << p->getName() << " " << p->getId() << endl;
+            for (auto pp: p->getAdjTerritories()) {
+                cout << pp->getName() << " - ";
+            }
+            cout << "\n";
         }
-    }
+
+   cout << map;
+   cout << map.validate();
 
 
-    string invalidMapName = "badMoon";
-    vector<vector<string>> invalidContinent = {{"Sajon",     "4"},
-                                               {"Cresinion", "2"},
-                                               {"Delphot",   "2"}};
-
-    vector<vector<string>> invalidTerritories = {{"1", "Bay of Dew",      "1"},
-                                                 {"2", "Byrgius",         "1"},
-                                                 {"3", "Ocean of Storms", "1"},
-                                                 {"4", "Sea of Rains",    "1"},
-                                                 {"5", "Harpalus",        "1"}};
-
-    vector<vector<int>> invalidBorders = {{1, 2},
-                                          {3, 4, 5}};
-
-    Map invalidMap = Map(invalidMapName, invalidContinent);
-
-    for (auto &i: invalidTerritories) {
-        invalidMap.addTerritory(stoi(i[0]), i[1], stoi(i[2]));
-    }
-
-
-    for (auto &i: invalidBorders) {
-        for (unsigned int j = 1; j < i.size(); j++) {
-            invalidMap.connectNeighbors(i[0], i[j]);
-        }
-    }
-
-    //test maps
-   // validMap.toStringMap();
-  // invalidMap.toStringMap();
-     cout << "Testing valid map...\n Connected : " << validMap.validate() << "\n";
-     cout << "Testing invalid map...\n Connected : " << invalidMap.validate() << "\n";
     return 0;
 }
 
