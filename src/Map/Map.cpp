@@ -14,6 +14,7 @@
 
 using namespace std;
 int Territory::idIncrement = 0;
+bool debug = false;
 
 Territory::Territory() {}
 
@@ -178,7 +179,6 @@ void Continent::addTerritoryToContinent(Territory *territory) {
 }
 
 
-
 /*Player *Continent::owner() {
     return nullptr;
 }*/
@@ -313,8 +313,8 @@ void Map::addContinent(Continent *continent) {
 }
 
 void Map::addEdge(Territory *source, Territory *dest) {
-    if(std::find(source->adjacentTerritories.begin(), source->adjacentTerritories.end(), dest)
-                !=source->adjacentTerritories.end()){
+    if (std::find(source->adjacentTerritories.begin(), source->adjacentTerritories.end(), dest)
+        != source->adjacentTerritories.end()) {
         cout << "Found existing edge" << endl;
     } else {
         source->adjacentTerritories.push_back(dest);
@@ -337,96 +337,114 @@ bool Map::isConnected() {
         if (!territory->visited) {
             territory->visited = true;
             if (territory->adjacentTerritories.empty()) {
-                cerr << "\nMap is NOT a connected graph!" << endl;
+                if (debug)
+                    cerr << "\nMap is NOT a connected graph!" << endl;
                 return false;
             }
             visited = traverseTerr(territory, visited);
         }
     }
-    cout << "\nTotal territories in map: " << visited << endl;
+    if (debug)
+        cout << "\nTotal territories in map: " << visited << endl;
     if (visited == territories.size()) {
-        cout << "\nMap is a connected graph!" << endl;
+        if (debug)
+            cout << "\nMap is a connected graph!" << endl;
         return true;
     } else {
-        cout << "\nMap is NOT a connected graph!" << endl;
+        if (debug)
+            cout << "\nMap is NOT a connected graph!" << endl;
         return false;
     }
 }
+
 int Map::traverseTerr(Territory *territory, int visited) {
     vector<Territory *> adjacentTerritories = territory->adjacentTerritories;
-    for (auto & adjTerr : adjacentTerritories) {
+    for (auto &adjTerr: adjacentTerritories) {
         if (!adjTerr->visited) {
             adjTerr->visited = true;
             visited = traverseTerr(adjTerr, visited);
         }
     }
-    cout << "\nVisiting " << territory->getName() << endl;
-    cout << "Total territories visited: " << visited + 1 << endl;
+    if (debug) {
+        cout << "\nVisiting " << territory->getName() << endl;
+        cout << "Total territories visited: " << visited + 1 << endl;
+    }
     return visited + 1;
 }
 
 bool Map::isSubgraphConnected() {
     resetTerr();
-    for (auto & continent : continents) {
+    for (auto &continent: continents) {
         string continentName = continent->getName();
         vector<Territory *> continentTerr = continent->getTerritories();
-        cout << "\nChecking " << continentName << " which has " << to_string(continentTerr.size()) << " members" << endl;
+        if (debug)
+            cout << "\nChecking " << continentName << " which has " << to_string(continentTerr.size()) << " members"
+                 << endl;
         int visited = 0;
         for (auto &terr: continentTerr) {
             if (!terr->visited) {
                 terr->visited = true;
                 if (terr->adjacentTerritories.empty()) {
-                    cerr << "\nContinent " << continent->getName() << " is NOT a connected sub graph!" << endl;
+                    if (debug)
+                        cerr << "\nContinent " << continent->getName() << " is NOT a connected sub graph!" << endl;
                     return false;
                 }
                 visited = traverseSubgraph(terr, continentName, visited);
             }
         }
-        cout << "\nTotal territories in continent: " << to_string(visited) << endl;
+        if (debug)
+            cout << "\nTotal territories in continent: " << to_string(visited) << endl;
         if (visited == continentTerr.size()) {
-            cout << "\nContinent " << continent->getName() << " is a connected subgraph!" << endl;
+            if (debug)
+                cout << "\nContinent " << continent->getName() << " is a connected subgraph!" << endl;
         } else {
-            cerr << "\nContinent " << continent->getName() << " is NOT a connected subgraph!" << endl;
+            if (debug)
+                cerr << "\nContinent " << continent->getName() << " is NOT a connected subgraph!" << endl;
             return false;
         }
     }
-    cout << "\nAll continents are connected sub graphs!" << endl;
+    if (debug)
+        cout << "\nAll continents are connected sub graphs!" << endl;
     return true;
 }
 
 
-int Map::traverseSubgraph(Territory *territory, const string& continent, int visited) {
+int Map::traverseSubgraph(Territory *territory, const string &continent, int visited) {
     vector<Territory *> adjacentTerritories = territory->adjacentTerritories;
-    for (auto & adjTerr : adjacentTerritories) {
+    for (auto &adjTerr: adjacentTerritories) {
         if (!adjTerr->visited && adjTerr->getContinent() == continent) {
             adjTerr->visited = true;
             visited = traverseSubgraph(adjTerr, continent, visited);
         }
     }
-    cout << "\nVisiting " << territory->getName() << "..." << endl;
-    cout << "Total territories visited: " << visited + 1 << endl;
+    if (debug) {
+        cout << "\nVisiting " << territory->getName() << "..." << endl;
+        cout << "Total territories visited: " << visited + 1 << endl;
+    }
     return visited + 1;
 }
 
 bool Map::isUniqueContinent() {
     map<string, string> listOfContinents;
-    for (auto & continent : continents) {
+    for (auto &continent: continents) {
         vector<Territory *> currTerritories = continent->getTerritories();
-        for (auto & terr : currTerritories)
+        for (auto &terr: currTerritories)
             if (listOfContinents.count(terr->getName()) > 0) {
-                cout << "\nTerritory " << terr->getName() << " is assigned more than one continent!" << endl;
+                if (debug)
+                    cout << "\nTerritory " << terr->getName() << " is assigned more than one continent!" << endl;
                 return false;
             } else {
                 listOfContinents[terr->getName()] = terr->getContinent();
             }
     }
-    cout << "\nEach territory has a unique continent!" << endl;
+    if (debug)
+        cout << "\nEach territory has a unique continent!" << endl;
     return true;
 }
 
 
 bool Map::validate() {
-    return (isUniqueContinent() && isConnected() && isSubgraphConnected()) ;
+    return (isUniqueContinent() && isConnected() && isSubgraphConnected());
 }
 
 

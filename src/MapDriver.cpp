@@ -7,7 +7,6 @@ using namespace std;
 
 int main() {
 
-
     // Hardcoded map
     vector<Territory*> neighbours;
     vector<Continent*> continents;
@@ -59,7 +58,8 @@ int main() {
             cout << "\n";
         }
 
-   cout << map;
+  // cout << map;
+
    cout << map.validate();
 
 

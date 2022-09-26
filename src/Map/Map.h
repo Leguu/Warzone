@@ -12,6 +12,8 @@ using std::vector;
 
 class Player;
 
+extern bool debug;
+
 class Territory {
 public:
 
