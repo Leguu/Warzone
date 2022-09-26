@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <memory>
 
 using std::string;
 using std::vector;
@@ -56,7 +57,7 @@ public:
     void setOwner(Player *);
 
     // To string method
-    // [[nodiscard]] string toString() const;
+     [[nodiscard]] string toString() const;
 
 protected:
     /// Global variable for assigning territory ids.
@@ -222,7 +223,7 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const MapLoader &mapLoader);
 
 
-    // static std::unique_ptr<Map> importMap(const string &path) noexcept(false);
+     static std::unique_ptr<Map> importMap(const string &path) noexcept(false);
 
     // parse the .map file
     bool parse();

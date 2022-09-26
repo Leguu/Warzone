@@ -14,10 +14,11 @@ std::ostream &operator<<(std::ostream &os, const Order &order) {
 Order::~Order() = default;
 
 void BombOrder::execute() {
-    if (target->owner && (target->owner->name == issuer->name)) {
+    if (target->getOwner() && (target->getOwner()->name == issuer->name)) {
         throw InvalidOrderException(issuer->name + " attempts to bomb himself! What an idiot.");
     }
-    this->target->armies /= 2;
+  //  this->target->armies /= 2;
+    this->target->setArmies(this->target->getArmies()/2);
 }
 
 BombOrder::BombOrder(Player *issuer, Territory *target)

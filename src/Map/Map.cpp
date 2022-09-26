@@ -99,6 +99,18 @@ void Territory::setOwner(Player *newOwner) {
 
 }
 
+string Territory::toString() const {
+    string str;
+    str += "[" + to_string(id) + "] ";
+    str += name;
+    if (owner) {
+        str += " (" + to_string(armies) + ", " + owner->name + ")";
+    } else {
+        str += " (" + to_string(armies) + ")";
+    }
+    return str;
+}
+
 /*string Territory::toString() const {
     string str;
     str += "[" + to_string(id) + "] ";
@@ -171,16 +183,16 @@ void Continent::addTerritoryToContinent(Territory *territory) {
     return nullptr;
 }*/
 
-/*
+
 unique_ptr<Map> MapLoader::importMap(const string &path) {
     auto allTerritories = vector<Territory *>{};
 
     auto expel = new Continent("Expel", 4);
 
-    auto arlia = new Territory("Arlia");
-    arlia->continent = expel;
-    auto krosse = new Territory("Krosse");
-    krosse->continent = expel;
+    auto arlia = new Territory("Arlia", "Expel");
+
+    auto krosse = new Territory("Krosse", "Expel");
+
 
     arlia->adjacentTerritories = {krosse};
     krosse->adjacentTerritories = {arlia};
@@ -190,26 +202,24 @@ unique_ptr<Map> MapLoader::importMap(const string &path) {
     allTerritories.push_back(arlia);
     allTerritories.push_back(krosse);
 
-    expel->territories = allTerritories;
+    expel->getTerritories() = allTerritories;
 
-    auto map = make_unique<Map>(continents, allTerritories);
+    auto map = make_unique<Map>("Map", allTerritories, continents);
 
     // Make sure to throw an exception if the map is invalid.
 
     return map;
 }
-*/
 
-/*
-Territory *findById(int id) const {
+Territory *Map::findById(int id) const {
     for (auto territory: territories) {
-        if (territory->id == id) {
+        if (territory->getId() == id) {
             return territory;
         }
     }
     return nullptr;
 }
-*/
+
 
 // ------------------ Maps ------------------------
 
@@ -418,6 +428,7 @@ bool Map::isUniqueContinent() {
 bool Map::validate() {
     return (isUniqueContinent() && isConnected() && isSubgraphConnected()) ;
 }
+
 
 /*
 Map(std::string &mapName, vector<Continent *> continents) {
