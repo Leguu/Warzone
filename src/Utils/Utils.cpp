@@ -28,3 +28,10 @@ int Utils::getInputInt(const std::string &prompt) {
     }
     return value;
 }
+
+void Utils::assert(bool condition, const std::string test) {
+    if (!condition) {
+        std::cout << test << " Has failed";
+        exit(-1);
+    }
+}

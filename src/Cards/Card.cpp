@@ -146,18 +146,18 @@ void BlockadeCard::play(Player *issuer) const {
  * Put a card in the deck
  * @param card The card that will be added to the deck
  */
-void Deck::put(Card* card){
-    unsigned int deckSize = this->cardCollection.size();
+void Deck::put(Card *card) {
+    unsigned int deckSize = this->cards.size();
     unsigned int randomLocation = rand() % deckSize;
-    this->cardCollection.insert(this->cardCollection.begin() + randomLocation, card);
+    this->cards.insert(this->cards.begin() + randomLocation, card);
 }
 
 /**
  * Deck constructor
- * @param cardCollection The cards that are initially in the deck
+ * @param cards The cards that are initially in the deck
  */
-Deck::Deck(std::vector<Card *> cardCollection) {
-    this->cardCollection = std::move(cardCollection);
+Deck::Deck(std::vector<Card *> cards) {
+    this->cards = std::move(cards);
 }
 
 /**
@@ -220,8 +220,13 @@ void NegotiateCard::play(Player *issuer) const {
  * Draw a card from the deck
  * @return The card that has been drawn
  */
-Card* Deck::draw() {
-    auto* card = this->cardCollection.back();
-    this->cardCollection.pop_back();
+Card *Deck::draw() {
+    auto *card = this->cards.back();
+    this->cards.pop_back();
     return card;
 }
+
+int Deck::getCardsSize() {
+    return this->cards.size();
+}
+

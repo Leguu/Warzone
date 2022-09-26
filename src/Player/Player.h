@@ -11,13 +11,14 @@ class Player;
 #include "../Cards/Card.h"
 
 class Hand;
+
 class OrderList;
 
 class Player {
 public:
     const std::string name;
-    OrderList* orders = new OrderList();
-    Hand* hand = new Hand();
+    OrderList *orders = new OrderList();
+    Hand *hand = new Hand();
     std::vector<Territory *> ownedTerritories = {};
     int reinforcements = 0;
 
@@ -32,7 +33,9 @@ public:
     // TODO
     void issueOrder();
 
-    void play(std::string &cardName);
+    void play(std::string const &cardName);
+private:
+    Card* findCardByName(std::string name, int* indexPointer) const;
 
 };
 

@@ -6,17 +6,11 @@
  * Play a card from the deck and add it to the deck
  * @param cardName The name of the card
  */
-void Player::play(std::string &cardName) {
+void Player::play(std::string const &cardName) {
     auto ge = GameEngine::instance();
-    Card* cardToPlay = nullptr;
     int index = -1;
-    for (auto &card: this->hand->cards) {
-        if(card->name == cardName){
-            cardToPlay = card;
-            break;
-        }
-        index = index + 1;
-    }
+    int* indexPointer = &index;
+    Card* cardToPlay = Player::findCardByName(cardName, indexPointer);
     if (cardToPlay != nullptr){
         cardToPlay->play(this);
         this->hand->remove(index);
@@ -36,4 +30,14 @@ const std::vector<Territory *> Player::toDefend() {
 
 void Player::issueOrder() {
 
+}
+
+Card* Player::findCardByName(std::string name, int* indexPointer) const {
+    for (auto &card: this->hand->cards) {
+        if (card->name == name) {
+            return card;
+        }
+        indexPointer = indexPointer + 1;
+    }
+    return nullptr;
 }

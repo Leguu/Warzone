@@ -1,6 +1,6 @@
 #include <iostream>
 #include "Cards/Card.h"
-#include "Cards/CardsTester.h"
+#include "Cards/CardsDriver.h"
 #include "GameEngine/GameEngine.h"
 
 // TODO Test functions
@@ -25,26 +25,24 @@ int main() {
  * Testing Cards Class Elements
  * ============================================================================================
  * */
-    CardsTester* ct = new CardsTester();
-    ct->testBombCardConstructor();
-    ct->testBombCardPlay();
-    ct->testBlockadeCardConstructor();
-    ct->testBlockadeCardPlay();
-    ct->testAirliftCardConstructor();
-    ct->testAirliftCardPlay();
-    ct->testNegotiateCardConstructor();
-    ct->testNegotiateCardPlay();
-    ct->testHandConstructor();
-    ct->testListHand();
-    ct->testHandAdd();
-    ct->testHandRemove();
-    ct->testDeckConstructor();
-    ct->testDeckDraw();
-    ct->testDeckPut();
-    ct->testDeckToString();
-    ct->testHandToString();
-    ct->testBombCardToString();
-    ct->testBlockadeCardToString();
-    ct->testAirliftCardToString();
-    ct->testNegotiateCardToString();
+    CardsTester::testBombCardConstructor();
+    CardsTester::testBombCardPlay();
+    CardsTester::testBlockadeCardConstructor();
+    CardsTester::testBlockadeCardPlay();
+    CardsTester::testAirliftCardConstructor();
+    CardsTester::testAirliftCardPlay();
+    CardsTester::testNegotiateCardConstructor();
+    CardsTester::testNegotiateCardPlay();
+    CardsTester::testHandConstructor();
+    CardsTester::testListHand();
+    CardsTester::testHandRemove();
+    CardsTester::testDeckConstructor();
+    CardsTester::testDeckDraw();
+    CardsTester::testDeckPut();
+    CardsTester::testDeckToString();
+    CardsTester::testHandToString();
+    CardsTester::testBombCardToString();
+    CardsTester::testBlockadeCardToString();
+    CardsTester::testAirliftCardToString();
+    CardsTester::testNegotiateCardToString();
 }

@@ -9,6 +9,8 @@ public:
     static std::string getInputString(const std::string &prompt);
 
     static int getInputInt(const std::string &prompt);
+
+    static void assert(bool condition, const std::string test);
 };
 
 

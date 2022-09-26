@@ -2,6 +2,7 @@
 #define WARZONE_CARD_H
 
 class CardManager;
+
 class Card;
 
 #include <vector>
@@ -12,13 +13,17 @@ class Hand {
 public:
 
     void remove(int index);
-    std::vector<Card*> cards;
+
+    std::vector<Card *> cards;
+
     void listHand();
+
     void draw();
+
     friend std::ostream &operator<<(std::ostream &os, const Hand &hand);
 
 private:
-    void add(Card* card);
+    void add(Card *card);
 };
 
 #include "../Player/Player.h"
@@ -75,21 +80,21 @@ public:
 };
 
 
-
 class Deck {
 public:
 
-    explicit Deck(std::vector<Card*> cardCollection);
-    std::vector<Card*> cardCollection;
+    explicit Deck(std::vector<Card *> cards);
 
-    Card* draw();
+    Card *draw();
 
-    void put(Card* card);
+    void put(Card *card);
 
     friend std::ostream &operator<<(std::ostream &os, const Deck &deck);
 
+    int getCardsSize();
+
 private:
-    std::vector<Card*> cards;
+    std::vector<Card *> cards;
 };
 
 #endif //WARZONE_CARD_H
