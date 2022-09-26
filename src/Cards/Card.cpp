@@ -8,7 +8,7 @@
 std::ostream &operator<<(std::ostream &os, const Hand &hand) {
     os << "You have " << hand.cards.size() << " cards in your hand." << std::endl;
     for (auto &card: hand.cards) {
-        os << card << std::endl;
+        os << *card << std::endl;
     }
     return os;
 }
@@ -16,7 +16,7 @@ std::ostream &operator<<(std::ostream &os, const Hand &hand) {
 std::ostream &operator<<(std::ostream &os, const Deck &deck) {
     os << "You have " << deck.cards.size() << " cards in your deck." << std::endl;
     for (auto &card: deck.cards) {
-        os << card << std::endl;
+        os << *card << std::endl;
     }
     return os;
 }

@@ -1,95 +1,200 @@
 #ifndef WARZONE_MAP_H
 #define WARZONE_MAP_H
 
-class Territory;
-
 #include <string>
-#include <ostream>
-#include "../Player/Player.h"
+#include <iostream>
+#include <vector>
+#include <set>
+#include <memory>
 
-class Continent {
-public:
-    const std::string name;
-    const int bonus;
+using std::string;
+using std::vector;
 
-    // TODO: Calculate the owner
-    Player *owner();
+class Player;
 
-    Continent(std::string name, int bonus);
-
-protected:
-    /// TODO list of references? also for Territory::adjacentTerritories
-    std::vector<Territory *> territories = {};
-
-    friend class MapLoader;
-};
+extern bool debug;
 
 class Territory {
 public:
-    const int id = idIncrement++;
-    const std::string name;
 
-    Player *owner = nullptr;
-    int armies = 10;
+    // Default constructor
+    Territory();
 
-    explicit Territory(std::string name);
+    // Constructor with necessary parameters
+    Territory(string territory, string continent);
 
-    [[nodiscard]] std::string toString() const;
+    Territory(string name, string continent, vector<Territory *> adjacentTerritories);
 
+    // Copy constructor
+    Territory(const Territory &orgTerritory);
+
+    // Destructor
+    virtual ~Territory();
+
+    // Assignment operator
+    Territory &operator=(const Territory &territory);
+
+    // Insertion operator
     friend std::ostream &operator<<(std::ostream &os, const Territory &territory);
+
+    // Method to get neighbors
+    vector<Territory *> getAdjTerritories() const;
+
+    vector<Territory *> adjacentTerritories;
+    bool visited;
+
+    // Getters and setters
+    string getName();
+
+    int getId() const;
+
+    string getContinent();
+
+    int getArmies() const;
+
+    void setArmies(int);
+
+    Player *getOwner();
+
+    void setOwner(Player *);
+
+    // To string method
+     [[nodiscard]] string toString() const;
 
 protected:
     /// Global variable for assigning territory ids.
     /// The ids for allTerritories need to be globally unique, so this can be static.
     static int idIncrement;
+private:
+    // Variables
+    int id = idIncrement++;
+    string name;
+    string continent;
+    int armies{0};
+    Player *owner = nullptr;
 
-    std::vector<Territory *> adjacentTerritories;
-    /// Todo is this really necessary?
-    Continent *continent = nullptr;
+    //  friend class MapLoader;
+};
 
-    friend class MapLoader;
+
+class Continent {
+public:
+
+    // Default constructor
+    Continent();
+
+    // Constructor with necessary name and optional bonus
+    Continent(string name, int bonus);
+
+    Continent(string name, int armies, vector<Territory *>);
+
+    // Copy constructor
+    Continent(const Continent &orgContinent);
+
+    // Destructor
+    virtual ~Continent();
+
+    // Assigment constructor
+    Continent &operator=(const Continent &continent);
+
+    // Insertion operator
+    friend std::ostream &operator<<(std::ostream &os, const Continent &continent);
+
+    // Getters and setters
+
+    vector<Territory *> getTerritories();
+
+    string getName();
+
+    int getBonus() const;
+
+    // A method to add a territory to a continent
+    void addTerritoryToContinent(Territory *territory);
+
+private:
+    vector<Territory *> territories;
+    string name;
+    int bonus;
+
 };
 
 class Map {
 public:
-    // TODO Map owns these pointers, they should be destructed properly.
-    // Could probably be unique_ptrs to make that clear
-    const std::vector<Continent *> continents;
-    const std::vector<Territory *> allTerritories;
+    // Default Constructors
+    Map();
 
-    Map(std::vector<Continent *> continents, std::vector<Territory *> territories);
+    // Constructor with necessary parameters
+    Map(string name, vector<Continent *> continents);
 
-    /// Figure out whether every continents have an owner?
-    inline bool allContinentsOwned() { return false; }
+    Map(string name, vector<Territory *> territories, vector<Continent *> continents);
 
-    [[nodiscard]] Territory *findById(int id) const;
+    // Copy Constructor
+    Map(const Map &orgMap);
 
-    // TODO: find by name?
+    // Destructor
+    virtual ~Map();
 
-    // TODO: Implement the tostring
+    // Assignment operator
+    Map &operator=(const Map &map);
+
+    // Insertion operator
     // Format:
     // Territory: adjacent, adjacent, adjacent
     // Territory1: adjacent, adjacent, adjacent
     // Territory2: adjacent, adjacent, adjacent
     friend std::ostream &operator<<(std::ostream &os, const Map &map);
 
-    // todo
-    virtual ~Map();
+    // Getters and setters
+    vector<Territory *> getAllTerritories();
 
+    void setAllTerritories(vector<Territory *>);
+
+    vector<Continent *> getContinents();
+
+    // A method to add a territory
+    void addTerritoryToMap(string newName, const string &continent);
+
+    void addTerritoryToMap(Territory *);
+
+    // A method to add a continent
+    void addContinent(Continent *continent);
+
+    // A method to connect territories
+    void addEdge(Territory *source, Territory *dest);
+
+    void resetTerr();
+
+    bool isConnected();
+    int traverseTerr(Territory *territory, int visited);
+
+    bool isSubgraphConnected();
+    int traverseSubgraph(Territory *territory, const string& continent, int visited);
+
+    bool isUniqueContinent();
+    bool validate();
+
+    /// Figure out whether every continents have an owner?
+    inline bool allContinentsOwned() { return false; }
+
+    [[nodiscard]] Territory *findById(int id) const;
+
+
+///// Exception for when the file cannot be read, or it's garbled
+//    class InvalidMapFileException : public std::runtime_error {
+//        [[nodiscard]] const char *what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
+//    };
+//
+///// Exception for when the map does not follow the game rules
+//    class InvalidGameMapException : public std::runtime_error {
+//        [[nodiscard]] const char *what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
+//    };
+
+    // private properties for Map class
 private:
-    friend class MapLoader;
-};
+    string name;
+    vector<Continent *> continents;
+    vector<Territory *> territories;
 
-/// Exception for when the file cannot be read, or it's garbled
-class InvalidMapFileException : public std::runtime_error {
-public:
-    [[nodiscard]] const char *what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
-};
-
-/// Exception for when the map does not follow the game rules
-class InvalidGameMapException : public std::runtime_error {
-public:
-    [[nodiscard]] const char *what() const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
 };
 
 class MapLoader {
@@ -101,7 +206,32 @@ public:
     // - territories are adjacent to at least one thing
     // - territories have a continent
     // - continents have at least one territory
-    static std::unique_ptr<Map> importMap(const std::string &path) noexcept(false);
+
+    string mapFile;
+
+    // constructor
+    MapLoader(string path);
+
+    // copy constructor
+    MapLoader(const MapLoader &orgMapLoader);
+
+    // destructor
+    virtual ~MapLoader();
+
+    // Assignment operator
+    MapLoader &operator=(const MapLoader &mapLoader);
+
+    // Insertion operator
+    friend std::ostream &operator<<(std::ostream &os, const MapLoader &mapLoader);
+
+     static std::unique_ptr<Map> importMap(const string &path) noexcept(false);
+
+    // parse the .map file
+    bool parse();
+
+    // create a Map obj
+    Map *createMap();
+
 };
 
 #endif //WARZONE_MAP_H

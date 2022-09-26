@@ -12,11 +12,11 @@ int main() {
 
     ge->players.push_back(std::make_unique<Player>("Bob"));
 
-    std::cout << "Armies of " + territory->name + " before: " << territory->armies << std::endl;
+    std::cout << "Armies of " + territory->getName() + " before: " << territory->getArmies() << std::endl;
 
     bombCard->play(ge->players[0].get());
 
     ge->executeOrders();
 
-    std::cout << "Armies of " + territory->name + " after: " << territory->armies << std::endl;
+    std::cout << "Armies of " + territory->getName() + " after: " << territory->getArmies() << std::endl;
 }
