@@ -17,6 +17,7 @@ public:
 
     std::vector<Card *> cards;
 
+    Hand() {};
     Hand(const Hand& h);
     Hand& operator=(const Hand& hand);
 
@@ -91,7 +92,7 @@ class Deck {
 public:
 
     explicit Deck(std::vector<Card *> cards) : cards(std::move(cards)) {}
-
+    Deck(){}
     Deck(const Deck& deck);
 
     Deck& operator=(const Deck& deck);
