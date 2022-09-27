@@ -87,7 +87,7 @@ bool BombCard::play(Player *issuer) const {
     while (!validInput) {
         std::cout << "Adjacent enemy territories you can bomb : " << std::endl;
         for (auto *adjacentEnemyTerritory: adjacentEnemyTerritories) {
-            std::cout << "name: " << adjacentEnemyTerritory->getName() << ", ID : " << adjacentEnemyTerritory->getId()
+            std::cout << "Name: " << adjacentEnemyTerritory->getName() << ", ID : " << adjacentEnemyTerritory->getId()
                       << std::endl;
         }
         territoryId = Utils::getInputInt("Please input the ID of the territory you will bomb or input -1 to exit\n");
@@ -149,8 +149,11 @@ bool BlockadeCard::play(Player *issuer) const {
     int territoryId;
     Territory* territory = nullptr;
     bool validInput = false;
-    //PRINT ALL OF THE USERS TERRITORIES HERE
     while (!validInput) {
+        std::cout << "Territories you own: " << std::endl;
+        for(Territory* playerTerritory: issuer->ownedTerritories){
+            std::cout << "Name: " << playerTerritory->getName() << ", ID : " << playerTerritory->getId() << std::endl;
+        }
         territoryId = Utils::getInputInt("Please input the ID of the territory you will Blockade or input -1 to exit \n");
         if (territoryId == -1) {
             return false;
@@ -166,6 +169,7 @@ bool BlockadeCard::play(Player *issuer) const {
         }
         auto order = new BlockadeOrder(issuer, territory);
         issuer->orders->push(order);
+        std::cout << std::endl;
         validInput = true;
     }
     return true;
