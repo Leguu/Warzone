@@ -25,20 +25,19 @@ BombOrder::BombOrder(Player *issuer, Territory *target)
         : Order(issuer, "Bomb", issuer->name + " bombs " + target->toString()),
           target(target) {}
 
-BombOrder::~BombOrder() {
-}
+BombOrder::~BombOrder() = default;
 
 InvalidOrderException::InvalidOrderException(const std::string &arg) : runtime_error(arg) {}
 
-void OrderList::push(std::unique_ptr<Order> order) {
-    this->orders.push_back(std::move(order));
+void OrderList::push(Order* order) {
+    this->orders.push_back(order);
 }
 
-std::unique_ptr<Order> OrderList::pop() {
+Order* OrderList::pop() {
     if (this->orders.empty()) return nullptr;
-    auto order = std::move(this->orders.front());
+    auto order = this->orders.front();
     this->orders.pop_front();
-    return std::move(order);
+    return order;
 }
 
 DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)
@@ -47,9 +46,7 @@ DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)
                 target->toString()),
           reinforcements(reinforcements), target(target) {}
 
-DeployOrder::~DeployOrder() {
-
-}
+DeployOrder::~DeployOrder() = default;
 
 AdvanceOrder::AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target)
         : Order(issuer, "Advance",
@@ -58,9 +55,7 @@ AdvanceOrder::AdvanceOrder(Player *issuer, int armies, Territory *source, Territ
                 target->toString()),
           armies(armies), source(source), target(target) {}
 
-AdvanceOrder::~AdvanceOrder() {
-
-}
+AdvanceOrder::~AdvanceOrder() = default;
 
 BlockadeOrder::BlockadeOrder(Player *issuer, Territory *target)
         : Order(issuer, "Blockade", issuer->name + " blockades " + target->toString()),

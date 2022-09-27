@@ -55,8 +55,8 @@ void BombCard::play(Player *issuer) const {
         std::cout << "Error: this territory does not exist!" << std::endl;
         return;
     }
-    auto order = std::make_unique<BombOrder>(issuer, territory);
-    issuer->orders->push(std::move(order));
+    const auto order = new BombOrder(issuer, territory);
+    issuer->orders->push(order);
 }
 
 BombCard::~BombCard() = default;

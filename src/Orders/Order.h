@@ -117,12 +117,12 @@ public:
 
     void move(int a, int b);
 
-    std::unique_ptr<Order> pop();
+    Order* pop();
 
-    void push(std::unique_ptr<Order> order);
+    void push(Order* order);
 
 private:
-    std::list<std::unique_ptr<Order>> orders = {};
+    std::list<Order*> orders = {};
 };
 
 
