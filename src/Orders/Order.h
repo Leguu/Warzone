@@ -39,9 +39,9 @@ public:
 
 class DeployOrder : public Order {
 public:
-  DeployOrder(Player *issuer, int reinforcements, Territory *target);
+  explicit DeployOrder(Player *issuer, int reinforcements, Territory *target);
 
-  inline void execute() override {};
+  void execute() override;
 
   ~DeployOrder() override;
 
@@ -125,7 +125,7 @@ public:
   void push(Order *order);
 
 private:
-  std::list<Order*> orders = {};
+  std::list<Order *> orders = {};
 };
 
 #endif //WARZONE_ORDER_H
