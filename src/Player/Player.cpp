@@ -8,14 +8,17 @@
  */
 void Player::play(std::string const &cardName) {
     auto ge = GameEngine::instance();
-    int index = -1;
-    int* indexPointer = &index;
-    Card* cardToPlay = Player::findCardByName(cardName, indexPointer);
-    if (cardToPlay != nullptr){
-        cardToPlay->play(this);
-        this->hand->remove(index);
-        ge->deck->put(cardToPlay);
-    }else{
+    int index = 0;
+    int *indexPointer = &index;
+    Card *cardToPlay = Player::findCardByName(cardName, indexPointer);
+    if (cardToPlay != nullptr) {
+        if (cardToPlay->play(this)){
+            this->hand->remove(index);
+            ge->deck->put(cardToPlay);
+        } else{
+            std::cout << "Cancelled play action" << std::endl;
+        }
+    } else {
         std::cout << "Error playing Card. No card of this name were found" << std::endl;
     }
 }
@@ -32,7 +35,7 @@ void Player::issueOrder() {
 
 }
 
-Card* Player::findCardByName(std::string name, int* indexPointer) const {
+Card *Player::findCardByName(std::string name, int *indexPointer) const {
     for (auto &card: this->hand->cards) {
         if (card->name == name) {
             return card;
@@ -40,4 +43,22 @@ Card* Player::findCardByName(std::string name, int* indexPointer) const {
         indexPointer = indexPointer + 1;
     }
     return nullptr;
+}
+
+/**
+ * Get all the enemy territories adjacent to your own
+ * @return all the enemy territories adjacent to yours
+ */
+const std::vector<Territory *> Player::getAdjacentEnemyTerritories() {
+    std::vector<Territory *> enemyTerritoriesAdjacent;
+    for (auto *friendlyTerritory: this->ownedTerritories) {
+        for (auto *adjacentTerritory: friendlyTerritory->adjacentTerritories) {
+            if (adjacentTerritory->getOwner() != this &&
+                std::find(enemyTerritoriesAdjacent.begin(), enemyTerritoriesAdjacent.end(), adjacentTerritory) ==
+                enemyTerritoriesAdjacent.end()) {
+                enemyTerritoriesAdjacent.push_back(adjacentTerritory);
+            }
+        }
+    }
+    return enemyTerritoriesAdjacent;
 }

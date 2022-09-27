@@ -23,6 +23,8 @@ public:
 
     inline explicit Player(std::string name) : name(std::move(name)) {}
 
+    const std::vector<Territory*> getAdjacentEnemyTerritories();
+
     // TODO
     const std::vector<Territory *> toAttack();
 

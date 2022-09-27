@@ -40,7 +40,7 @@ public:
     const std::string name;
     const std::string description;
 
-    virtual void play(Player *issuer) const = 0;
+    virtual bool play(Player *issuer) const = 0;
 
     Card(std::string name, std::string description) : name(std::move(name)), description(std::move(description)){}
 
@@ -55,7 +55,7 @@ class BombCard : public Card {
 public:
     inline BombCard() : Card("BombCard", "Use to destroy half of an enemy territory's army") {}
 
-    void play(Player *issuer) const override;
+    bool play(Player *issuer) const override;
 
     ~BombCard() override;
 };
@@ -64,7 +64,7 @@ class BlockadeCard : public Card {
 public:
     inline BlockadeCard() : Card("BlockadeCard", "Use to lose control of a territory but triple its army size") {}
 
-    void play(Player *issuer) const override;
+    bool play(Player *issuer) const override;
 
     ~BlockadeCard() override;
 };
@@ -73,7 +73,7 @@ class AirliftCard : public Card {
 public:
     inline AirliftCard() : Card("AirliftCard", "Use to move armies from any territory to any other") {}
 
-    void play(Player *issuer) const override;
+    bool play(Player *issuer) const override;
 
     ~AirliftCard() override;
 };
@@ -82,7 +82,7 @@ class NegotiateCard : public Card {
 public:
     inline NegotiateCard() : Card("NegotiateCard", "Use to prevent attacks between you and another player") {}
 
-    void play(Player *issuer) const override;
+    bool play(Player *issuer) const override;
 
     ~NegotiateCard() override;
 };

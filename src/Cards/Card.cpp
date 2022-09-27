@@ -78,20 +78,46 @@ Card::~Card() = default;
  * Playing the bomb card
  * @param issuer The player playing the card
  */
-void BombCard::play(Player *issuer) const {
+bool BombCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
-    int territoryId = Utils::getInputInt("Please input the ID of the territory you will bomb");
-    auto territory = ge->map->findById(territoryId);
-    if (!territory) {
-        std::cout << "Error: this territory does not exist!" << std::endl;
-        return;
+    int territoryId = -1;
+    Territory *territory = nullptr;
+    auto adjacentEnemyTerritories = issuer->getAdjacentEnemyTerritories();
+    bool validInput = false;
+    while (!validInput) {
+        std::cout << "Adjacent enemy territories you can bomb : " << std::endl;
+        for (auto *adjacentEnemyTerritory: adjacentEnemyTerritories) {
+            std::cout << "name: " << adjacentEnemyTerritory->getName() << ", ID : " << adjacentEnemyTerritory->getId()
+                      << std::endl;
+        }
+        territoryId = Utils::getInputInt("Please input the ID of the territory you will bomb or input -1 to exit\n");
+        if (territoryId == -1) {
+            return false;
+        }
+        territory = ge->map->findById(territoryId);
+        if (!territory) {
+            std::cout << "Error: this territory does not exist!\n" << std::endl;
+            continue;
+        }
+        if (territory->getOwner() == issuer) {
+            std::cout << "Error: Cannot bomb your own territory!\n" << std::endl;
+            continue;
+        }
+        bool territoryIsAdjacent = false;
+        for (auto *adjacentEnemyTerritory: adjacentEnemyTerritories) {
+            if (territoryId == adjacentEnemyTerritory->getId())
+                territoryIsAdjacent = true;
+        }
+        if (!territoryIsAdjacent) {
+            std::cout << "Error: Can only bomb adjacent territories!\n" << std::endl;
+            continue;
+        }
+        auto order = new BombOrder(issuer, territory);
+        issuer->orders->push(order);
+        std::cout << std::endl;
+        validInput = true;
     }
-    if (territory->getOwner() == issuer) {
-        std::cout << "Error: Cannot bomb your own territory!" << std::endl;
-        return;
-    }
-    auto order = new BombOrder(issuer, territory);
-    issuer->orders->push(order);
+    return true;
 }
 
 /**
@@ -118,21 +144,31 @@ NegotiateCard::~NegotiateCard() = default;
  * Playing the block card
  * @param issuer The player playing the card
  */
-void BlockadeCard::play(Player *issuer) const {
+bool BlockadeCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
-    auto territoryId = Utils::getInputInt("Please input the ID of the territory you will Blockade");
-    auto territory = ge->map->findById(territoryId);
-    if (!territory) {
-        std::cout << "Error: this territory does not exist!" << std::endl;
-        return;
+    int territoryId;
+    Territory* territory = nullptr;
+    bool validInput = false;
+    //PRINT ALL OF THE USERS TERRITORIES HERE
+    while (!validInput) {
+        territoryId = Utils::getInputInt("Please input the ID of the territory you will Blockade or input -1 to exit \n");
+        if (territoryId == -1) {
+            return false;
+        }
+        territory = ge->map->findById(territoryId);
+        if (!territory) {
+            std::cout << "Error: This territory does not exist!\n" << std::endl;
+            continue;
+        }
+        if (territory->getOwner() != issuer) {
+            std::cout << "Error: Cannot blockade territory you don't own!\n" << std::endl;
+            continue;
+        }
+        auto order = new BlockadeOrder(issuer, territory);
+        issuer->orders->push(order);
+        validInput = true;
     }
-    if (territory->getOwner() != issuer) {
-        std::cout << "Error: Cannot blockade territory you don't own!" << std::endl;
-        return;
-    }
-
-    auto order = new BlockadeOrder(issuer, territory);
-    issuer->orders->push(order);
+    return true;
 }
 
 /**
@@ -149,42 +185,40 @@ void Deck::put(Card *card) {
  * Playing the airlift card
  * @param issuer The player playing the card
  */
-void AirliftCard::play(Player *issuer) const {
+bool AirliftCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
     auto territoryPlayerId = Utils::getInputInt("Please input the ID of the territory you will airlift from");
     auto territoryPlayer = ge->map->findById(territoryPlayerId);
     if (!territoryPlayer) {
         std::cout << "Error: this territory does not exist!" << std::endl;
-        return;
     }
     auto armiesSize = Utils::getInputInt("Please input the number of soldiers you wish to move");
     if (armiesSize < 0) {
         std::cout << "Error: Please place a positive army size!" << std::endl;
-        return;
     }
     if (armiesSize > territoryPlayer->getArmies()) {
         std::cout << "Error: Please do write a number smaller than the total army size on this territory!" << std::endl;
-        return;
     }
     auto territoryTargetId = Utils::getInputInt("Please input the ID of the territory you will airlift to");
     auto territoryTarget = ge->map->findById(territoryTargetId);
     if (!territoryTarget) {
         std::cout << "Error: this territory does not exist!" << std::endl;
-        return;
     }
     auto order = new AirliftOrder(issuer, armiesSize, territoryPlayer, territoryTarget);
     issuer->orders->push(order);
+    return true;
 }
 
 /**
  * Draw a card from the deck and add it to your hand
  */
-Card* Hand::draw() {
+Card *Hand::draw() {
     auto ge = GameEngine::instance();
     auto card = ge->deck->draw();
     this->add(card);
     return card;
 }
+
 /**
  * Hand copy constructor
  * @param hand The hand argument
@@ -201,16 +235,16 @@ Hand::Hand(const Hand &hand) {
  * Playing the negotiate card
  * @param issuer The player playing the card
  */
-void NegotiateCard::play(Player *issuer) const {
+bool NegotiateCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
     auto playerName = Utils::getInputString("Please input the name of the Player you wish to negotiate with");
     Player *player = ge->findPlayerByName(playerName);
     if (!player) {
         std::cout << "Error: this player does not exist!" << std::endl;
-        return;
     }
     auto order = new NegotiateOrder(issuer, player);
     issuer->orders->push(order);
+    return true;
 }
 
 /**
@@ -230,7 +264,7 @@ int Deck::getCardsSize() {
 
 int Deck::getRandomLocation() {
     unsigned int deckSize = this->getCardsSize();
-    if(deckSize > 0){
+    if (deckSize > 0) {
         return (rand() % deckSize);
     }
 }
@@ -278,10 +312,10 @@ Deck &Deck::operator=(const Deck &deck) {
 /**
  * Hand destructor
  */
-Hand::~Hand(){
+Hand::~Hand() {
     int counter = 0;
     for (auto *card: this->cards) {
-        delete(card);
+        delete (card);
         this->cards[counter] = nullptr;
         counter = counter + 1;
     }
@@ -290,10 +324,10 @@ Hand::~Hand(){
 /**
  * Deck destructor
  */
-Deck::~Deck(){
+Deck::~Deck() {
     int counter = 0;
     for (auto *card: this->cards) {
-        delete(card);
+        delete (card);
         this->cards[counter] = nullptr;
         counter = counter + 1;
     }
