@@ -38,6 +38,14 @@ Order* OrderList::pop() {
     return order;
 }
 
+/**
+ * Return the number of orders the player has used
+ * @return The number of orders
+ */
+int OrderList::getOrdersSize() {
+    return this->orders.size();
+}
+
 DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)
         : Order(issuer, "Deploy",
                 issuer->name + " deploys " + std::to_string(reinforcements) + " armies to " +

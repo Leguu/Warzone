@@ -80,7 +80,7 @@ Card::~Card() = default;
  */
 void BombCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
-    auto territoryId = Utils::getInputInt("Please input the ID of the territory you will bomb");
+    int territoryId = Utils::getInputInt("Please input the ID of the territory you will bomb");
     auto territory = ge->map->findById(territoryId);
     if (!territory) {
         std::cout << "Error: this territory does not exist!" << std::endl;
@@ -179,10 +179,11 @@ void AirliftCard::play(Player *issuer) const {
 /**
  * Draw a card from the deck and add it to your hand
  */
-void Hand::draw() {
+Card* Hand::draw() {
     auto ge = GameEngine::instance();
     auto card = ge->deck->draw();
     this->add(card);
+    return card;
 }
 /**
  * Hand copy constructor
@@ -229,7 +230,9 @@ int Deck::getCardsSize() {
 
 int Deck::getRandomLocation() {
     unsigned int deckSize = this->getCardsSize();
-    return rand() % deckSize;
+    if(deckSize > 0){
+        return (rand() % deckSize);
+    }
 }
 
 /**

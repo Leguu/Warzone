@@ -23,7 +23,7 @@ public:
 
     void listHand();
 
-    void draw();
+    Card* draw();
 
     ~Hand();
 
@@ -53,7 +53,7 @@ private:
 
 class BombCard : public Card {
 public:
-    inline BombCard() : Card("Bomb", "Use to destroy half of an enemy territory's army") {}
+    inline BombCard() : Card("BombCard", "Use to destroy half of an enemy territory's army") {}
 
     void play(Player *issuer) const override;
 
@@ -62,7 +62,7 @@ public:
 
 class BlockadeCard : public Card {
 public:
-    inline BlockadeCard() : Card("Blockade", "Use to lose control of a territory but triple its army size") {}
+    inline BlockadeCard() : Card("BlockadeCard", "Use to lose control of a territory but triple its army size") {}
 
     void play(Player *issuer) const override;
 
@@ -71,7 +71,7 @@ public:
 
 class AirliftCard : public Card {
 public:
-    inline AirliftCard() : Card("Airlift", "Use to move armies from any territory to any other") {}
+    inline AirliftCard() : Card("AirliftCard", "Use to move armies from any territory to any other") {}
 
     void play(Player *issuer) const override;
 
@@ -80,7 +80,7 @@ public:
 
 class NegotiateCard : public Card {
 public:
-    inline NegotiateCard() : Card("Negotiate", "Use to prevent attacks between you and another player") {}
+    inline NegotiateCard() : Card("NegotiateCard", "Use to prevent attacks between you and another player") {}
 
     void play(Player *issuer) const override;
 
@@ -91,7 +91,7 @@ public:
 class Deck {
 public:
 
-    explicit Deck(std::vector<Card *> cards) : cards(std::move(cards)) {}
+    explicit Deck(std::vector<Card *> cards) : cards(std::move(cards)){}
     Deck(){}
     Deck(const Deck& deck);
 

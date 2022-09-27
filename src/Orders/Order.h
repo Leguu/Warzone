@@ -21,6 +21,8 @@ public:
 
     void push(Order* order);
 
+    int getOrdersSize();
+
 private:
     std::list<Order*> orders = {};
 };

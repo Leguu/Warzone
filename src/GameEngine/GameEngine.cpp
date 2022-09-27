@@ -64,5 +64,9 @@ void GameEngine::listDeck() {
 }
 
 Player *GameEngine::findPlayerByName(std::string name) {
-    return nullptr;
+    for(auto* player: this->players){
+        if(player->name == name){
+            return player;
+        }
+    }
 }
