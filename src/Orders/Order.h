@@ -82,10 +82,11 @@ class BlockadeOrder : public Order {
 public:
     explicit BlockadeOrder(Player *issuer, Territory *target);
 
-private:
-    inline void execute() override {};
+    void execute() override;
 
-private:
+	~BlockadeOrder() override;
+
+ private:
     Territory *target;
 };
 
