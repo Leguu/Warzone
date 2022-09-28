@@ -4,11 +4,13 @@
 #include <iostream>
 #include <iomanip>
 
-// ------------------ Order -------------------------
-Order::Order(Player *issuer, std::string name, std::string description)
-	: name(std::move(name)), description(std::move(description)), issuer(issuer) {}
+using namespace std;
 
-std::ostream &operator<<(std::ostream &os, const Order &order) {
+// ------------------ Order -------------------------
+Order::Order(Player *issuer, string name, string description)
+	: name(move(name)), description(move(description)), issuer(issuer) {}
+
+ostream &operator<<(ostream &os, const Order &order) {
   os << order.name << ": " << order.description;
   return os;
 }
@@ -18,7 +20,7 @@ Order::~Order() = default;
 // ------------------ DeployOrder ------------------------
 DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)
 	: Order(issuer, "Deploy",
-			issuer->name + " deploys " + std::to_string(reinforcements) + " armies to " +
+			issuer->name + " deploys " + to_string(reinforcements) + " armies to " +
 				target->toString()),
 	  reinforcements(reinforcements), target(target) {}
 
@@ -38,7 +40,7 @@ DeployOrder::~DeployOrder() = default;
 // ------------------ AdvanceOrder ------------------------
 AdvanceOrder::AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target)
 	: Order(issuer, "Advance",
-			issuer->name + " advances " + std::to_string(armies) + " armies from " + source->toString() +
+			issuer->name + " advances " + to_string(armies) + " armies from " + source->toString() +
 				" to " +
 				target->toString()),
 	  armies(armies), source(source), target(target) {}
@@ -76,7 +78,7 @@ void BlockadeOrder::validate() {
   // Validation:
   // -----------
   //           1. If player does not own territory? (To confirm if this is a possibility)
-  if (std::find(issuer->ownedTerritories.begin(), issuer->ownedTerritories.end(), target)
+  if (find(issuer->ownedTerritories.begin(), issuer->ownedTerritories.end(), target)
 	  != issuer->ownedTerritories.end()) {
 	throw InvalidOrderException(issuer->name + " does not own territory " + target->getName());
   }
@@ -96,7 +98,7 @@ BlockadeOrder::~BlockadeOrder() = default;
 // ------------------ AirliftOrder ------------------------
 AirliftOrder::AirliftOrder(Player *issuer, int armies, Territory *source, Territory *target)
 	: Order(issuer, "Airlift",
-			issuer->name + " airlifts " + std::to_string(armies) + " armies from " + source->toString() +
+			issuer->name + " airlifts " + to_string(armies) + " armies from " + source->toString() +
 				" to " +
 				target->toString()),
 	  armies(armies), source(source), target(target) {}
@@ -108,9 +110,9 @@ void AirliftOrder::validate() {
   //           2. If player does not own source territory? (To confirm if this is a possibility)
   if (source->getArmies() - armies < 0) {
 	throw InvalidOrderException(
-		issuer->name + "'s source territory (" + source->getName() + ") does not have " + std::to_string(armies)
+		issuer->name + "'s source territory (" + source->getName() + ") does not have " + to_string(armies)
 			+ " number of army members.");
-  } else if (std::find(issuer->ownedTerritories.begin(), issuer->ownedTerritories.end(), target)
+  } else if (find(issuer->ownedTerritories.begin(), issuer->ownedTerritories.end(), target)
 	  != issuer->ownedTerritories.end()) {
 	throw InvalidOrderException(issuer->name + " does not own territory " + target->getName());
   }
@@ -146,42 +148,42 @@ Order *OrderList::pop() {
 
 void OrderList::remove(int index) {
   auto iter = this->orders.begin();
-  std::advance(iter, index);
+  advance(iter, index);
   this->orders.erase(iter);
 }
 
 void OrderList::move(int a, int b) {
   auto iterA = this->orders.begin();
-  std::advance(iterA, a);
+  advance(iterA, a);
 
   auto iterB = this->orders.begin();
-  std::advance(iterB, b);
+  advance(iterB, b);
 
   auto tmp = *iterA;
   *iterA = *iterB;
   *iterB = tmp;
 }
 
-std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {
+ostream &operator<<(ostream &os, const OrderList &orderList) {
   auto idx = 7;
   auto divider = "--------------------------------------------------------------------------------";
 
-  std::cout << divider << "\n" << std::left << std::setw(3) << "Id | " << std::left << std::setw(15) << "Name"
-			<< "| Description"
-			<< "\n" << divider << std::endl;
+  cout << divider << "\n" << left << setw(3) << "Id | " << left << setw(15) << "Name"
+	   << "| Description"
+	   << "\n" << divider << endl;
 
   for (auto iter = orderList.orders.begin(); iter != orderList.orders.end(); ++iter) {
-	std::cout << std::left << std::setw(3) << std::to_string(idx) << "| " << std::left << std::setw(15)
-			  << (*iter)->getName()
-			  << "| " + (*iter)->description
-			  << std::endl;
+	cout << left << setw(3) << to_string(idx) << "| " << left << setw(15)
+		 << (*iter)->getName()
+		 << "| " + (*iter)->description
+		 << endl;
 	++idx;
   }
 
-  std::cout << divider << std::endl;
+  cout << divider << endl;
 
   return os;
 }
 
 // ------------------ Exception ------------------------
-InvalidOrderException::InvalidOrderException(const std::string &arg) : runtime_error(arg) {}
+InvalidOrderException::InvalidOrderException(const string &arg) : runtime_error(arg) {}
