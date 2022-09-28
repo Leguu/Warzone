@@ -63,7 +63,7 @@ public:
 
     static void execute(Player *issuer, Territory *territory);
 
-    const std::vector<std::string> getAliases();
+    const std::vector<std::string> getAliases() override;
 
     ~BombCard() override;
 
@@ -78,7 +78,7 @@ public:
 
     static void execute(Player *issuer, Territory *territory);
 
-    const std::vector<std::string> getAliases();
+    const std::vector<std::string> getAliases() override;
 
 
     ~BlockadeCard() override;
@@ -93,7 +93,7 @@ public:
 
     static void execute(Player *issuer, int armiesSize, Territory *territoryPlayer, Territory *territoryTarget);
 
-    const std::vector<std::string> getAliases();
+    const std::vector<std::string> getAliases() override;
 
 
     ~AirliftCard() override;
@@ -108,7 +108,7 @@ public:
 
     static void execute(Player *issuer, Player *target);
 
-    const std::vector<std::string> getAliases();
+    const std::vector<std::string> getAliases() override;
 
     ~NegotiateCard() override;
 };
@@ -119,7 +119,7 @@ public:
 
     explicit Deck(std::vector<Card *> cards) : cards(std::move(cards)) {}
 
-    Deck() {}
+    Deck() = default;
 
     Deck(const Deck &deck);
 
