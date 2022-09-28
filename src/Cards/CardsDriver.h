@@ -52,6 +52,14 @@ public:
     static void testAirliftCardToString();
 
     static void testNegotiateCardToString();
+
+    static void testBombExecute();
+
+    static void testBlockadeExecute();
+
+    static void testAirliftExecute();
+
+    static void testNegotiateExecute();
 };
 
 #endif //WARZONE_CARDSDRIVER_H

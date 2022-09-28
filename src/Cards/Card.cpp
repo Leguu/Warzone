@@ -39,7 +39,7 @@ std::ostream &operator<<(std::ostream &os, const Deck &deck) {
  * List the contents of the hand
  */
 void Hand::listHand() {
-    std::cout << this << std::endl;
+    std::cout << *this << std::endl;
 }
 
 /**
@@ -83,8 +83,7 @@ bool BombCard::play(Player *issuer) const {
     int territoryId = -1;
     Territory *territory = nullptr;
     auto adjacentEnemyTerritories = issuer->getAdjacentEnemyTerritories();
-    bool validInput = false;
-    while (!validInput) {
+    while (true) {
         std::cout << "Adjacent enemy territories you can bomb : " << std::endl;
         for (auto *adjacentEnemyTerritory: adjacentEnemyTerritories) {
             std::cout << "Name: " << adjacentEnemyTerritory->getName() << ", ID : " << adjacentEnemyTerritory->getId()
@@ -112,12 +111,30 @@ bool BombCard::play(Player *issuer) const {
             std::cout << "Error: Can only bomb adjacent territories!\n" << std::endl;
             continue;
         }
-        auto order = new BombOrder(issuer, territory);
-        issuer->orders->push(order);
         std::cout << std::endl;
-        validInput = true;
+        break;
     }
+    BombCard::execute(issuer, territory);
     return true;
+}
+
+/**
+ * add bomb card to the orders
+ * @param issuer The player playing the card
+ * @param territory The territory the card targets
+ */
+void BombCard::execute(Player *issuer, Territory *territory) {
+    auto order = new BombOrder(issuer, territory);
+    issuer->orders->push(order);
+}
+
+/**
+ * Return list of alias for the bomb card
+ * @return list of alias for the bomb card
+ */
+const std::vector<std::string> BombCard::getAliases() {
+    return {"bomb", "bombcard", "bomb card", "Bomb", "Bombcard", "BombCard", "Bomb Card",
+            "Bomb card", "bomb Card"};
 }
 
 /**
@@ -147,14 +164,14 @@ NegotiateCard::~NegotiateCard() = default;
 bool BlockadeCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
     int territoryId;
-    Territory* territory = nullptr;
-    bool validInput = false;
-    while (!validInput) {
+    Territory *territory = nullptr;
+    while (true) {
         std::cout << "Territories you own: " << std::endl;
-        for(Territory* playerTerritory: issuer->ownedTerritories){
+        for (Territory *playerTerritory: issuer->ownedTerritories) {
             std::cout << "Name: " << playerTerritory->getName() << ", ID : " << playerTerritory->getId() << std::endl;
         }
-        territoryId = Utils::getInputInt("Please input the ID of the territory you will Blockade or input -1 to exit \n");
+        territoryId = Utils::getInputInt(
+                "Please input the ID of the territory you will Blockade or input -1 to exit \n");
         if (territoryId == -1) {
             return false;
         }
@@ -167,12 +184,30 @@ bool BlockadeCard::play(Player *issuer) const {
             std::cout << "Error: Cannot blockade territory you don't own!\n" << std::endl;
             continue;
         }
-        auto order = new BlockadeOrder(issuer, territory);
-        issuer->orders->push(order);
         std::cout << std::endl;
-        validInput = true;
+        break;
     }
+    BlockadeCard::execute(issuer, territory);
     return true;
+}
+
+/**
+ * add blockade card to the orders
+ * @param issuer The player playing the card
+ * @param territory The territory the card targets
+ */
+void BlockadeCard::execute(Player *issuer, Territory *territory) {
+    auto order = new BlockadeOrder(issuer, territory);
+    issuer->orders->push(order);
+}
+
+/**
+ * Return a list of alias for the blockade card
+ * @return list of alias for the blockade card
+ */
+const std::vector<std::string> BlockadeCard::getAliases() {
+    return {"blockade", "blockadecard", "blockade card", "Blockade", "Blockadecard",
+            "BlockadeCard", "Blockade Card", "Blockade card", "blockade Card"};
 }
 
 /**
@@ -180,8 +215,12 @@ bool BlockadeCard::play(Player *issuer) const {
  * @param card The card that will be added to the deck
  */
 void Deck::put(Card *card) {
-    unsigned int randomLocation = this->getRandomLocation();
-    this->cards.insert(this->cards.begin() + randomLocation, card);
+    if (this->getCardsSize() > 0) {
+        unsigned int randomLocation = this->getRandomLocation();
+        this->cards.insert(this->cards.begin() + (randomLocation % this->getCardsSize()), card);
+    } else {
+        this->cards.push_back(card);
+    }
 }
 
 
@@ -191,26 +230,83 @@ void Deck::put(Card *card) {
  */
 bool AirliftCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
-    auto territoryPlayerId = Utils::getInputInt("Please input the ID of the territory you will airlift from");
-    auto territoryPlayer = ge->map->findById(territoryPlayerId);
-    if (!territoryPlayer) {
-        std::cout << "Error: this territory does not exist!" << std::endl;
+    int territoryOriginId;
+    int territoryTargetId;
+    int armiesSize;
+    Territory *territoryOrigin = nullptr;
+    Territory *territoryTarget = nullptr;
+    while (true) {
+        std::cout << "Territories you own: " << std::endl;
+        for (Territory *territory: issuer->ownedTerritories) {
+            std::cout << "Name: " << territory->getName() << ", ID : " << territory->getId() << std::endl;
+        }
+        territoryOriginId = Utils::getInputInt(
+                "Please input the ID of the territory you will airlift from or input -1 to exit \n");
+        if (territoryOriginId == -1) {
+            return false;
+        }
+        territoryOrigin = ge->map->findById(territoryOriginId);
+        if (!territoryOrigin) {
+            std::cout << "Error: This territory does not exist!\n" << std::endl;
+            continue;
+        }
+        if (territoryOrigin->getOwner() != issuer) {
+            std::cout << "Error: Cannot airlift from a territory you don't own!\n" << std::endl;
+            continue;
+        }
+        std::cout << "Number of soldiers on the chosen territory: " << territoryOrigin->getArmies() << std::endl;
+        armiesSize = Utils::getInputInt("Please input the number of soldiers you wish to move or input -1 to exit");
+        if (armiesSize == -1) {
+            return false;
+        }
+        if (armiesSize < 0) {
+            std::cout << "Error: Please place a positive army size!" << std::endl;
+            continue;
+        }
+        if (armiesSize > territoryOrigin->getArmies()) {
+            std::cout << "Error: Number inputted is bigger than army size on this territory" << std::endl;
+            continue;
+        }
+        territoryTargetId = Utils::getInputInt(
+                "Please input the ID of the territory you will airlift to or input -1 to exit");
+        if (territoryTargetId == -1) {
+            return false;
+        }
+        territoryTarget = ge->map->findById(territoryTargetId);
+        if (!territoryTarget) {
+            std::cout << "Error: this territory does not exist!" << std::endl;
+            continue;
+        }
+        if (territoryTarget->getOwner() != issuer) {
+            std::cout << "Error: Cannot airlift to a territory you don't own!\n" << std::endl;
+            continue;
+        }
+        std::cout << std::endl;
+        break;
     }
-    auto armiesSize = Utils::getInputInt("Please input the number of soldiers you wish to move");
-    if (armiesSize < 0) {
-        std::cout << "Error: Please place a positive army size!" << std::endl;
-    }
-    if (armiesSize > territoryPlayer->getArmies()) {
-        std::cout << "Error: Please do write a number smaller than the total army size on this territory!" << std::endl;
-    }
-    auto territoryTargetId = Utils::getInputInt("Please input the ID of the territory you will airlift to");
-    auto territoryTarget = ge->map->findById(territoryTargetId);
-    if (!territoryTarget) {
-        std::cout << "Error: this territory does not exist!" << std::endl;
-    }
-    auto order = new AirliftOrder(issuer, armiesSize, territoryPlayer, territoryTarget);
-    issuer->orders->push(order);
+    AirliftCard::execute(issuer, armiesSize, territoryOrigin, territoryTarget);
     return true;
+}
+
+/**
+ * add airlift card to the orders
+ * @param issuer The player playing the card
+ * @param armiesSize The number of troops you want to airlift
+ * @param territoryOrigin The territory you will airlift from
+ * @param territoryTarget The territory you will airlift to
+ */
+void AirliftCard::execute(Player *issuer, int armiesSize, Territory *territoryOrigin, Territory *territoryTarget) {
+    auto order = new AirliftOrder(issuer, armiesSize, territoryOrigin, territoryTarget);
+    issuer->orders->push(order);
+}
+
+/**
+ * Return a list of alias for the airlift card
+ * @return list of alias for the airlift card
+ */
+const std::vector<std::string> AirliftCard::getAliases() {
+    return {"airlift", "airliftcard", "airlift card", "Airlift", "Airliftcard",
+            "AirliftCard", "Airlift Card", "Airlift card", "airlift Card"};
 }
 
 /**
@@ -241,14 +337,50 @@ Hand::Hand(const Hand &hand) {
  */
 bool NegotiateCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
-    auto playerName = Utils::getInputString("Please input the name of the Player you wish to negotiate with");
-    Player *player = ge->findPlayerByName(playerName);
-    if (!player) {
-        std::cout << "Error: this player does not exist!" << std::endl;
+    std::string playerName;
+    Player *target = nullptr;
+    while (true) {
+        std::cout << "List of all players in the game:" << std::endl;
+        for (auto player: ge->players) {
+            std::cout << "- " << player->name << std::endl;
+        }
+        playerName = Utils::getInputString(
+                "Please input the name of the Player you wish to negotiate with or input -1 to exit");
+        if (playerName == "-1") {
+            return false;
+        }
+        target = ge->findPlayerByName(playerName);
+        if (!target) {
+            std::cout << "Error: this player does not exist!" << std::endl;
+            continue;
+        }
+        if (target == issuer) {
+            std::cout << "Error: cannot negotiate with yourself!" << std::endl;
+            continue;
+        }
+        break;
     }
-    auto order = new NegotiateOrder(issuer, player);
-    issuer->orders->push(order);
+    NegotiateCard::execute(issuer, target);
     return true;
+}
+
+/**
+ * add negotiate card to the orders
+ * @param issuer The player asking to negotiate
+ * @param target The target player wants to negotiate with
+ */
+void NegotiateCard::execute(Player *issuer, Player *target) {
+    auto order = new NegotiateOrder(issuer, target);
+    issuer->orders->push(order);
+}
+
+/**
+ * Return a list of aliases for negotiate card
+ * @return list of aliases for negotiate card
+ */
+const std::vector<std::string> NegotiateCard::getAliases() {
+    return {"negotiate", "negotiatecard", "negotiate card", "Negotiate", "Negotiatecard",
+            "NegotiateCard", "Negotiate Card", "Negotiate card", "negotiate Card"};
 }
 
 /**
@@ -262,12 +394,21 @@ Card *Deck::draw() {
     return card;
 }
 
+/**
+ * Get the number of cards in the deck
+ * @return the number of cards in the deck
+ */
 int Deck::getCardsSize() {
     return this->cards.size();
 }
 
+/**
+ * Get a random location in the deck
+ * @return random location in the deck
+ */
 int Deck::getRandomLocation() {
     unsigned int deckSize = this->getCardsSize();
+    srand((unsigned int) time(NULL));
     if (deckSize > 0) {
         return (rand() % deckSize);
     }
@@ -335,4 +476,8 @@ Deck::~Deck() {
         this->cards[counter] = nullptr;
         counter = counter + 1;
     }
+}
+
+Card *findCardByName(std::string name, int *indexPointer) {
+    return nullptr;
 }

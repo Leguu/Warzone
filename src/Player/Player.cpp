@@ -13,7 +13,7 @@ void Player::play(std::string const &cardName) {
     Card *cardToPlay = Player::findCardByName(cardName, indexPointer);
     if (cardToPlay != nullptr) {
         if (cardToPlay->play(this)){
-            this->hand->remove(index);
+            this->hand->remove(*indexPointer);
             ge->deck->put(cardToPlay);
         } else{
             std::cout << "Cancelled play action" << std::endl;
@@ -35,12 +35,19 @@ void Player::issueOrder() {
 
 }
 
+/**
+ * Find a card by its name
+ * @param name The name of the card
+ * @param indexPointer An index we will change for the parent to indicate which card we are on
+ * @return A pointer to the card
+ */
 Card *Player::findCardByName(std::string name, int *indexPointer) const {
     for (auto &card: this->hand->cards) {
-        if (card->name == name) {
-            return card;
-        }
-        indexPointer = indexPointer + 1;
+        for(auto cardName : card->getAliases())
+            if (cardName == name) {
+                return card;
+            }
+        *indexPointer = *indexPointer + 1;
     }
     return nullptr;
 }

@@ -17,44 +17,51 @@ int main() {
  * */
     auto divider = "================================================================";
     /* ---------------------------- Testing All Methods ---------------------------- */
-    // NOTE FOR SELF PLEASE READ
-    // 1- Have to add loops to verify user input in CardsPlay functions
-    // 2- Verify territories adjacency as if statement too?
-    bool validInput = false;
     int input = 0;
-    while (!validInput) {
-        input = Utils::getInputInt("Please input 1 to test all functions, 2 to call testCards function, -1 to exit\n");
+    while (true) {
+        input = Utils::getInputInt(
+                "Please input:\n1 To call testCards function \n2 To test all constructors\n3 To test all Play functions\n4 To test all Cards interaction functions\n5 To test all toString functions\n-1 to exit\n");
         if (input == 1) {
             std::cout << divider << std::endl;
-            std::cout << "Testing Cards.cpp functions" << std::endl;
+            std::cout << "Cards Driver : TestCards method" << std::endl;
             std::cout << divider << std::endl;
-//           CardsTester::testBombCardConstructor();
-//           CardsTester::testBombCardPlay();
-//           CardsTester::testBlockadeCardConstructor();
-//           CardsTester::testBlockadeCardPlay();
+            testCards();
+        } else if (input == 2) {
+            std::cout << divider << std::endl;
+            std::cout << "Testing Cards.cpp Constructors" << std::endl;
+            std::cout << divider << std::endl;
+            CardsTester::testBombCardConstructor();
+            CardsTester::testBlockadeCardConstructor();
             CardsTester::testAirliftCardConstructor();
+            CardsTester::testNegotiateCardConstructor();
+            CardsTester::testDeckConstructor();
+            CardsTester::testHandConstructor();
+        } else if (input == 3) {
+            std::cout << divider << std::endl;
+            std::cout << "Testing Cards.cpp Play functions" << std::endl;
+            std::cout << divider << std::endl;
+            CardsTester::testBombCardPlay();
+            CardsTester::testBlockadeCardPlay();
             CardsTester::testAirliftCardPlay();
-//            CardsTester::testNegotiateCardConstructor();
-//            CardsTester::testNegotiateCardPlay();
-//            CardsTester::testHandConstructor();
-//            CardsTester::testListHand();
-//            CardsTester::testHandRemove();
-//            CardsTester::testDeckConstructor();
+            CardsTester::testNegotiateCardPlay();
+        } else if (input == 4) {
+            std::cout << divider << std::endl;
+            std::cout << "Testing Cards.cpp Card Interaction functions" << std::endl;
+            std::cout << divider << std::endl;
+            CardsTester::testHandRemove();
             CardsTester::testDeckDraw();
             CardsTester::testDeckPut();
+        } else if (input == 5) {
+            std::cout << divider << std::endl;
+            std::cout << "Testing Cards.cpp toString functions" << std::endl;
+            std::cout << divider << std::endl;
             CardsTester::testDeckToString();
             CardsTester::testHandToString();
             CardsTester::testBombCardToString();
             CardsTester::testBlockadeCardToString();
             CardsTester::testAirliftCardToString();
             CardsTester::testNegotiateCardToString();
-            validInput = true;
-        } else if (input == 2) {
-            /* ---------------------------- Testing TestCards Method ---------------------------- */
-            std::cout << divider << std::endl;
-            std::cout << "Cards Driver : TestCards method" << std::endl;
-            std::cout << divider << std::endl;
-            testCards();
+            CardsTester::testListHand();
         } else if (input == -1) {
             exit(-1);
         }
@@ -71,23 +78,44 @@ void testCards() {
                                  new NegotiateCard, new BlockadeCard, new BlockadeCard};
     auto ge = new GameEngine("../assets/Moon.map");
     ge->deck = new Deck(cards);
-    auto *player = new Player("bob");
-    player->hand = new Hand();
+    auto playerOne = new Player("Bob");
+    auto playerTwo = new Player("CoolerBob");
+    auto territoryOne = new Territory("potato", "potato");
+    auto territoryTwo = new Territory("coolerPotato", "potato");
+    auto territoryThree = new Territory("coolestPotato", "potato");
+    playerOne->ownedTerritories.push_back(territoryOne);
+    playerOne->ownedTerritories.push_back(territoryThree);
+    playerTwo->ownedTerritories.push_back(territoryTwo);
+    territoryOne->setOwner(playerOne);
+    territoryOne->setArmies(20);
+    territoryThree->setOwner(playerOne);
+    territoryThree->setArmies(15);
+    territoryTwo->setOwner(playerTwo);
+    ge->players.push_back(playerOne);
+    ge->players.push_back(playerTwo);
+    ge->map->addContinent(new Continent("potato", 5));
+    ge->map->addTerritoryToMap(territoryOne);
+    ge->map->addTerritoryToMap(territoryTwo);
+    ge->map->addTerritoryToMap(territoryThree);
+    ge->map->addEdge(territoryOne, territoryTwo);
+    ge->map->addEdge(territoryOne, territoryThree);
+    ge->map->addEdge(territoryThree, territoryTwo);
+    playerOne->hand = new Hand();
     while (ge->deck->getCardsSize() != 0) {
-        player->hand->draw();
+        playerOne->hand->draw();
     }
-    for (auto *card: player->hand->cards) {
-        player->play(card->name);
+    while (!playerOne->hand->cards.empty()) {
+        playerOne->play(playerOne->hand->cards[0]->name);
     }
-    std::cout << "Content of Deck after every card has been played: " << ge->deck << std::endl;
-    std::cout << "Content of the hand after card has been played: " << player->hand << std::endl;
+    std::cout << "Content of Deck after every card has been played: " << *ge->deck << std::endl;
+    std::cout << "Content of the hand after card has been played: " << *playerOne->hand << std::endl;
 }
 
 /**
  * Test the BombCard constructor
  */
 void CardsTester::testBombCardConstructor() {
-    auto *card = new BombCard();
+    auto card = new BombCard();
     std::cout << "Bomb Card built successfully : name : " << card->name << ", desc: " << card->description << std::endl;
 }
 
@@ -96,8 +124,8 @@ void CardsTester::testBombCardConstructor() {
  */
 void CardsTester::testBombCardPlay() {
     auto ge = new GameEngine("../assets/Moon.map");
-    auto *playerOne = new Player("Bob");
-    auto *playerTwo = new Player("CoolerBob");
+    auto playerOne = new Player("Bob");
+    auto playerTwo = new Player("CoolerBob");
     auto territoryOne = new Territory("potato", "potato");
     auto territoryTwo = new Territory("coolerPotato", "potato");
     playerOne->ownedTerritories.push_back(territoryOne);
@@ -111,7 +139,7 @@ void CardsTester::testBombCardPlay() {
     ge->map->addTerritoryToMap(territoryOne);
     ge->map->addTerritoryToMap(territoryTwo);
     ge->map->addEdge(territoryOne, territoryTwo);
-    auto *card = playerOne->hand->draw();
+    auto card = playerOne->hand->draw();
     auto orderSizeBeforePlay = playerOne->orders->getOrdersSize();
     playerOne->play(card->name);
     auto orderSizeAfterPlay = playerOne->orders->getOrdersSize();
@@ -122,7 +150,7 @@ void CardsTester::testBombCardPlay() {
  * Test the BlockadeCard constructor
  */
 void CardsTester::testBlockadeCardConstructor() {
-    auto *card = new BlockadeCard();
+    auto card = new BlockadeCard();
     std::cout << "Blockade Card built successfully : name : " << card->name << ", desc: " << card->description
               << std::endl;
 }
@@ -132,14 +160,14 @@ void CardsTester::testBlockadeCardConstructor() {
  */
 void CardsTester::testBlockadeCardPlay() {
     auto ge = new GameEngine("../assets/Moon.map");
-    auto *playerOne = new Player("Bob");
+    auto playerOne = new Player("Bob");
     auto territoryOne = new Territory("potato", "potato");
     playerOne->ownedTerritories.push_back(territoryOne);
     territoryOne->setOwner(playerOne);
     ge->deck = new Deck({new BlockadeCard()});
     ge->players.push_back(playerOne);
     ge->map->addTerritoryToMap(territoryOne);
-    auto *card = playerOne->hand->draw();
+    auto card = playerOne->hand->draw();
     auto orderSizeBeforePlay = playerOne->orders->getOrdersSize();
     playerOne->play(card->name);
     auto orderSizeAfterPlay = playerOne->orders->getOrdersSize();
@@ -151,7 +179,7 @@ void CardsTester::testBlockadeCardPlay() {
  * Test the AirliftCard constructor
  */
 void CardsTester::testAirliftCardConstructor() {
-    auto *card = new AirliftCard();
+    auto card = new AirliftCard();
     std::cout << "Airlift Card built successfully : name : " << card->name << ", desc: " << card->description
               << std::endl;
 }
@@ -160,25 +188,26 @@ void CardsTester::testAirliftCardConstructor() {
  * Test the AirliftCard play function
  */
 void CardsTester::testAirliftCardPlay() {
-    auto *player = new Player("Bob");
-    std::vector<Card *> cards = {new AirliftCard()};
     auto ge = new GameEngine("../assets/Moon.map");
-    ge->deck = new Deck(cards);
-    auto *card = player->hand->draw();
-    auto territory = new Territory("potato", "potato");
-    auto territoryTwo = new Territory("potato", "potato");
-    territory->setOwner(player);
-    territory->setArmies(10);
-    ge->map->addTerritoryToMap(territory);
-    territoryTwo->setOwner(player);
+    auto playerOne = new Player("Bob");
+    auto territoryOne = new Territory("potato", "potato");
+    auto territoryTwo = new Territory("coolerPotato", "potato");
+    auto territoryThree = new Territory("uncoolPotato", "potato");
+    playerOne->ownedTerritories.push_back(territoryOne);
+    territoryOne->setArmies(10);
+    playerOne->ownedTerritories.push_back(territoryTwo);
+    territoryOne->setOwner(playerOne);
+    territoryTwo->setOwner(playerOne);
+    ge->deck = new Deck({new AirliftCard()});
+    ge->players.push_back(playerOne);
+    ge->map->addContinent(new Continent("potato", 5));
+    ge->map->addTerritoryToMap(territoryOne);
     ge->map->addTerritoryToMap(territoryTwo);
-    std::cout << "The ID of the newly created \"from\" territory used for this example is: " << territory->getId()
-              << std::endl;
-    std::cout << "The ID of the newly created \"to\" territory used for this example is: " << territoryTwo->getId()
-              << std::endl;
-    auto orderSizeBeforePlay = player->orders->getOrdersSize();
-    player->play(card->name);
-    auto orderSizeAfterPlay = player->orders->getOrdersSize();
+    ge->map->addTerritoryToMap(territoryThree);
+    auto card = playerOne->hand->draw();
+    auto orderSizeBeforePlay = playerOne->orders->getOrdersSize();
+    playerOne->play(card->name);
+    auto orderSizeAfterPlay = playerOne->orders->getOrdersSize();
     Utils::assert(orderSizeBeforePlay + 1 == orderSizeAfterPlay, "testAirliftCardPlay");
 }
 
@@ -186,7 +215,7 @@ void CardsTester::testAirliftCardPlay() {
  * Test the NegotiateCard constructor
  */
 void CardsTester::testNegotiateCardConstructor() {
-    auto *card = new NegotiateCard();
+    auto card = new NegotiateCard();
     std::cout << "Negotiate Card built successfully : name : " << card->name << ", desc: " << card->description
               << std::endl;
 }
@@ -195,28 +224,30 @@ void CardsTester::testNegotiateCardConstructor() {
  * Test the NegotiateCard play function
  */
 void CardsTester::testNegotiateCardPlay() {
-    auto *player = new Player("Bob");
-    auto *playerTwo = new Player("CoolerBob");
-    std::vector<Card *> cards = {new NegotiateCard()};
     auto ge = new GameEngine("../assets/Moon.map");
-    ge->deck = new Deck(cards);
-    auto *card = player->hand->draw();
-    ge->players.push_back(player);
+    auto playerOne = new Player("Bob");
+    auto playerTwo = new Player("CoolerBob");
+    auto playerThree = new Player("MostCoolBob");
+    auto playerFour = new Player("UncoolBob");
+    ge->deck = new Deck({new NegotiateCard()});
+    ge->players.push_back(playerOne);
     ge->players.push_back(playerTwo);
-    std::cout << "The name of the newly created target player used for this example is: " << playerTwo->name
-              << std::endl;
-    auto orderSizeBeforePlay = player->orders->getOrdersSize();
-    player->play(card->name);
-    auto orderSizeAfterPlay = player->orders->getOrdersSize();
-    Utils::assert(orderSizeBeforePlay + 1 == orderSizeAfterPlay, "testNegotiateCardPlay");
+    ge->players.push_back(playerThree);
+    ge->players.push_back(playerFour);
+    auto card = playerOne->hand->draw();
+    auto orderSizeBeforePlay = playerOne->orders->getOrdersSize();
+    playerOne->play(card->name);
+    auto orderSizeAfterPlay = playerOne->orders->getOrdersSize();
+    Utils::assert(orderSizeBeforePlay + 1 == orderSizeAfterPlay, "testAirliftCardPlay");
+
 }
 
 /**
  * Test the Hand constructor
  */
 void CardsTester::testHandConstructor() {
-    auto *hand = new Hand();
-    std::cout << "Hand successfully built, should be empty. Number of cards held in hand :" << hand->cards.size()
+    auto hand = new Hand();
+    std::cout << "Hand successfully built, should be empty. Number of cards held in hand: " << hand->cards.size()
               << std::endl;
 }
 
@@ -224,9 +255,9 @@ void CardsTester::testHandConstructor() {
  * Test the Hand Listhand function
  */
 void CardsTester::testListHand() {
-    auto *hand = new Hand();
+    auto hand = new Hand();
     hand->listHand();
-    std::cout << "Finished printing Hand" << std::endl;
+    std::cout << "Finished printing Hand\n" << std::endl;
 }
 
 /**
@@ -235,7 +266,7 @@ void CardsTester::testListHand() {
 void CardsTester::testDeckConstructor() {
     std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard,
                                  new BlockadeCard};
-    auto *deck = new Deck(cards);
+    auto deck = new Deck(cards);
     std::cout << "Deck successfully built, should contain a n>0 number of cards: " << deck->getCardsSize() << std::endl;
 }
 
@@ -248,7 +279,6 @@ void CardsTester::testDeckDraw() {
     auto ge = new GameEngine("../assets/Moon.map");
     ge->deck = new Deck(cards);
     auto initialDeckSize = ge->deck->getCardsSize();
-    auto *card = ge->deck->draw();
     auto drawnDeckSize = ge->deck->getCardsSize();
     Utils::assert(initialDeckSize == drawnDeckSize + 1, "testDeckDraw");
 }
@@ -259,8 +289,8 @@ void CardsTester::testDeckDraw() {
 void CardsTester::testDeckPut() {
     std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard,
                                  new BlockadeCard};
-    auto *deck = new Deck(cards);
-    auto *card = new BlockadeCard();
+    auto deck = new Deck(cards);
+    auto card = new BlockadeCard();
     auto initialDeckSize = deck->getCardsSize();
     deck->put(card);
     auto addedDeckSize = deck->getCardsSize();
@@ -273,9 +303,9 @@ void CardsTester::testDeckPut() {
 void CardsTester::testDeckToString() {
     std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard,
                                  new BlockadeCard};
-    auto *deck = new Deck(cards);
-    std::cout << deck << std::endl;
-    std::cout << "Finished printing Deck" << std::endl;
+    auto deck = new Deck(cards);
+    std::cout << *deck << std::endl;
+    std::cout << "Finished printing Deck\n" << std::endl;
 }
 
 /**
@@ -284,42 +314,42 @@ void CardsTester::testDeckToString() {
 void CardsTester::testHandToString() {
     std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard,
                                  new BlockadeCard};
-    auto *deck = new Deck(cards);
-    auto *hand = new Hand();
+    auto deck = new Deck(cards);
+    auto hand = new Hand();
     auto ge = new GameEngine("assets/Moon.map");
     ge->deck = deck;
     while (deck->getCardsSize() != 0) {
         hand->draw();
     }
-    std::cout << hand << std::endl;
-    std::cout << "Finished printing Hand" << std::endl;
+    std::cout << *hand << std::endl;
+    std::cout << "Finished printing Hand\n" << std::endl;
 }
 
 /**
  * Test the BombCard toString function
  */
 void CardsTester::testBombCardToString() {
-    auto *card = new BombCard();
-    std::cout << card;
-    std::cout << "Finished printing BombCard" << std::endl;
+    auto card = new BombCard();
+    std::cout << *card;
+    std::cout << "\nFinished printing BombCard\n" << std::endl;
 }
 
 /**
  * Test the BlockadeCard toString function
  */
 void CardsTester::testBlockadeCardToString() {
-    auto *card = new BlockadeCard();
-    std::cout << card;
-    std::cout << "Finished printing BlockadeCard" << std::endl;
+    auto card = new BlockadeCard();
+    std::cout << *card;
+    std::cout << "\nFinished printing BlockadeCard\n" << std::endl;
 }
 
 /**
  * Test the AirliftCard toString function
  */
 void CardsTester::testAirliftCardToString() {
-    auto *card = new AirliftCard();
-    std::cout << card;
-    std::cout << "Finished printing AirliftCard" << std::endl;
+    auto card = new AirliftCard();
+    std::cout << *card;
+    std::cout << "\nFinished printing AirliftCard\n" << std::endl;
 
 }
 
@@ -327,9 +357,9 @@ void CardsTester::testAirliftCardToString() {
  * Test the NegotiateCard toString function
  */
 void CardsTester::testNegotiateCardToString() {
-    auto *card = new NegotiateCard();
-    std::cout << card;
-    std::cout << "Finished printing NegotiateCard" << std::endl;
+    auto card = new NegotiateCard();
+    std::cout << *card;
+    std::cout << "\nFinished printing NegotiateCard\n" << std::endl;
 }
 
 /**
@@ -338,8 +368,8 @@ void CardsTester::testNegotiateCardToString() {
 void CardsTester::testHandRemove() {
     std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard,
                                  new BlockadeCard};
-    auto *deck = new Deck(cards);
-    auto *hand = new Hand();
+    auto deck = new Deck(cards);
+    auto hand = new Hand();
     auto ge = new GameEngine("assets/Moon.map");
     ge->deck = deck;
     while (deck->getCardsSize() != 0) {
@@ -350,3 +380,5 @@ void CardsTester::testHandRemove() {
     auto removedHandSize = hand->cards.size();
     Utils::assert(addedHandSize == removedHandSize + 1, "testHandRemove");
 }
+
+

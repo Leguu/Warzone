@@ -69,4 +69,5 @@ Player *GameEngine::findPlayerByName(std::string name) {
             return player;
         }
     }
+    return nullptr;
 }
