@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <iostream>
+#include <iomanip>
 
 // ------------------ Order -------------------------
 Order::Order(Player *issuer, std::string name, std::string description)
@@ -159,6 +160,27 @@ void OrderList::move(int a, int b) {
   auto tmp = *iterA;
   *iterA = *iterB;
   *iterB = tmp;
+}
+
+std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {
+  auto idx = 7;
+  auto divider = "--------------------------------------------------------------------------------";
+
+  std::cout << divider << "\n" << std::left << std::setw(3) << "Id | " << std::left << std::setw(15) << "Name"
+			<< "| Description"
+			<< "\n" << divider << std::endl;
+
+  for (auto iter = orderList.orders.begin(); iter != orderList.orders.end(); ++iter) {
+	std::cout << std::left << std::setw(3) << std::to_string(idx) << "| " << std::left << std::setw(15)
+			  << (*iter)->getName()
+			  << "| " + (*iter)->description
+			  << std::endl;
+	++idx;
+  }
+
+  std::cout << divider << std::endl;
+
+  return os;
 }
 
 // ------------------ Exception ------------------------

@@ -36,6 +36,8 @@ public:
 
   friend std::ostream &operator<<(std::ostream &os, const Order &order);
 
+  virtual std::string_view getName() const = 0;
+
   virtual ~Order();
 };
 
@@ -46,6 +48,10 @@ public:
   void validate() override;
 
   void execute() override;
+
+  std::string_view getName() const override {
+	return "DeployOrder";
+  }
 
   ~DeployOrder() override;
 
@@ -61,6 +67,10 @@ public:
   inline void validate() override {};
 
   inline void execute() override {};
+
+  std::string_view getName() const override {
+	return "AdvanceOrder";
+  }
 
   ~AdvanceOrder() override;
 
@@ -78,6 +88,10 @@ public:
 
   void execute() override;
 
+  std::string_view getName() const override {
+	return "BombOrder";
+  }
+
   ~BombOrder() override;
 
 private:
@@ -94,6 +108,10 @@ public:
 
   virtual void execute() override;
 
+  std::string_view getName() const override {
+	return "BlockadeOrder";
+  }
+
   ~BlockadeOrder() override;
 
 private:
@@ -107,6 +125,10 @@ public:
   void validate() override;
 
   void execute() override;
+
+  std::string_view getName() const override {
+	return "AirliftOrder";
+  }
 
   ~AirliftOrder() override;
 
@@ -124,6 +146,10 @@ public:
 
   inline void execute() override {};
 
+  std::string_view getName() const override {
+	return "NegotiateOrder";
+  }
+
 private:
   const Player *const target;
 };
@@ -137,6 +163,8 @@ public:
   Order *pop();
 
   void push(Order *order);
+
+  friend std::ostream &operator<<(std::ostream &os, const OrderList &orderList);
 
 private:
   std::list<Order *> orders = {};
