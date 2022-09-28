@@ -29,37 +29,37 @@ void testOrdersLists() {
   list.push(airlift);
   list.push(negotiate);
 
-  cout << "\nPush operation test:" << endl;
-  cout << "--------------------" << endl;
-  cout << "Operation – 6 push commands" << endl;
-  cout << "Expected – a list with 6 orders" << endl;
-  cout << "Results – contents of list after operation was performed" << endl;
-  cout << list << endl;
+  std::cout << "\nPush operation test:" << std::endl;
+  std::cout << "--------------------" << std::endl;
+  std::cout << "Operation – 6 push commands" << std::endl;
+  std::cout << "Expected – a list with 6 orders" << std::endl;
+  std::cout << "Results – contents of list after operation was performed" << std::endl;
+  std::cout << list << std::endl;
 
-  cout << "\nRemove operation test:" << endl;
-  cout << "---------------------" << endl;
+  std::cout << "\nRemove operation test:" << std::endl;
+  std::cout << "---------------------" << std::endl;
   list.remove(2);
-  cout << "Operation – remove performed on order number 3 (BombOrder, index 2)" << endl;
-  cout << "Expected – the same list as above but with 5 orders" << endl;
-  cout << "Results – contents of list after operation was performed" << endl;
-  cout << list << endl;
+  std::cout << "Operation – remove performed on order number 3 (BombOrder, index 2)" << std::endl;
+  std::cout << "Expected – the same list as above but with 5 orders" << std::endl;
+  std::cout << "Results – contents of list after operation was performed" << std::endl;
+  std::cout << list << std::endl;
 
-  cout << "\nMove operation test:" << endl;
-  cout << "---------------------" << endl;
+  std::cout << "\nMove operation test:" << std::endl;
+  std::cout << "---------------------" << std::endl;
   list.move(1, 2);
-  cout
+  std::cout
 	  << "Operation – move performed between order number 2 and 3 (AdvanceOrder, index 1 and BlockadeOrder, index 2)"
-	  << endl;
-  cout << "Expected – the same list as above but with 5 orders" << endl;
-  cout << "Results – contents of list after operation was performed" << endl;
-  cout << list << endl;
+	  << std::endl;
+  std::cout << "Expected – the same list as above but with 5 orders" << std::endl;
+  std::cout << "Results – contents of list after operation was performed" << std::endl;
+  std::cout << list << std::endl;
 
 }
 
 int main() {
-  cout << "---------------------" << endl;
-  cout << "Testing Orders Lists:" << endl;
-  cout << "---------------------" << endl;
+  std::cout << "---------------------" << std::endl;
+  std::cout << "Testing Orders Lists:" << std::endl;
+  std::cout << "---------------------" << std::endl;
 
   testOrdersLists();
 
