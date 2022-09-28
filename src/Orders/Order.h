@@ -30,7 +30,9 @@ public:
   Order(Player *issuer, std::string name, std::string description);
 
   /// Throws InvalidOrderException if the order no longer makes sense (due to previous orders)
-  virtual void execute() noexcept(false) = 0;
+  virtual void validate() noexcept(false) = 0;
+
+  virtual void execute() = 0;
 
   friend std::ostream &operator<<(std::ostream &os, const Order &order);
 
@@ -40,6 +42,8 @@ public:
 class DeployOrder : public Order {
 public:
   explicit DeployOrder(Player *issuer, int reinforcements, Territory *target);
+
+  void validate() override;
 
   void execute() override;
 
@@ -53,6 +57,8 @@ private:
 class AdvanceOrder : public Order {
 public:
   AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target);
+
+  inline void validate() override {};
 
   inline void execute() override {};
 
@@ -68,6 +74,8 @@ class BombOrder : public Order {
 public:
   explicit BombOrder(Player *issuer, Territory *target);
 
+  void validate() override;
+
   void execute() override;
 
   ~BombOrder() override;
@@ -82,6 +90,8 @@ class BlockadeOrder : public Order {
 public:
   explicit BlockadeOrder(Player *issuer, Territory *target);
 
+  void validate() override;
+
   virtual void execute() override;
 
   ~BlockadeOrder() override;
@@ -93,6 +103,8 @@ private:
 class AirliftOrder : public Order {
 public:
   AirliftOrder(Player *issuer, int armies, Territory *source, Territory *target);
+
+  void validate() override;
 
   void execute() override;
 
@@ -107,6 +119,8 @@ private:
 class NegotiateOrder : public Order {
 public:
   explicit NegotiateOrder(Player *issuer, const Player *target);
+
+  inline void validate() override {};
 
   inline void execute() override {};
 

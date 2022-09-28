@@ -1,5 +1,4 @@
 #include <iostream>
-#include <string>
 #include <vector>
 #include "../GameEngine/GameEngine.h"
 
@@ -7,7 +6,7 @@
 
 using namespace std;
 
-int testOrdersLists() {
+void testOrdersLists() {
   OrderList list = OrderList();
 
   auto ge = new GameEngine("assets/Moon.map");
@@ -21,6 +20,12 @@ int testOrdersLists() {
   auto adv = new AdvanceOrder(&player, 5, territoryS, territoryT);
 
   list.push(bomb);
+}
+
+int main() {
+  std::cout << "Testing Orders Lists:" << std::endl;
+
+  testOrdersLists();
 
   return 0;
 }
