@@ -16,6 +16,8 @@ public:
 
   static string trim(const string &s);
   static string WHITESPACE;
+
+  static bool isEqualLowercase(const string &a, const string &b);
 };
 
 #endif //WARZONE_UTILS_H

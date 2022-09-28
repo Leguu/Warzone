@@ -19,14 +19,10 @@ extern bool debug;
 
 class Territory {
 public:
-
-  // Default constructor
-  Territory();
-
   // Constructor with necessary parameters
-  Territory(string territory, Continent *continent);
+  Territory(const string &territory, Continent *continent);
 
-  explicit inline Territory(string name) : name(std::move(name)) {}
+  explicit inline Territory(const string &name) : name(Utils::trim(name)) {}
 
   // Copy constructor
   Territory(const Territory &orgTerritory);
@@ -78,20 +74,14 @@ private:
   int id = idIncrement++;
   string name;
   Continent *continent = nullptr;
-  int armies{0};
+  int armies = 0;
   Player *owner = nullptr;
 };
 
 class Continent {
 public:
-
-  // Default constructor
-  Continent();
-
   // Constructor with necessary name and optional bonus
   Continent(string name, int bonus);
-
-  Continent(string name, int armies, vector<Territory *>);
 
   // Copy constructor
   Continent(const Continent &orgContinent);
@@ -121,18 +111,13 @@ public:
 private:
   vector<Territory *> territories;
   string name;
-  int bonus = 0;
+  int bonus;
 };
 
 class Map {
 public:
   // Default Constructors
   Map();
-
-  // Constructor with necessary parameters
-  Map(string name, vector<Continent *> continents);
-
-  Map(string name, vector<Territory *> territories, vector<Continent *> continents);
 
   // Copy Constructor
   Map(const Map &orgMap);
@@ -153,8 +138,6 @@ public:
   // Getters and setters
   vector<Territory *> getAllTerritories();
 
-  void setAllTerritories(vector<Territory *>);
-
   vector<Continent *> getContinents();
 
   void addTerritoryToMap(Territory *);
@@ -165,9 +148,6 @@ public:
   Continent *findContinentByName(const string &continentName);
 
   Territory *findTerritoryByName(const string &continentName);
-
-  // A method to connect territories
-  static void addEdge(Territory *source, Territory *dest);
 
   bool allContinentsOwned();
 
@@ -183,7 +163,7 @@ private:
 
   void resetTerr();
 
-  bool isConnected();
+  void assertConnected();
   int traverseTerr(Territory *territory, int visited);
 
   bool isSubgraphConnected();
@@ -191,7 +171,7 @@ private:
 
   bool isUniqueContinent();
 
-  bool assertEveryEdgeIsTwoWay();
+  void assertEveryEdgeIsTwoWay();
 
 };
 

@@ -56,3 +56,10 @@ std::string rtrim(const std::string &s) {
 string Utils::trim(const string &s) {
   return rtrim(ltrim(s));
 }
+bool Utils::isEqualLowercase(const string &a, const string &b) {
+  auto aStr = a;
+  auto bStr = b;
+  std::transform(aStr.begin(), aStr.end(), aStr.begin(), ::tolower);
+  std::transform(bStr.begin(), bStr.end(), bStr.begin(), ::tolower);
+  return aStr == bStr;
+}

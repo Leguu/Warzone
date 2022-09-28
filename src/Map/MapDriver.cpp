@@ -2,18 +2,23 @@
 #include <filesystem>
 #include "Map.h"
 
-using namespace std;
+using std::cout;
+using std::runtime_error;
+using std::endl;
+using std::filesystem::directory_iterator;
 
 int main() {
-  for (const auto &file : std::filesystem::directory_iterator{"../assets/"})  //loop through the current folder
-  {
+  for (const auto &file : directory_iterator{"../assets/"}) {
+    auto path = file.path().string();
     try {
-      MapLoader::importMap(file.path().string());
-      cout << "Map file '" << file.path().string() << "' completely valid!" << endl;
+      MapLoader::importMap(path);
+      cout << "Map file '" << path << "' completely valid!" << endl;
     } catch (runtime_error &e) {
-      cout << "Error caught for file '" + file.path().string() << "': " << e.what() << endl;
+      cout << "Error caught for file '" + path << "': " << e.what() << endl;
     }
   }
 
-  return 0;
+  auto moon = MapLoader::importMap("../assets/Moon.map");
+
+  cout << *moon << endl;
 }
