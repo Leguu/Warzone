@@ -49,7 +49,7 @@ public:
 
   void execute() override;
 
-  std::string_view getName() const override {
+  [[nodiscard]] std::string_view getName() const override {
 	return "DeployOrder";
   }
 
@@ -64,11 +64,11 @@ class AdvanceOrder : public Order {
 public:
   AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target);
 
-  inline void validate() override {};
+  void validate() override;
 
-  inline void execute() override {};
+  void execute() override;
 
-  std::string_view getName() const override {
+  [[nodiscard]] std::string_view getName() const override {
 	return "AdvanceOrder";
   }
 
@@ -88,7 +88,7 @@ public:
 
   void execute() override;
 
-  std::string_view getName() const override {
+  [[nodiscard]] std::string_view getName() const override {
 	return "BombOrder";
   }
 
@@ -106,9 +106,9 @@ public:
 
   void validate() override;
 
-  virtual void execute() override;
+  void execute() override;
 
-  std::string_view getName() const override {
+  [[nodiscard]] std::string_view getName() const override {
 	return "BlockadeOrder";
   }
 
@@ -126,7 +126,7 @@ public:
 
   void execute() override;
 
-  std::string_view getName() const override {
+  [[nodiscard]] std::string_view getName() const override {
 	return "AirliftOrder";
   }
 
@@ -142,11 +142,11 @@ class NegotiateOrder : public Order {
 public:
   explicit NegotiateOrder(Player *issuer, const Player *target);
 
-  inline void validate() override {};
+  void validate() override;
 
-  inline void execute() override {};
+  void execute() override;
 
-  std::string_view getName() const override {
+  [[nodiscard]] std::string_view getName() const override {
 	return "NegotiateOrder";
   }
 
@@ -163,6 +163,8 @@ public:
   Order *pop();
 
   void push(Order *order);
+
+  void executeOrders();
 
   friend std::ostream &operator<<(std::ostream &os, const OrderList &orderList);
 

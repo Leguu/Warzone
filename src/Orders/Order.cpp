@@ -23,6 +23,8 @@ DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)
 	  reinforcements(reinforcements), target(target) {}
 
 void DeployOrder::validate() {// Implement check if is within territory
+  std::cout << "Validating " + std::string(this->getName()) << std::endl;
+
   if (target->getOwner() && (target->getOwner()->ownedTerritories != issuer->ownedTerritories)) {
 	throw InvalidOrderException(issuer->name + "tried to deploy in enemy territory!");
   }
@@ -30,6 +32,7 @@ void DeployOrder::validate() {// Implement check if is within territory
 
 void DeployOrder::execute() {
   validate();
+  std::cout << "Executing " + std::string(this->getName()) << std::endl;
   this->target->setArmies(this->target->getArmies() + reinforcements);
 }
 
@@ -43,6 +46,15 @@ AdvanceOrder::AdvanceOrder(Player *issuer, int armies, Territory *source, Territ
 				target->toString()),
 	  armies(armies), source(source), target(target) {}
 
+void AdvanceOrder::validate() {// Implement check if is within territory
+  std::cout << "Validating " + std::string(this->getName()) << std::endl;
+}
+
+void AdvanceOrder::execute() {
+  validate();
+  std::cout << "Executing " + std::string(this->getName()) << std::endl;
+}
+
 AdvanceOrder::~AdvanceOrder() = default;
 
 // ------------------ BombOrder ------------------------
@@ -51,6 +63,8 @@ BombOrder::BombOrder(Player *issuer, Territory *target)
 	  target(target) {}
 
 void BombOrder::validate() {
+  std::cout << "Validating " + std::string(this->getName()) << std::endl;
+
   // Validation:
   // -----------
   //           1. If player attempts to bomb himself.
@@ -61,6 +75,7 @@ void BombOrder::validate() {
 
 void BombOrder::execute() {
   validate();
+  std::cout << "Executing " + std::string(this->getName()) << std::endl;
   //  this->target->armies /= 2;
   this->target->setArmies(this->target->getArmies() / 2);
 }
@@ -73,6 +88,8 @@ BlockadeOrder::BlockadeOrder(Player *issuer, Territory *target)
 	  target(target) {}
 
 void BlockadeOrder::validate() {
+  std::cout << "Validating " + std::string(this->getName()) << std::endl;
+
   // Validation:
   // -----------
   //           1. If player does not own territory? (To confirm if this is a possibility)
@@ -83,7 +100,7 @@ void BlockadeOrder::validate() {
 }
 void BlockadeOrder::execute() {
   validate();
-
+  std::cout << "Executing " + std::string(this->getName()) << std::endl;
   this->target->setArmies(this->target->getArmies() * 3);
   //  TODO:
   //  -----
@@ -102,6 +119,8 @@ AirliftOrder::AirliftOrder(Player *issuer, int armies, Territory *source, Territ
 	  armies(armies), source(source), target(target) {}
 
 void AirliftOrder::validate() {
+  std::cout << "Validating " + std::string(this->getName()) << std::endl;
+
   // Validation:
   // -----------
   //           1. If source territory does not have int "armies" number of army members.
@@ -118,7 +137,7 @@ void AirliftOrder::validate() {
 
 void AirliftOrder::execute() {
   validate();
-
+  std::cout << "Executing " + std::string(this->getName()) << std::endl;
   int sourceArmies = this->source->getArmies();
   this->source->setArmies(sourceArmies - armies);
   this->target->setArmies(sourceArmies + armies);
@@ -130,6 +149,15 @@ AirliftOrder::~AirliftOrder() = default;
 NegotiateOrder::NegotiateOrder(Player *issuer, const Player *target)
 	: Order(issuer, "Negotiate", issuer->name + " negotiates with " + target->name),
 	  target(target) {}
+
+void NegotiateOrder::validate() {// Implement check if is within territory
+  std::cout << "Validating " + std::string(this->getName()) << std::endl;
+}
+
+void NegotiateOrder::execute() {
+  validate();
+  std::cout << "Executing " + std::string(this->getName()) << std::endl;
+}
 
 // ------------------ OrderList ------------------------
 void OrderList::push(Order *order) {
@@ -162,18 +190,29 @@ void OrderList::move(int a, int b) {
   *iterB = tmp;
 }
 
+void OrderList::executeOrders() {
+  auto idx = 1;
+  auto divider = "--------------------------------------------------------------------------------";
+  for (auto &order : this->orders) {
+	std::cout << std::to_string(idx) + ". ";
+	order->execute();
+	std::cout << divider << std::endl;
+	++idx;
+  }
+}
+
 std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {
-  auto idx = 7;
+  auto idx = 1;
   auto divider = "--------------------------------------------------------------------------------";
 
   std::cout << divider << "\n" << std::left << std::setw(3) << "Id | " << std::left << std::setw(15) << "Name"
 			<< "| Description"
 			<< "\n" << divider << std::endl;
 
-  for (auto iter = orderList.orders.begin(); iter != orderList.orders.end(); ++iter) {
+  for (auto order : orderList.orders) {
 	std::cout << std::left << std::setw(3) << std::to_string(idx) << "| " << std::left << std::setw(15)
-			  << (*iter)->getName()
-			  << "| " + (*iter)->description
+			  << order->getName()
+			  << "| " + order->description
 			  << std::endl;
 	++idx;
   }
