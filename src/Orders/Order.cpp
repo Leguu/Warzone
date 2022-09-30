@@ -25,8 +25,8 @@ DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)
 void DeployOrder::validate() {// Implement check if is within territory
   std::cout << "Validating " + this->name << std::endl;
 
-  if (target->getOwner() && (target->getOwner()->ownedTerritories == issuer->ownedTerritories)) {
-	throw InvalidOrderException(issuer->name + "tried to deploy in own territory! Must be neutral!");
+  if (target->getOwner() && (target->getOwner() != issuer)) {
+	throw InvalidOrderException(issuer->name + " tried to deploy in someone else's territory.");
   } else if (reinforcements > issuer->reinforcements) {
 	throw InvalidOrderException(issuer->name + " does not have the specified number of reinforcements. Player has "
 									+ std::to_string(issuer->reinforcements) + " reinforcements, but requested "
