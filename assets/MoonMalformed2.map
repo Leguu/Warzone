@@ -11,12 +11,11 @@ Cresinion=2
 Delphot=2
 
 [Territories]
-; this is a comment!
+; bay of dew is adjacent to harpalus, but harpalus is not adjacent to bay of dew
 Bay of Dew,60,222,Cresinion,Byrgius,Ocean of Storms,Sea of Rains,Harpalus
 Ocean of Storms,145,300,Cresinion,Bay of Dew, Sea of Rains,Byrgius,Sea of Clouds
 Sea of Rains,279,236,Cresinion,Ocean of Storms,Bay of Dew,Harpalus,Aristotle,Sea of Serenity,Rhaeticus,Sea of Clouds
-;another comment
-Harpalus,208,73,Cresinion,Bay of Dew, Sea of Rains, Aristotle
+Harpalus,208,73,Cresinion,Sea of Rains, Aristotle
 
 Aristotle,425,73,Delphot,Harpalus,Sea of Rains,Sea of Serenity,Sea of Crisis
 Sea of Serenity,469,215,Delphot,Sea of Rains,Rhaeticus,Sea of Nectar,Sea of Crisis,Aristotle 
