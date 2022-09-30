@@ -46,19 +46,12 @@ void testOrdersLists() {
   std::cout << "---------------------" << std::endl;
   list.move(1, 2);
   std::cout
-	  << "Operation – move performed between order number 2 and 3 (AdvanceOrder, index 1 and BlockadeOrder, index 2)"
-	  << std::endl;
+      << "Operation - move performed between order number 2 and 3 (AdvanceOrder, index 1 and BlockadeOrder, index 2)"
+      << std::endl;
   std::cout << "Expected - the same list as above but with 5 orders" << std::endl;
   std::cout << "Results - contents of list after operation was performed" << std::endl;
   std::cout << list << std::endl;
 
-  std::cout << "\nExecute operation test:" << std::endl;
-  std::cout << "----------------------" << std::endl;
-  std::cout << "Executing every order left in the list" << std::endl;
-  std::cout << "Expected - every order is validated first and then executed" << std::endl;
-  std::cout << "Results - contents of list after operation was performed" << std::endl;
-  std::cout << "--------------------------------------------------------------------------------" << std::endl;
-  list.executeOrders();
 }
 
 int main() {
