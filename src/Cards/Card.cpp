@@ -70,6 +70,14 @@ std::ostream &operator<<(std::ostream &os, const Card &card) {
 }
 
 /**
+ * Return the aliases of a card
+ * @return the aliases of a card
+ */
+const std::vector<std::string> Card::getAliases() {
+    return this->aliases;
+}
+
+/**
  * Destructor for the card
  */
 Card::~Card() = default;
@@ -80,20 +88,17 @@ Card::~Card() = default;
  */
 bool BombCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
-    int territoryId = -1;
-    Territory *territory = nullptr;
     auto adjacentEnemyTerritories = issuer->getAdjacentEnemyTerritories();
     while (true) {
         std::cout << "Adjacent enemy territories you can bomb : " << std::endl;
-        for (auto *adjacentEnemyTerritory: adjacentEnemyTerritories) {
-            std::cout << "Name: " << adjacentEnemyTerritory->getName() << ", ID : " << adjacentEnemyTerritory->getId()
-                      << std::endl;
+        for (auto adjacentEnemyTerritory: adjacentEnemyTerritories) {
+            std::cout << *adjacentEnemyTerritory << std::endl;
         }
-        territoryId = Utils::getInputInt("Please input the ID of the territory you will bomb or input -1 to exit\n");
+        auto territoryId = Utils::getInputInt("Please input the ID of the territory you will bomb or input -1 to exit\n");
         if (territoryId == -1) {
             return false;
         }
-        territory = ge->map->findById(territoryId);
+        auto territory = ge->map->findById(territoryId);
         if (!territory) {
             std::cout << "Error: this territory does not exist!\n" << std::endl;
             continue;
@@ -103,7 +108,7 @@ bool BombCard::play(Player *issuer) const {
             continue;
         }
         bool territoryIsAdjacent = false;
-        for (auto *adjacentEnemyTerritory: adjacentEnemyTerritories) {
+        for (auto adjacentEnemyTerritory: adjacentEnemyTerritories) {
             if (territoryId == adjacentEnemyTerritory->getId())
                 territoryIsAdjacent = true;
         }
@@ -112,10 +117,9 @@ bool BombCard::play(Player *issuer) const {
             continue;
         }
         std::cout << std::endl;
-        break;
+        BombCard::execute(issuer, territory);
+        return true;
     }
-    BombCard::execute(issuer, territory);
-    return true;
 }
 
 /**
@@ -128,14 +132,6 @@ void BombCard::execute(Player *issuer, Territory *territory) {
     issuer->orders->push(order);
 }
 
-/**
- * Return list of alias for the bomb card
- * @return list of alias for the bomb card
- */
-const std::vector<std::string> BombCard::getAliases() {
-    return {"bomb", "bombcard", "bomb card", "Bomb", "Bombcard", "BombCard", "Bomb Card",
-            "Bomb card", "bomb Card"};
-}
 
 /**
  * Destructor for the Bomb Card
@@ -163,19 +159,17 @@ NegotiateCard::~NegotiateCard() = default;
  */
 bool BlockadeCard::play(Player *issuer) const {
     auto ge = GameEngine::instance();
-    int territoryId;
-    Territory *territory = nullptr;
     while (true) {
         std::cout << "Territories you own: " << std::endl;
         for (Territory *playerTerritory: issuer->ownedTerritories) {
             std::cout << "Name: " << playerTerritory->getName() << ", ID : " << playerTerritory->getId() << std::endl;
         }
-        territoryId = Utils::getInputInt(
+        auto territoryId = Utils::getInputInt(
                 "Please input the ID of the territory you will Blockade or input -1 to exit \n");
         if (territoryId == -1) {
             return false;
         }
-        territory = ge->map->findById(territoryId);
+        auto territory = ge->map->findById(territoryId);
         if (!territory) {
             std::cout << "Error: This territory does not exist!\n" << std::endl;
             continue;
@@ -185,10 +179,9 @@ bool BlockadeCard::play(Player *issuer) const {
             continue;
         }
         std::cout << std::endl;
-        break;
+        BlockadeCard::execute(issuer, territory);
+        return true;
     }
-    BlockadeCard::execute(issuer, territory);
-    return true;
 }
 
 /**
@@ -202,25 +195,11 @@ void BlockadeCard::execute(Player *issuer, Territory *territory) {
 }
 
 /**
- * Return a list of alias for the blockade card
- * @return list of alias for the blockade card
- */
-const std::vector<std::string> BlockadeCard::getAliases() {
-    return {"blockade", "blockadecard", "blockade card", "Blockade", "Blockadecard",
-            "BlockadeCard", "Blockade Card", "Blockade card", "blockade Card"};
-}
-
-/**
  * Put a card in the deck
  * @param card The card that will be added to the deck
  */
 void Deck::put(Card *card) {
-    if (this->getCardsSize() > 0) {
-        unsigned int randomLocation = this->getRandomLocation();
-        this->cards.insert(this->cards.begin() + (randomLocation % this->getCardsSize()), card);
-    } else {
-        this->cards.push_back(card);
-    }
+    this->cards.push_back(card);
 }
 
 
@@ -233,8 +212,6 @@ bool AirliftCard::play(Player *issuer) const {
     int territoryOriginId;
     int territoryTargetId;
     int armiesSize;
-    Territory *territoryOrigin = nullptr;
-    Territory *territoryTarget = nullptr;
     while (true) {
         std::cout << "Territories you own: " << std::endl;
         for (Territory *territory: issuer->ownedTerritories) {
@@ -245,7 +222,7 @@ bool AirliftCard::play(Player *issuer) const {
         if (territoryOriginId == -1) {
             return false;
         }
-        territoryOrigin = ge->map->findById(territoryOriginId);
+        auto territoryOrigin = ge->map->findById(territoryOriginId);
         if (!territoryOrigin) {
             std::cout << "Error: This territory does not exist!\n" << std::endl;
             continue;
@@ -272,7 +249,7 @@ bool AirliftCard::play(Player *issuer) const {
         if (territoryTargetId == -1) {
             return false;
         }
-        territoryTarget = ge->map->findById(territoryTargetId);
+        auto territoryTarget = ge->map->findById(territoryTargetId);
         if (!territoryTarget) {
             std::cout << "Error: this territory does not exist!" << std::endl;
             continue;
@@ -282,10 +259,9 @@ bool AirliftCard::play(Player *issuer) const {
             continue;
         }
         std::cout << std::endl;
-        break;
+        AirliftCard::execute(issuer, armiesSize, territoryOrigin, territoryTarget);
+        return true;
     }
-    AirliftCard::execute(issuer, armiesSize, territoryOrigin, territoryTarget);
-    return true;
 }
 
 /**
@@ -298,15 +274,6 @@ bool AirliftCard::play(Player *issuer) const {
 void AirliftCard::execute(Player *issuer, int armiesSize, Territory *territoryOrigin, Territory *territoryTarget) {
     auto order = new AirliftOrder(issuer, armiesSize, territoryOrigin, territoryTarget);
     issuer->orders->push(order);
-}
-
-/**
- * Return a list of alias for the airlift card
- * @return list of alias for the airlift card
- */
-const std::vector<std::string> AirliftCard::getAliases() {
-    return {"airlift", "airliftcard", "airlift card", "Airlift", "Airliftcard",
-            "AirliftCard", "Airlift Card", "Airlift card", "airlift Card"};
 }
 
 /**
@@ -325,7 +292,7 @@ Card *Hand::draw() {
  */
 Hand::Hand(const Hand &hand) {
     std::vector<Card *> cards;
-    for (auto *card: hand.cards) {
+    for (auto card: hand.cards) {
         cards.push_back(card);
     }
     this->cards = cards;
@@ -358,10 +325,9 @@ bool NegotiateCard::play(Player *issuer) const {
             std::cout << "Error: cannot negotiate with yourself!" << std::endl;
             continue;
         }
-        break;
+        NegotiateCard::execute(issuer, target);
+        return true;
     }
-    NegotiateCard::execute(issuer, target);
-    return true;
 }
 
 /**
@@ -375,21 +341,15 @@ void NegotiateCard::execute(Player *issuer, Player *target) {
 }
 
 /**
- * Return a list of aliases for negotiate card
- * @return list of aliases for negotiate card
- */
-const std::vector<std::string> NegotiateCard::getAliases() {
-    return {"negotiate", "negotiatecard", "negotiate card", "Negotiate", "Negotiatecard",
-            "NegotiateCard", "Negotiate Card", "Negotiate card", "negotiate Card"};
-}
-
-/**
  * Draw a card randomly from the deck
  * @return The card that has been drawn
  */
 Card *Deck::draw() {
+    if(this->getCardsSize() == 0){
+        return nullptr;
+    }
     unsigned int randomLocation = this->getRandomLocation();
-    auto *card = this->cards[randomLocation];
+    auto card = this->cards[randomLocation];
     this->cards.erase(this->cards.begin() + randomLocation);
     return card;
 }
@@ -420,7 +380,7 @@ int Deck::getRandomLocation() {
  */
 Deck::Deck(const Deck &deck) {
     std::vector<Card *> cards;
-    for (auto *card: deck.cards) {
+    for (auto card: deck.cards) {
         cards.push_back(card);
     }
     this->cards = cards;
@@ -433,7 +393,7 @@ Deck::Deck(const Deck &deck) {
  */
 Hand &Hand::operator=(const Hand &hand) {
     std::vector<Card *> cards;
-    for (auto *card: hand.cards) {
+    for (auto card: hand.cards) {
         cards.push_back(card);
     }
     this->cards = cards;
@@ -447,7 +407,7 @@ Hand &Hand::operator=(const Hand &hand) {
  */
 Deck &Deck::operator=(const Deck &deck) {
     std::vector<Card *> cards;
-    for (auto *card: deck.cards) {
+    for (auto card: deck.cards) {
         cards.push_back(card);
     }
     this->cards = cards;
@@ -458,11 +418,8 @@ Deck &Deck::operator=(const Deck &deck) {
  * Hand destructor
  */
 Hand::~Hand() {
-    int counter = 0;
-    for (auto *card: this->cards) {
+    for (auto card: this->cards) {
         delete (card);
-        this->cards[counter] = nullptr;
-        counter = counter + 1;
     }
 }
 
@@ -471,13 +428,9 @@ Hand::~Hand() {
  */
 Deck::~Deck() {
     int counter = 0;
-    for (auto *card: this->cards) {
+    for (auto card: this->cards) {
         delete (card);
         this->cards[counter] = nullptr;
         counter = counter + 1;
     }
-}
-
-Card *findCardByName(std::string name, int *indexPointer) {
-    return nullptr;
 }

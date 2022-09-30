@@ -279,6 +279,7 @@ void CardsTester::testDeckDraw() {
     auto ge = new GameEngine("../assets/Moon.map");
     ge->deck = new Deck(cards);
     auto initialDeckSize = ge->deck->getCardsSize();
+    ge->deck->draw();
     auto drawnDeckSize = ge->deck->getCardsSize();
     Utils::assert(initialDeckSize == drawnDeckSize + 1, "testDeckDraw");
 }

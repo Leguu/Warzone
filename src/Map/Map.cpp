@@ -57,7 +57,7 @@ ostream &operator<<(ostream &os, const Territory &territory) {
     os << "ID of territory: " << territory.id << "\n"
        << "Name of territory: " << territory.name << "\n"
        << "Continent ID: " << territory.continent << "\n"
-       << "Owner of territory: " << territory.owner << "\n"
+       << "Owner of territory: " << *(territory.owner)
        << "Number of armies: " << territory.armies << "\n";
 
     return os;

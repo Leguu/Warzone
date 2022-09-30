@@ -41,12 +41,16 @@ class Card {
 public:
     const std::string name;
     const std::string description;
+    const std::vector<std::string> aliases;
 
     virtual bool play(Player *issuer) const = 0;
 
-    Card(std::string name, std::string description) : name(std::move(name)), description(std::move(description)) {}
+    Card(std::string name, std::string description, std::vector<std::string> aliases) : name(std::move(name)),
+                                                                                      description(
+                                                                                              std::move(description)),
+                                                                                      aliases(aliases) {}
 
-    virtual const std::vector<std::string> getAliases() = 0;
+    const std::vector<std::string> getAliases();
 
     virtual ~Card();
 
@@ -57,28 +61,29 @@ private:
 class BombCard : public Card {
 public:
 
-    inline BombCard() : Card("BombCard", "Use to destroy half of an enemy territory's army") {}
+    inline BombCard() : Card("BombCard", "Use to destroy half of an enemy territory's army",
+                             {"bomb", "bombcard", "bomb card", "Bomb", "Bombcard", "BombCard", "Bomb Card",
+                              "Bomb card", "bomb Card"}) {}
 
     bool play(Player *issuer) const override;
 
     static void execute(Player *issuer, Territory *territory);
 
-    const std::vector<std::string> getAliases() override;
-
     ~BombCard() override;
+
 
 };
 
 class BlockadeCard : public Card {
 public:
 
-    inline BlockadeCard() : Card("BlockadeCard", "Use to lose control of a territory but triple its army size") {}
+    inline BlockadeCard() : Card("BlockadeCard", "Use to lose control of a territory but triple its army size",
+                                 {"blockade", "blockadecard", "blockade card", "Blockade", "Blockadecard",
+                                  "BlockadeCard", "Blockade Card", "Blockade card", "blockade Card"}) {}
 
     bool play(Player *issuer) const override;
 
     static void execute(Player *issuer, Territory *territory);
-
-    const std::vector<std::string> getAliases() override;
 
 
     ~BlockadeCard() override;
@@ -87,13 +92,13 @@ public:
 class AirliftCard : public Card {
 public:
 
-    inline AirliftCard() : Card("AirliftCard", "Use to move armies from any territory to any other") {}
+    inline AirliftCard() : Card("AirliftCard", "Use to move armies from any territory to any other",
+                                {"airlift", "airliftcard", "airlift card", "Airlift", "Airliftcard",
+                                 "AirliftCard", "Airlift Card", "Airlift card", "airlift Card"}) {}
 
     bool play(Player *issuer) const override;
 
     static void execute(Player *issuer, int armiesSize, Territory *territoryPlayer, Territory *territoryTarget);
-
-    const std::vector<std::string> getAliases() override;
 
 
     ~AirliftCard() override;
@@ -102,13 +107,14 @@ public:
 class NegotiateCard : public Card {
 public:
 
-    inline NegotiateCard() : Card("NegotiateCard", "Use to prevent attacks between you and another player") {}
+    inline NegotiateCard() : Card("NegotiateCard", "Use to prevent attacks between you and another player",
+                                  {"negotiate", "negotiatecard", "negotiate card", "Negotiate", "Negotiatecard",
+                                   "NegotiateCard", "Negotiate Card", "Negotiate card", "negotiate Card"}) {}
 
     bool play(Player *issuer) const override;
 
     static void execute(Player *issuer, Player *target);
 
-    const std::vector<std::string> getAliases() override;
 
     ~NegotiateCard() override;
 };

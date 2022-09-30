@@ -35,6 +35,9 @@ public:
     void issueOrder();
 
     void play(std::string const &cardName);
+
+    friend std::ostream &operator<<(std::ostream &os, const Player &player);
+
 private:
     Card* findCardByName(std::string name, int* indexPointer) const;
 

@@ -32,6 +32,6 @@ int Utils::getInputInt(const std::string &prompt) {
 void Utils::assert(bool condition, const std::string test) {
     if (!condition) {
         std::cout << test << " Has failed";
-        exit(-1);
+        throw std::runtime_error(test);
     }
 }
