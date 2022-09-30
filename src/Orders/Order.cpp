@@ -26,7 +26,7 @@ void DeployOrder::validate() {// Implement check if is within territory
   std::cout << "Validating " + std::string(this->getName()) << std::endl;
 
   if (target->getOwner() && (target->getOwner()->ownedTerritories != issuer->ownedTerritories)) {
-	throw InvalidOrderException(issuer->name + "tried to deploy in enemy territory!");
+	throw InvalidOrderException(issuer->name + " tried to deploy in enemy territory!");
   }
 }
 
@@ -93,8 +93,7 @@ void BlockadeOrder::validate() {
   // Validation:
   // -----------
   //           1. If player does not own territory? (To confirm if this is a possibility)
-  if (std::find(issuer->ownedTerritories.begin(), issuer->ownedTerritories.end(), target)
-	  != issuer->ownedTerritories.end()) {
+  if (target->getOwner() && (target->getOwner() != issuer)) {
 	throw InvalidOrderException(issuer->name + " does not own territory " + target->getName());
   }
 }
@@ -129,8 +128,7 @@ void AirliftOrder::validate() {
 	throw InvalidOrderException(
 		issuer->name + "'s source territory (" + source->getName() + ") does not have " + std::to_string(armies)
 			+ " number of army members.");
-  } else if (std::find(issuer->ownedTerritories.begin(), issuer->ownedTerritories.end(), target)
-	  != issuer->ownedTerritories.end()) {
+  } else if (target->getOwner() && (target->getOwner() != issuer)) {
 	throw InvalidOrderException(issuer->name + " does not own territory " + target->getName());
   }
 }
@@ -139,8 +137,9 @@ void AirliftOrder::execute() {
   validate();
   std::cout << "Executing " + std::string(this->getName()) << std::endl;
   int sourceArmies = this->source->getArmies();
+  int targetArmies = this->target->getArmies();
   this->source->setArmies(sourceArmies - armies);
-  this->target->setArmies(sourceArmies + armies);
+  this->target->setArmies(targetArmies + armies);
 }
 
 AirliftOrder::~AirliftOrder() = default;
@@ -191,18 +190,18 @@ void OrderList::move(int a, int b) {
 }
 
 void OrderList::executeOrders() {
-  auto idx = 1;
+  auto i = 1;
   auto divider = "--------------------------------------------------------------------------------";
   for (auto &order : this->orders) {
-	std::cout << std::to_string(idx) + ". ";
+	std::cout << std::to_string(i) + ". ";
 	order->execute();
 	std::cout << divider << std::endl;
-	++idx;
+	++i;
   }
 }
 
 std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {
-  auto idx = 1;
+  auto i = 1;
   auto divider = "--------------------------------------------------------------------------------";
 
   std::cout << divider << "\n" << std::left << std::setw(3) << "Id | " << std::left << std::setw(15) << "Name"
@@ -210,11 +209,11 @@ std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {
 			<< "\n" << divider << std::endl;
 
   for (auto order : orderList.orders) {
-	std::cout << std::left << std::setw(3) << std::to_string(idx) << "| " << std::left << std::setw(15)
+	std::cout << std::left << std::setw(3) << std::to_string(i) << "| " << std::left << std::setw(15)
 			  << order->getName()
 			  << "| " + order->description
 			  << std::endl;
-	++idx;
+	++i;
   }
 
   std::cout << divider << std::endl;
