@@ -36,8 +36,6 @@ public:
 
   friend std::ostream &operator<<(std::ostream &os, const Order &order);
 
-  virtual std::string_view getName() const = 0;
-
   virtual ~Order();
 };
 
@@ -48,10 +46,6 @@ public:
   void validate() override;
 
   void execute() override;
-
-  [[nodiscard]] std::string_view getName() const override {
-	return "DeployOrder";
-  }
 
   ~DeployOrder() override;
 
@@ -67,10 +61,6 @@ public:
   void validate() override;
 
   void execute() override;
-
-  [[nodiscard]] std::string_view getName() const override {
-	return "AdvanceOrder";
-  }
 
   ~AdvanceOrder() override;
 
@@ -88,10 +78,6 @@ public:
 
   void execute() override;
 
-  [[nodiscard]] std::string_view getName() const override {
-	return "BombOrder";
-  }
-
   ~BombOrder() override;
 
 private:
@@ -108,10 +94,6 @@ public:
 
   void execute() override;
 
-  [[nodiscard]] std::string_view getName() const override {
-	return "BlockadeOrder";
-  }
-
   ~BlockadeOrder() override;
 
 private:
@@ -125,10 +107,6 @@ public:
   void validate() override;
 
   void execute() override;
-
-  [[nodiscard]] std::string_view getName() const override {
-	return "AirliftOrder";
-  }
 
   ~AirliftOrder() override;
 
@@ -145,10 +123,6 @@ public:
   void validate() override;
 
   void execute() override;
-
-  [[nodiscard]] std::string_view getName() const override {
-	return "NegotiateOrder";
-  }
 
 private:
   const Player *const target;

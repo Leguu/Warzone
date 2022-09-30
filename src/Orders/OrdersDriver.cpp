@@ -53,7 +53,7 @@ void testOrdersLists() {
   std::cout << list << std::endl;
 
   std::cout << "\nExecute operation test:" << std::endl;
-  std::cout << "---------------------" << std::endl;
+  std::cout << "----------------------" << std::endl;
   std::cout << "Executing every order left in the list" << std::endl;
   std::cout << "Expected - every order is validated first and then executed" << std::endl;
   std::cout << "Results - contents of list after operation was performed" << std::endl;
