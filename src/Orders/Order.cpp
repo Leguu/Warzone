@@ -5,23 +5,25 @@
 #include <iomanip>
 
 // ------------------ Order -------------------------
-Order::Order(Player *issuer, std::string name, std::string description)
-	: name(std::move(name)), description(std::move(description)), issuer(issuer) {}
+Order::Order(Player *issuer, std::string name)
+	: name(std::move(name)),issuer(issuer) {}
 
-std::ostream &operator<<(std::ostream &os, const Order &order) {
-  os << order.name << ": " << order.description;
+std::ostream &operator<<(std::ostream &os, Order &order) {
+  os << order.name << ": " << order.description();
   return os;
 }
+
 
 Order::~Order() = default;
 
 // ------------------ DeployOrder ------------------------
 DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)
-	: Order(issuer, "Deploy",
-			issuer->name + " deploys " + std::to_string(reinforcements) + " armies to " +
-				target->toString()),
+	: Order(issuer, "Deploy"),
 	  reinforcements(reinforcements), target(target) {}
-
+std::string DeployOrder::description() {
+  return issuer->name + " deploys " + std::to_string(reinforcements) + " armies to " +
+      target->toString();
+}
 void DeployOrder::validate() {// Implement check if is within territory
   if (target->getOwner() && (target->getOwner() != issuer)) {
 	throw InvalidOrderException(issuer->name + " tried to deploy in someone else's territory.");
@@ -42,18 +44,23 @@ DeployOrder::~DeployOrder() = default;
 
 // ------------------ AdvanceOrder ------------------------
 AdvanceOrder::AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target)
-	: Order(issuer, "Advance",
-			issuer->name + " advances " + std::to_string(armies) + " armies from " + source->toString() +
-				" to " +
-				target->toString()),
+	: Order(issuer, "Advance"),
 	  armies(armies), source(source), target(target) {}
+std::string AdvanceOrder::description() {
+  return issuer->name + " advances " + std::to_string(armies) + " armies from " + source->toString() +
+      " to " +
+      target->toString();
+}
 
 AdvanceOrder::~AdvanceOrder() = default;
 
 // ------------------ BombOrder ------------------------
 BombOrder::BombOrder(Player *issuer, Territory *target)
-	: Order(issuer, "Bomb", issuer->name + " bombs " + target->toString()),
+	: Order(issuer, "Bomb"),
 	  target(target) {}
+std::string BombOrder::description() {
+  return issuer->name + " bombs " + target->toString();
+}
 
 void BombOrder::validate() {
   if (target->getOwner() && (target->getOwner()->name == issuer->name)) {
@@ -70,9 +77,11 @@ BombOrder::~BombOrder() = default;
 
 // ------------------ BlockadeOrder ------------------------
 BlockadeOrder::BlockadeOrder(Player *issuer, Territory *target)
-	: Order(issuer, "Blockade", issuer->name + " blockades " + target->toString()),
+	: Order(issuer, "Blockade"),
 	  target(target) {}
-
+std::string BlockadeOrder::description() {
+  return issuer->name + " blockades " + target->toString();
+}
 void BlockadeOrder::validate() {
   if (target->getOwner() && (target->getOwner() != issuer)) {
 	throw InvalidOrderException(issuer->name + " does not own territory " + target->getName());
@@ -87,12 +96,13 @@ BlockadeOrder::~BlockadeOrder() = default;
 
 // ------------------ AirliftOrder ------------------------
 AirliftOrder::AirliftOrder(Player *issuer, int armies, Territory *source, Territory *target)
-	: Order(issuer, "Airlift",
-			issuer->name + " airlifts " + std::to_string(armies) + " armies from " + source->toString() +
-				" to " +
-				target->toString()),
+	: Order(issuer, "Airlift"),
 	  armies(armies), source(source), target(target) {}
-
+std::string AirliftOrder::description() {
+  return issuer->name + " airlifts " + std::to_string(armies) + " armies from " + source->toString() +
+      " to " +
+      target->toString();
+}
 void AirliftOrder::validate() {
   if (source->getArmies() - armies < 0) {
 	throw InvalidOrderException(
@@ -115,9 +125,11 @@ AirliftOrder::~AirliftOrder() = default;
 
 // ------------------ NegotiateOrder ------------------------
 NegotiateOrder::NegotiateOrder(Player *issuer, const Player *target)
-	: Order(issuer, "Negotiate", issuer->name + " negotiates with " + target->name),
+	: Order(issuer, "Negotiate"),
 	  target(target) {}
-
+std::string NegotiateOrder::description() {
+  return issuer->name + " negotiates with " + target->name;
+}
 NegotiateOrder::~NegotiateOrder() = default;
 
 // ------------------ OrderList ------------------------
@@ -169,7 +181,7 @@ std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {
   for (auto order : orderList.orders) {
 	std::cout << std::left << std::setw(3) << std::to_string(i) << "| " << std::left << std::setw(10)
 			  << order->name
-			  << "| " + order->description
+			  << "| " + order->description()
 			  << std::endl;
 	++i;
   }

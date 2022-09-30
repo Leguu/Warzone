@@ -24,17 +24,21 @@ class Order {
 public:
   const std::string name;
   // TODO: maybe this should be a function... maybe the number of people changes between when an order is created and it is executed
-  const std::string description;
+  // void Description(std::string name, std::string action, std::string territory);
+ // virtual void description() = 0;
+ // const std::string description;
+
   Player *issuer;
 
-  Order(Player *issuer, std::string name, std::string description);
+  Order(Player *issuer, std::string name);
 
   /// Throws InvalidOrderException if the order no longer makes sense (due to previous orders)
   virtual void validate() noexcept(false) = 0;
+  virtual std::string description() = 0;
 
   virtual void execute() = 0;
 
-  friend std::ostream &operator<<(std::ostream &os, const Order &order);
+  friend std::ostream &operator<<(std::ostream &os, Order &order);
 
   virtual ~Order();
 };
@@ -46,6 +50,8 @@ public:
   void validate() override;
 
   void execute() override;
+
+  std::string description() override;
 
   ~DeployOrder() override;
 
@@ -61,6 +67,7 @@ public:
   inline void validate() override {};
 
   inline void execute() override {};
+  std::string description() override;
 
   ~AdvanceOrder() override;
 
@@ -78,6 +85,8 @@ public:
 
   void execute() override;
 
+  std::string description() override;
+
   ~BombOrder() override;
 
 private:
@@ -94,6 +103,8 @@ public:
 
   void execute() override;
 
+  std::string description() override;
+
   ~BlockadeOrder() override;
 
 private:
@@ -107,6 +118,8 @@ public:
   void validate() override;
 
   void execute() override;
+
+  std::string description() override;
 
   ~AirliftOrder() override;
 
@@ -123,6 +136,8 @@ public:
   inline void validate() override {};
 
   inline void execute() override {};
+
+  std::string description() override;
 
   ~NegotiateOrder() override;
 
