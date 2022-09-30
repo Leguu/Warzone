@@ -120,9 +120,9 @@ class NegotiateOrder : public Order {
 public:
   explicit NegotiateOrder(Player *issuer, const Player *target);
 
-  void validate() override;
+  inline void validate() override {};
 
-  void execute() override;
+  inline void execute() override {};
 
 private:
   const Player *const target;

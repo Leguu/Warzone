@@ -89,8 +89,6 @@ BlockadeOrder::BlockadeOrder(Player *issuer, Territory *target)
 
 void BlockadeOrder::validate() {
 
-
-
   //           1. If player does not own territory? (To confirm if this is a possibility)
   if (target->getOwner() && (target->getOwner() != issuer)) {
     throw InvalidOrderException(issuer->name + " does not own territory " + target->getName());
@@ -144,15 +142,6 @@ AirliftOrder::~AirliftOrder() = default;
 NegotiateOrder::NegotiateOrder(Player *issuer, const Player *target)
     : Order(issuer, "Negotiate", issuer->name + " negotiates with " + target->name),
       target(target) {}
-
-void NegotiateOrder::validate() {// Implement check if is within territory
-
-}
-
-void NegotiateOrder::execute() {
-  validate();
-
-}
 
 // ------------------ OrderList ------------------------
 void OrderList::push(Order *order) {
