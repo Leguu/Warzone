@@ -142,7 +142,9 @@ void OrderList::remove(int index) {
 }
 
 void OrderList::move(int a, int b) {
-  std::swap(this->orders[a], this->orders[b]);
+  if ((0 <= a && a < this->orders.size()) && (0 <= b && b < this->orders.size())) {
+	std::swap(this->orders[a], this->orders[b]);
+  }
 }
 
 void OrderList::executeOrders() {
