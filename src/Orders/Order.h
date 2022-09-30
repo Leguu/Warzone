@@ -136,11 +136,15 @@ public:
 
   void move(int a, int b);
 
+  Order *get(int index);
+
   Order *pop();
 
   void push(Order *order);
 
   void executeOrders();
+
+  int getNumberOfOrders();
 
   friend std::ostream &operator<<(std::ostream &os, const OrderList &orderList);
 

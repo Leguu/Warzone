@@ -133,6 +133,10 @@ Order *OrderList::pop() {
   return order;
 }
 
+Order *OrderList::get(int index) {
+  return this->orders[index];
+}
+
 void OrderList::remove(int index) {
   this->orders.erase(this->orders.begin() + index);
 }
@@ -142,12 +146,14 @@ void OrderList::move(int a, int b) {
 }
 
 void OrderList::executeOrders() {
-  auto i = 1;
-  for (auto &order : this->orders) {
-	std::cout << std::to_string(i) + ". ";
+  while (!this->orders.empty()) {
+	auto order = pop();
 	order->execute();
-	++i;
   }
+}
+
+int OrderList::getNumberOfOrders() {
+  return this->orders.size();
 }
 
 std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include "../GameEngine/GameEngine.h"
+#include "../Utils/Utils.h"
 
 #include "Order.h"
 
@@ -26,39 +27,21 @@ void testOrdersLists() {
   list.push(blockade);
   list.push(airlift);
   list.push(negotiate);
+  Utils::assertCondition(list.getNumberOfOrders() == 6, "Push operation failed: list size is not 6.");
 
-  std::cout << "\nPush operation test:" << std::endl;
-  std::cout << "--------------------" << std::endl;
-  std::cout << "Operation - 6 push commands" << std::endl;
-  std::cout << "Expected - a list with 6 orders" << std::endl;
-  std::cout << "Results - contents of list after operation was performed" << std::endl;
-  std::cout << list << std::endl;
-
-  std::cout << "\nRemove operation test:" << std::endl;
-  std::cout << "---------------------" << std::endl;
   list.remove(2);
-  std::cout << "Operation - remove performed on order number 3 (BombOrder, index 2)" << std::endl;
-  std::cout << "Expected - the same list as above but with 5 orders" << std::endl;
-  std::cout << "Results - contents of list after operation was performed" << std::endl;
-  std::cout << list << std::endl;
+  Utils::assertCondition(list.getNumberOfOrders() == 5, "Remove operation failed: list size is not 5.");
+  Utils::assertCondition(list.get(2) == blockade, "Remove operation failed: index 2 is not blockade order.");
 
-  std::cout << "\nMove operation test:" << std::endl;
-  std::cout << "---------------------" << std::endl;
   list.move(1, 2);
-  std::cout
-      << "Operation - move performed between order number 2 and 3 (AdvanceOrder, index 1 and BlockadeOrder, index 2)"
-      << std::endl;
-  std::cout << "Expected - the same list as above but with 5 orders" << std::endl;
-  std::cout << "Results - contents of list after operation was performed" << std::endl;
-  std::cout << list << std::endl;
+  Utils::assertCondition(list.get(1) == blockade, "Move operation failed: index 1 is not blockade order.");
+  Utils::assertCondition(list.get(2) == advance, "Move operation failed: index 2 is not advance order.");
 
+  list.executeOrders();
+  Utils::assertCondition(list.getNumberOfOrders() == 0, "Execute orders operation failed: list is not empty.");
 }
 
 int main() {
-  std::cout << "---------------------" << std::endl;
-  std::cout << "Testing Orders Lists:" << std::endl;
-  std::cout << "---------------------" << std::endl;
-
   testOrdersLists();
 
   return 0;

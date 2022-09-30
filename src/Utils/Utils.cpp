@@ -64,3 +64,9 @@ bool Utils::isEqualLowercase(const string &a, const string &b) {
   std::transform(bStr.begin(), bStr.end(), bStr.begin(), ::tolower);
   return aStr == bStr;
 }
+
+void Utils::assertCondition(bool condition, const std::string message) {
+  if (!condition) {
+	throw std::runtime_error(message);
+  }
+}

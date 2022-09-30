@@ -15,9 +15,12 @@ public:
   static vector<std::string> *tokenizer(const string &s, char del);
 
   static string trim(const string &s);
+
   static string WHITESPACE;
 
   static bool isEqualLowercase(const string &a, const string &b);
+
+  static void assertCondition(bool condition, const std::string message);
 };
 
 #endif //WARZONE_UTILS_H
