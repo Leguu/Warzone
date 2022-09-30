@@ -27,12 +27,18 @@ void DeployOrder::validate() {// Implement check if is within territory
 
   if (target->getOwner() && (target->getOwner()->ownedTerritories != issuer->ownedTerritories)) {
 	throw InvalidOrderException(issuer->name + " tried to deploy in enemy territory!");
+  } else if (reinforcements > issuer->reinforcements) {
+	throw InvalidOrderException(issuer->name + " does not have the specified number of reinforcements. Player has "
+									+ std::to_string(issuer->reinforcements) + " reinforcements, but requested "
+									+ std::to_string(reinforcements) + " reinforcements.");
   }
 }
 
 void DeployOrder::execute() {
   validate();
   std::cout << "Executing " + std::string(this->getName()) << std::endl;
+
+  this->issuer->reinforcements -= reinforcements;
   this->target->setArmies(this->target->getArmies() + reinforcements);
 }
 

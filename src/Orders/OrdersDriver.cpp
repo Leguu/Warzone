@@ -13,7 +13,7 @@ void testOrdersLists() {
   auto player1 = Player("Bob");
   auto player2 = Player("Alice");
 
-  auto deploy = new DeployOrder(&player1, 5, territoryT);
+  auto deploy = new DeployOrder(&player1, 0, territoryT);
   auto advance = new AdvanceOrder(&player1, 5, territoryS, territoryT);
   auto bomb = new BombOrder(&player1, territoryT);
   auto blockade = new BlockadeOrder(&player1, territoryT);
