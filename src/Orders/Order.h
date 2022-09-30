@@ -58,9 +58,9 @@ class AdvanceOrder : public Order {
 public:
   AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target);
 
-  void validate() override;
+  inline void validate() override {};
 
-  void execute() override;
+  inline void execute() override {};
 
   ~AdvanceOrder() override;
 
@@ -123,6 +123,8 @@ public:
   inline void validate() override {};
 
   inline void execute() override {};
+
+  ~NegotiateOrder() override;
 
 private:
   const Player *const target;

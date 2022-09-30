@@ -17,15 +17,15 @@ int Utils::getInputInt(const std::string &prompt) {
   std::string input;
   int value;
   while (true) {
-    std::cout << inputPrompt << std::flush;
-    std::cin >> input;
-    try {
-      value = std::stoi(input);
-      break;
-    } catch (std::invalid_argument &e) {
-      std::cout << "Your input has to be a number!" << std::endl;
-      continue;
-    }
+	std::cout << inputPrompt << std::flush;
+	std::cin >> input;
+	try {
+	  value = std::stoi(input);
+	  break;
+	} catch (std::invalid_argument &e) {
+	  std::cout << "Your input has to be a number!" << std::endl;
+	  continue;
+	}
   }
   return value;
 }
@@ -35,8 +35,8 @@ vector<std::string> *Utils::tokenizer(const string &s, char del) {
   std::stringstream ss(s);
   string word;
   while (!ss.eof()) {
-    getline(ss, word, del);
-    vec->push_back(word);
+	getline(ss, word, del);
+	vec->push_back(word);
   }
   return vec;
 }
@@ -56,6 +56,7 @@ std::string rtrim(const std::string &s) {
 string Utils::trim(const string &s) {
   return rtrim(ltrim(s));
 }
+
 bool Utils::isEqualLowercase(const string &a, const string &b) {
   auto aStr = a;
   auto bStr = b;
