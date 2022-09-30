@@ -100,11 +100,11 @@ bool BombCard::play(Player *issuer) const {
         }
         auto territory = ge->map->findById(territoryId);
         if (!territory) {
-            std::cout << "Error: this territory does not exist!\n" << std::endl;
+            std::cout << "Error: this territory does not exist!" << std::endl << std::endl;
             continue;
         }
         if (territory->getOwner() == issuer) {
-            std::cout << "Error: Cannot bomb your own territory!\n" << std::endl;
+            std::cout << "Error: Cannot bomb your own territory!" << std::endl << std::endl;
             continue;
         }
         bool territoryIsAdjacent = false;
@@ -113,7 +113,7 @@ bool BombCard::play(Player *issuer) const {
                 territoryIsAdjacent = true;
         }
         if (!territoryIsAdjacent) {
-            std::cout << "Error: Can only bomb adjacent territories!\n" << std::endl;
+            std::cout << "Error: Can only bomb adjacent territories!" << std::endl << std::endl;
             continue;
         }
         std::cout << std::endl;
@@ -171,11 +171,11 @@ bool BlockadeCard::play(Player *issuer) const {
         }
         auto territory = ge->map->findById(territoryId);
         if (!territory) {
-            std::cout << "Error: This territory does not exist!\n" << std::endl;
+            std::cout << "Error: This territory does not exist!" << std::endl << std::endl;
             continue;
         }
         if (territory->getOwner() != issuer) {
-            std::cout << "Error: Cannot blockade territory you don't own!\n" << std::endl;
+            std::cout << "Error: Cannot blockade territory you don't own!" << std::endl << std::endl;
             continue;
         }
         std::cout << std::endl;
@@ -224,11 +224,11 @@ bool AirliftCard::play(Player *issuer) const {
         }
         auto territoryOrigin = ge->map->findById(territoryOriginId);
         if (!territoryOrigin) {
-            std::cout << "Error: This territory does not exist!\n" << std::endl;
+            std::cout << "Error: This territory does not exist!" << std::endl << std::endl;
             continue;
         }
         if (territoryOrigin->getOwner() != issuer) {
-            std::cout << "Error: Cannot airlift from a territory you don't own!\n" << std::endl;
+            std::cout << "Error: Cannot airlift from a territory you don't own!" << std::endl << std::endl;
             continue;
         }
         std::cout << "Number of soldiers on the chosen territory: " << territoryOrigin->getArmies() << std::endl;
@@ -255,7 +255,7 @@ bool AirliftCard::play(Player *issuer) const {
             continue;
         }
         if (territoryTarget->getOwner() != issuer) {
-            std::cout << "Error: Cannot airlift to a territory you don't own!\n" << std::endl;
+            std::cout << "Error: Cannot airlift to a territory you don't own!" << std::endl << std::endl;
             continue;
         }
         std::cout << std::endl;
