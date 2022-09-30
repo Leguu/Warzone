@@ -173,26 +173,16 @@ Order *OrderList::pop() {
   if (this->orders.empty())
 	return nullptr;
   auto order = this->orders.front();
-  this->orders.pop_front();
+  this->orders.erase(this->orders.begin());
   return order;
 }
 
 void OrderList::remove(int index) {
-  auto iter = this->orders.begin();
-  std::advance(iter, index);
-  this->orders.erase(iter);
+  this->orders.erase(this->orders.begin() + index);
 }
 
 void OrderList::move(int a, int b) {
-  auto iterA = this->orders.begin();
-  std::advance(iterA, a);
-
-  auto iterB = this->orders.begin();
-  std::advance(iterB, b);
-
-  auto tmp = *iterA;
-  *iterA = *iterB;
-  *iterB = tmp;
+  std::swap(this->orders[a], this->orders[b]);
 }
 
 void OrderList::executeOrders() {

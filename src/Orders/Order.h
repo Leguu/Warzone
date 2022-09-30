@@ -169,7 +169,7 @@ public:
   friend std::ostream &operator<<(std::ostream &os, const OrderList &orderList);
 
 private:
-  std::list<Order *> orders = {};
+  std::vector<Order *> orders = {};
 };
 
 #endif //WARZONE_ORDER_H
