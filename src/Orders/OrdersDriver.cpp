@@ -7,7 +7,7 @@
 void testOrdersLists() {
   OrderList list = OrderList();
 
-  auto ge = new GameEngine("assets/Moon.map");
+  auto ge = new GameEngine("../assets/Moon.map");
   const auto territoryS = ge->map->findById(0);
   const auto territoryT = ge->map->findById(1);
   auto player1 = Player("Bob");
