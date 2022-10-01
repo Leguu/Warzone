@@ -82,14 +82,17 @@ BombOrder::~BombOrder() = default;
 BlockadeOrder::BlockadeOrder(Player *issuer, Territory *target)
 	: Order(issuer, "Blockade"),
 	  target(target) {}
+
 std::string BlockadeOrder::description() {
   return issuer->name + " blockades " + target->toString();
 }
+
 void BlockadeOrder::validate() {
   if (target->getOwner() && (target->getOwner() != issuer)) {
 	throw InvalidOrderException(issuer->name + " does not own territory " + target->getName());
   }
 }
+
 void BlockadeOrder::execute() {
   validate();
   this->target->setArmies(this->target->getArmies() * 3);
@@ -101,11 +104,13 @@ BlockadeOrder::~BlockadeOrder() = default;
 AirliftOrder::AirliftOrder(Player *issuer, int armies, Territory *source, Territory *target)
 	: Order(issuer, "Airlift"),
 	  armies(armies), source(source), target(target) {}
+
 std::string AirliftOrder::description() {
   return issuer->name + " airlifts " + std::to_string(armies) + " armies from " + source->toString() +
 	  " to " +
 	  target->toString();
 }
+
 void AirliftOrder::validate() {
   if (source->getArmies() - armies < 0) {
 	throw InvalidOrderException(
@@ -130,9 +135,11 @@ AirliftOrder::~AirliftOrder() = default;
 NegotiateOrder::NegotiateOrder(Player *issuer, const Player *target)
 	: Order(issuer, "Negotiate"),
 	  target(target) {}
+
 std::string NegotiateOrder::description() {
   return issuer->name + " negotiates with " + target->name;
 }
+
 NegotiateOrder::~NegotiateOrder() = default;
 
 // ------------------ OrderList ------------------------
