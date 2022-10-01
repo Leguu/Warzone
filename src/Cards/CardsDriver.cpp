@@ -86,6 +86,12 @@ void testCards() {
     playerOne->ownedTerritories.push_back(territoryOne);
     playerOne->ownedTerritories.push_back(territoryThree);
     playerTwo->ownedTerritories.push_back(territoryTwo);
+    territoryOne->addAdjacent(territoryTwo);
+    territoryOne->addAdjacent(territoryThree);
+    territoryTwo->addAdjacent(territoryOne);
+    territoryTwo->addAdjacent(territoryThree);
+    territoryThree->addAdjacent(territoryTwo);
+    territoryThree->addAdjacent(territoryOne);
     territoryOne->setOwner(playerOne);
     territoryOne->setArmies(20);
     territoryThree->setOwner(playerOne);
@@ -132,9 +138,11 @@ void CardsTester::testBombCardPlay() {
     ge->deck = new Deck({new BombCard()});
     ge->players.push_back(playerOne);
     ge->players.push_back(playerTwo);
-    ge->map->addContinent(new Continent("potato", 5));
+    ge->map->addContinent(new Continent("potatoLand", 5));
     ge->map->addTerritoryToMap(territoryOne);
     ge->map->addTerritoryToMap(territoryTwo);
+    territoryOne->addAdjacent(territoryTwo);
+    territoryTwo->addAdjacent(territoryOne);
     auto card = playerOne->hand->draw();
     auto orderSizeBeforePlay = playerOne->orders->getOrdersSize();
     playerOne->play(card->name);
@@ -313,7 +321,7 @@ void CardsTester::testHandToString() {
                                  new BlockadeCard};
     auto deck = new Deck(cards);
     auto hand = new Hand();
-    auto ge = new GameEngine("assets/Moon.map");
+    auto ge = new GameEngine("../assets/Moon.map");
     ge->deck = deck;
     while (deck->getCardsSize() != 0) {
         hand->draw();
@@ -367,13 +375,13 @@ void CardsTester::testHandRemove() {
                                  new BlockadeCard};
     auto deck = new Deck(cards);
     auto hand = new Hand();
-    auto ge = new GameEngine("assets/Moon.map");
+    auto ge = new GameEngine("../assets/Moon.map");
     ge->deck = deck;
     while (deck->getCardsSize() != 0) {
         hand->draw();
     }
     auto addedHandSize = hand->cards.size();
-    hand->remove(1);
+    hand->remove(new BombCard());
     auto removedHandSize = hand->cards.size();
     Utils::assert(addedHandSize == removedHandSize + 1, "testHandRemove");
 }

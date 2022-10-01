@@ -384,6 +384,18 @@ bool Map::allContinentsOwned() {
     return true;
 }
 
+/**
+ * Ask user for input about the territory and throw exception if he asks to leave
+ * @return id of the territory he wants to select
+ */
+int Map::getInputTerritory(std::string inputRequest) {
+    auto territoryId = Utils::getInputInt(inputRequest);
+    if (territoryId == -1) {
+        throw std::invalid_argument("Cancelled action");
+    }
+    return territoryId;
+}
+
 Map *MapLoader::importMap(const string &path) {
     ifstream file(path);
 

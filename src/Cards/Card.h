@@ -13,7 +13,7 @@ class Card;
 class Hand {
 public:
 
-    void remove(int index);
+    void remove(Card* card);
 
     std::vector<Card *> cards;
 
@@ -62,8 +62,7 @@ class BombCard : public Card {
 public:
 
     inline BombCard() : Card("BombCard", "Use to destroy half of an enemy territory's army",
-                             {"bomb", "bombcard", "bomb card", "Bomb", "Bombcard", "BombCard", "Bomb Card",
-                              "Bomb card", "bomb Card"}) {}
+                             {"bomb", "bombcard"}) {}
 
     bool play(Player *issuer) const override;
 
@@ -78,8 +77,7 @@ class BlockadeCard : public Card {
 public:
 
     inline BlockadeCard() : Card("BlockadeCard", "Use to lose control of a territory but triple its army size",
-                                 {"blockade", "blockadecard", "blockade card", "Blockade", "Blockadecard",
-                                  "BlockadeCard", "Blockade Card", "Blockade card", "blockade Card"}) {}
+                                 {"blockade", "blockadecard"}) {}
 
     bool play(Player *issuer) const override;
 
@@ -93,8 +91,7 @@ class AirliftCard : public Card {
 public:
 
     inline AirliftCard() : Card("AirliftCard", "Use to move armies from any territory to any other",
-                                {"airlift", "airliftcard", "airlift card", "Airlift", "Airliftcard",
-                                 "AirliftCard", "Airlift Card", "Airlift card", "airlift Card"}) {}
+                                {"airlift", "airliftcard"}) {}
 
     bool play(Player *issuer) const override;
 
@@ -108,8 +105,7 @@ class NegotiateCard : public Card {
 public:
 
     inline NegotiateCard() : Card("NegotiateCard", "Use to prevent attacks between you and another player",
-                                  {"negotiate", "negotiatecard", "negotiate card", "Negotiate", "Negotiatecard",
-                                   "NegotiateCard", "Negotiate Card", "Negotiate card", "negotiate Card"}) {}
+                                  {"negotiate", "negotiatecard"}) {}
 
     bool play(Player *issuer) const override;
 

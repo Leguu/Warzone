@@ -144,6 +144,8 @@ public:
 
     void addTerritoryToMap(Territory *);
 
+    static int getInputTerritory(std::string inputRequest);
+
     // A method to add a continent
     void addContinent(Continent *continent);
 

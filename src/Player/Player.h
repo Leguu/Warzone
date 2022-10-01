@@ -39,7 +39,7 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const Player &player);
 
 private:
-    Card* findCardByName(std::string name, int* indexPointer) const;
+    Card* findCardByName(std::string name) const;
 
 };
 

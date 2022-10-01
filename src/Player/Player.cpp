@@ -8,12 +8,10 @@
  */
 void Player::play(std::string const &cardName) {
     auto ge = GameEngine::instance();
-    int index = 0;
-    int *indexPointer = &index;
-    auto cardToPlay = Player::findCardByName(cardName, indexPointer);
+    auto cardToPlay = Player::findCardByName(cardName);
     if (cardToPlay != nullptr) {
         if (cardToPlay->play(this)) {
-            this->hand->remove(*indexPointer);
+            this->hand->remove(cardToPlay);
             ge->deck->put(cardToPlay);
         } else {
             std::cout << "Cancelled play action" << std::endl;
@@ -41,13 +39,12 @@ void Player::issueOrder() {
  * @param indexPointer An index we will change for the parent to indicate which card we are on
  * @return A pointer to the card
  */
-Card *Player::findCardByName(std::string name, int *indexPointer) const {
+Card *Player::findCardByName(std::string name) const {
     for (auto &card: this->hand->cards) {
         for (auto cardName: card->getAliases())
-            if (cardName == name) {
+            if (Utils::isEqualLowercase(Utils::trim(cardName), name)) {
                 return card;
             }
-        *indexPointer = *indexPointer + 1;
     }
     return nullptr;
 }
@@ -59,7 +56,7 @@ Card *Player::findCardByName(std::string name, int *indexPointer) const {
 const std::vector<Territory *> Player::getAdjacentEnemyTerritories() {
     std::vector<Territory *> enemyTerritoriesAdjacent;
     for (auto friendlyTerritory: this->ownedTerritories) {
-        for (auto adjacentTerritory: friendlyTerritory->adjacentTerritories) {
+        for (auto adjacentTerritory: friendlyTerritory->getAdjTerritories()) {
             if (adjacentTerritory->getOwner() != this && adjacentTerritory->getOwner() &&
                 std::find(enemyTerritoriesAdjacent.begin(), enemyTerritoriesAdjacent.end(), adjacentTerritory) ==
                 enemyTerritoriesAdjacent.end()) {
