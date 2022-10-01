@@ -91,3 +91,4 @@ void Utils::assertCondition(bool condition, const std::string message) {
 }
 
 Utils::CancelledInputException::CancelledInputException() : runtime_error("Input was cancelled!") {}
+Utils::CancelledInputException::~CancelledInputException() = default;

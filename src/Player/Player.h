@@ -14,18 +14,15 @@ using std::cout;
 using std::endl;
 using std::string;
 
-class Hand;
-class OrderList;
-
 class Player {
 public:
   const string name;
-  OrderList *orders = new OrderList();
+  OrderList *orders;
   Hand *hand = new Hand();
   vector<Territory *> ownedTerritories = {};
   int reinforcements = 0;
 
-  inline explicit Player(string name) : name(std::move(name)) {}
+  explicit Player(string name);
 
   vector<Territory *> getAdjacentEnemyTerritories();
 

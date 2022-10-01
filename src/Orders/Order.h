@@ -2,7 +2,6 @@
 #define WARZONE_ORDER_H
 
 class OrderList;
-
 class Order;
 
 #include <vector>
@@ -10,7 +9,6 @@ class Order;
 #include <ostream>
 #include <queue>
 #include <list>
-
 #include "../Player/Player.h"
 
 /// Thrown when an order can not be executed due to invalid state
