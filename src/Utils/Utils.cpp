@@ -2,7 +2,7 @@
 #include <sstream>
 #include "Utils.h"
 
-const auto inputPrompt = ">";
+const string Utils::inputPrompt = ">";
 
 std::string Utils::getInputString(const std::string &prompt) {
   std::cout << prompt << std::endl;
@@ -64,9 +64,11 @@ bool Utils::isEqualLowercase(const string &a, const string &b) {
   return aStr == bStr;
 }
 
-void Utils::assert(bool condition, const std::string test) {
-    if (!condition) {
-        std::cout << test << " Has failed";
-        throw std::runtime_error(test);
-    }
+void Utils::assert(bool condition, const std::string &test) {
+  if (!condition)
+    throw std::runtime_error(test);
 }
+
+Utils::CancelledInputException::~CancelledInputException() noexcept = default;
+
+Utils::CancelledInputException::CancelledInputException() : runtime_error("Input was cancelled!") {}

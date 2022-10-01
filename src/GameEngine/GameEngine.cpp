@@ -4,70 +4,62 @@
 GameEngine *GameEngine::_instance = nullptr;
 
 GameEngine::GameEngine(const std::string &mp) {
-    map = MapLoader::importMap(mp);
-    _instance = this;
+  map = MapLoader::importMap(mp);
+  _instance = this;
 }
 
 /// @returns Game Over
 bool GameEngine::executeOrders() {
-    std::cout << std::endl << "Executing orders..." << std::endl;
-    for (auto &player: this->players) {
-        while (auto order = player->orders->pop()) {
-            try {
-                order->execute();
-                std::cout << *order << std::endl;
-                if (map->allContinentsOwned()) {
-                    return true;
-                }
-            } catch (InvalidOrderException &e) {
-                std::cout << e.what() << std::endl;
-            }
+  std::cout << std::endl << "Executing orders..." << std::endl;
+  for (auto &player : this->players) {
+    while (auto order = player->orders->pop()) {
+      try {
+        order->execute();
+        std::cout << *order << std::endl;
+        if (map->allContinentsOwned()) {
+          std::cout << "Game is over!" << std::endl;
+          return true;
         }
+      } catch (InvalidOrderException &e) {
+        std::cout << order->name << " order issued by " + order->issuer->name << " was invalid: " << e.what()
+                  << std::endl;
+      }
     }
-    std::cout << "... All orders have been executed" << std::endl << std::endl;
-    return false;
+  }
+  std::cout << "... All orders have been executed" << std::endl << std::endl;
+  return false;
 }
 
-
-//Player *GameEngine::findPlayerByName(std::string name) {
-//    for (auto &eachPlayer: this->players) {
-//        if (eachPlayer->name == name) {
-//            return std::make_unique<Player>(eachPlayer);
-//        }
-//    }
-//}
-
-
 void GameEngine::play() {
-    initialisePlayers();
+  initialisePlayers();
 
-    while (true) {
-        assignReinforcements();
+  while (true) {
+    assignReinforcements();
 
-        issueOrders();
+    issueOrders();
 
-        auto gameOver = executeOrders();
-        // If the game is over
-        if (gameOver) {
-            break;
-        }
+    auto gameOver = executeOrders();
+    // If the game is over
+    if (gameOver) {
+      break;
     }
+  }
 
-    std::cout << "Game is over!" << std::endl;
+  std::cout << "Game is over!" << std::endl;
 }
 
 /**
  * List the contents of the deck
  */
 void GameEngine::listDeck() {
-    std::cout << this->deck << std::endl;
+  std::cout << this->deck << std::endl;
 }
 
 Player *GameEngine::findPlayerByName(std::string name) {
-    for(auto* player: this->players){
-        if(player->name == name){
-            return player;
-        }
+  for (auto *player : this->players) {
+    if (player->name == name) {
+      return player;
     }
-    return nullptr;
+  }
+  return nullptr;
 }

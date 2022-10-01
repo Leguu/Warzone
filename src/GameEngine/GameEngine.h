@@ -8,14 +8,13 @@ class GameEngine;
 #include "../Player/Player.h"
 #include "../Orders/Order.h"
 
-
 class GameEngine {
 public:
   static const bool debug = true;
 
-    std::vector<Player*> players;
-    Map* map;
-    Deck* deck;
+  std::vector<Player *> players;
+  Map *map;
+  Deck *deck = new Deck();
 
   static GameEngine *instance() {
     return _instance;
@@ -42,7 +41,7 @@ public:
 
   bool executeOrders();
 
-    void listDeck();
+  void listDeck();
 
 private:
   static GameEngine *_instance;
