@@ -9,6 +9,7 @@ class Card;
 #include <vector>
 #include <string>
 #include <ostream>
+using std::string;
 
 class Hand {
 public:
@@ -26,6 +27,8 @@ public:
   void listHand() const;
 
   Card *draw();
+
+  Card *removeByName(const string& name);
 
   ~Hand();
 

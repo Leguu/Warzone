@@ -6,59 +6,35 @@
  * Play a card from the deck and add it to the deck
  * @param cardName The name of the card
  */
-void Player::play(std::string const &cardName) {
+void Player::play(string const &cardName) {
   auto ge = GameEngine::instance();
-  auto cardToPlay = Player::findCardByName(cardName);
-  if (cardToPlay != nullptr) {
-    if (cardToPlay->play(this)) {
-      this->hand->remove(cardToPlay);
-      ge->deck->put(cardToPlay);
-    } else {
-      std::cout << "Cancelled play action" << std::endl;
-    }
+  auto card = hand->removeByName(cardName);
+  if (card != nullptr) {
+    card->play(this);
+    ge->deck->put(card);
   } else {
-    std::cout << "Error playing Card. No card of this name were found" << std::endl;
+    cout << "Could not find that card. Are you sure you have it in your hand?" << endl;
   }
 }
 
-const std::vector<Territory *> Player::toAttack() {
-  return std::vector<Territory *>();
+vector<Territory *> Player::toAttack() {
+  return {};
 }
 
-const std::vector<Territory *> Player::toDefend() {
-  return std::vector<Territory *>();
-}
-
-void Player::issueOrder() {
-
-}
-
-/**
- * Find a card by its name
- * @param name The name of the card
- * @param indexPointer An index we will change for the parent to indicate which card we are on
- * @return A pointer to the card
- */
-Card *Player::findCardByName(std::string name) const {
-  for (auto &card : this->hand->cards) {
-    for (auto cardName : card->getAliases())
-      if (Utils::isEqualLowercase(Utils::trim(cardName), name)) {
-        return card;
-      }
-  }
-  return nullptr;
+vector<Territory *> Player::toDefend() {
+  return {};
 }
 
 /**
  * Get all the enemy territories adjacent to your own
  * @return all the enemy territories adjacent to yours
  */
-std::vector<Territory *> Player::getAdjacentEnemyTerritories() {
-  std::vector<Territory *> enemyTerritoriesAdjacent;
+vector<Territory *> Player::getAdjacentEnemyTerritories() {
+  vector<Territory *> enemyTerritoriesAdjacent;
   for (auto friendlyTerritory : this->ownedTerritories) {
     for (auto adjacentTerritory : friendlyTerritory->getAdjTerritories()) {
       if (adjacentTerritory->getOwner() != this && adjacentTerritory->getOwner() &&
-          std::find(enemyTerritoriesAdjacent.begin(), enemyTerritoriesAdjacent.end(), adjacentTerritory) ==
+          find(enemyTerritoriesAdjacent.begin(), enemyTerritoriesAdjacent.end(), adjacentTerritory) ==
               enemyTerritoriesAdjacent.end()) {
         enemyTerritoriesAdjacent.push_back(adjacentTerritory);
       }
@@ -74,7 +50,7 @@ std::vector<Territory *> Player::getAdjacentEnemyTerritories() {
  * @return A string containing a player's information
  */
 std::ostream &operator<<(std::ostream &os, const Player &player) {
-  os << player.name << std::endl;
+  os << player.name << endl;
   return os;
 }
 void Player::drawFromDeck() const {
@@ -82,4 +58,135 @@ void Player::drawFromDeck() const {
 
   auto card = ge->deck->draw();
   hand->cards.push_back(card);
+}
+
+void Player::issueOrder() {
+  auto ge = GameEngine::instance();
+  while (true) {
+    auto input = Utils::toLowercase(Utils::trim(Utils::getInputString()));
+
+    auto tokenized = Utils::tokenizer(input, ' ');
+
+    try {
+      if (input == "help") {
+        cout << GameEngine::helpText << endl;
+      } else if (input == "list hand") {
+        cout << *hand << endl;
+      } else if (input == "list orders") {
+        cout << *orders << endl;
+      } else if (input == "advance") {
+        issueAdvanceOrder();
+      } else if (input == "deploy") {
+        issueDeployOrder();
+      } else if ((*tokenized)[0] == "play") {
+        auto cardName = input.substr(5);
+
+        play(cardName);
+      } else if (input == "map") {
+        cout << *ge->map << endl;
+      } else if ((*tokenized)[0] == "territory") {
+        auto territoryName = input.substr(10);
+        auto territory = ge->map->findTerritory(territoryName);
+
+        if (!territory) {
+          cout << "Couldn't find that territory, sorry" << endl;
+          continue;
+        }
+
+        cout << territory->longDescription() << endl;
+      } else if (input == "done") {
+        return;
+      }
+    } catch (Utils::CancelledInputException &) {
+      cout << "Cancelled that command." << endl;
+    }
+  }
+}
+
+void Player::issueAdvanceOrder() {
+  auto ge = GameEngine::instance();
+  cout << "You can advance from: ";
+  for (auto t : ownedTerritories) {
+    cout << "* " << t->getName() << " ";
+  }
+  cout << endl;
+  auto source = ge->map->getInputTerritory("What's your source territory?", true);
+
+  cout << "Where would you like to advance to? You can choose from: ";
+  for (auto t : source->getAdjTerritories()) {
+    cout << "* " << *t << " ";
+  }
+  Territory *target;
+  while (true) {
+    cout << endl;
+    target = ge->map->getInputTerritory(true);
+
+    if (std::find(source->getAdjTerritories().begin(), source->getAdjTerritories().end(), target)
+        != source->getAdjTerritories().end()) {
+      cout << "That territory is not adjacent to your chosen territory, sorry.";
+      continue;
+    }
+
+    break;
+  }
+
+  int armies;
+  while (true) {
+    armies = Utils::getInputInt(
+        "How many armies would you like to send? Territory " + source->getName() + " has "
+            + std::to_string(source->getArmies())
+            + " territories...", true);
+
+    if (armies <= 0) {
+      cout << "You have to choose a number of armies greater than 0." << endl;
+      continue;
+    } else if (armies > source->getArmies()) {
+      cout << "Your source territory does not have that many armies!" << endl;
+      continue;
+    }
+
+    break;
+  }
+
+  orders->push(new AdvanceOrder(this, armies, source, target));
+
+  cout << "Advance order issued." << endl;
+}
+
+void Player::issueDeployOrder() {
+  auto ge = GameEngine::instance();
+  cout << "You can deploy to: ";
+  for (auto t : ownedTerritories) {
+    cout << "* " << t->getName() << " ";
+  }
+  cout << endl;
+  Territory *target;
+  while (true) {
+    target = ge->map->getInputTerritory("What's your target territory?", true);
+
+    if (target->getOwner() != this) {
+      cout << "You can't deploy on another player's territory." << endl;
+      continue;
+    }
+
+    break;
+  }
+
+  int armies;
+  while (true) {
+    armies = Utils::getInputInt(
+        "How many armies would you like to send? You have " + std::to_string(reinforcements) + " reinforcements.",
+        true);
+
+    if (armies <= 0) {
+      cout << "You have to choose a number of armies greater than 0." << endl;
+      continue;
+    }
+
+    break;
+  }
+
+  orders->push(new DeployOrder(this, armies, target));
+
+  cout << "Deploy order issued." << endl;
 }

@@ -23,6 +23,8 @@ public:
 
     int getOrdersSize();
 
+  friend std::ostream &operator<<(std::ostream &Os, const OrderList &List);
+
 private:
     std::list<Order*> orders = {};
 };

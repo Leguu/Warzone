@@ -7,7 +7,7 @@
 #include <iostream>
 
 /**
- * Verify that we can create a valid deck, draw all its cards, play them, and everything is functional
+ * Verify that we can create a valid deck, draw all its cards, runGameLoop them, and everything is functional
  */
 void testCards() {
   std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard,
@@ -58,7 +58,7 @@ void testBombCardConstructor() {
 }
 
 /**
- * Test the BombCard play function
+ * Test the BombCard runGameLoop function
  */
 void testBombCardPlay() {
   auto ge = new GameEngine("../assets/Moon.map");
@@ -95,7 +95,7 @@ void testBlockadeCardConstructor() {
 }
 
 /**
- * Test the Blockade Card play function
+ * Test the Blockade Card runGameLoop function
  */
 void testBlockadeCardPlay() {
   auto ge = new GameEngine("../assets/Moon.map");
@@ -124,7 +124,7 @@ void testAirliftCardConstructor() {
 }
 
 /**
- * Test the AirliftCard play function
+ * Test the AirliftCard runGameLoop function
  */
 void testAirliftCardPlay() {
   auto ge = new GameEngine("../assets/Moon.map");
@@ -160,7 +160,7 @@ void testNegotiateCardConstructor() {
 }
 
 /**
- * Test the NegotiateCard play function
+ * Test the NegotiateCard runGameLoop function
  */
 void testNegotiateCardPlay() {
   auto ge = new GameEngine("../assets/Moon.map");
