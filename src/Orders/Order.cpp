@@ -3,9 +3,6 @@
 #include <utility>
 #include <iostream>
 
-Order::Order(Player *issuer, std::string name, std::string description)
-        : name(std::move(name)), description(std::move(description)), issuer(issuer) {}
-
 std::ostream &operator<<(std::ostream &os, const Order &order) {
     os << order.name << ": " << order.description;
     return os;
@@ -30,15 +27,23 @@ BombOrder::~BombOrder() {
 
 InvalidOrderException::InvalidOrderException(const std::string &arg) : runtime_error(arg) {}
 
-void OrderList::push(std::unique_ptr<Order> order) {
-    this->orders.push_back(std::move(order));
+void OrderList::push(Order* order) {
+    this->orders.push_back(order);
 }
 
-std::unique_ptr<Order> OrderList::pop() {
+Order* OrderList::pop() {
     if (this->orders.empty()) return nullptr;
-    auto order = std::move(this->orders.front());
+    auto order = this->orders.front();
     this->orders.pop_front();
-    return std::move(order);
+    return order;
+}
+
+/**
+ * Return the number of orders the player has used
+ * @return The number of orders
+ */
+int OrderList::getOrdersSize() {
+    return this->orders.size();
 }
 
 DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)

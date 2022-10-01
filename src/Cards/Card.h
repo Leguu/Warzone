@@ -3,19 +3,54 @@
 
 class CardManager;
 
+class Card;
+
+#include <utility>
 #include <vector>
 #include <string>
 #include <ostream>
+
+class Hand {
+public:
+
+    void remove(Card* card);
+
+    std::vector<Card *> cards;
+
+    Hand() {};
+
+    Hand(const Hand &h);
+
+    Hand &operator=(const Hand &hand);
+
+    void listHand();
+
+    Card *draw();
+
+    ~Hand();
+
+    friend std::ostream &operator<<(std::ostream &os, const Hand &hand);
+
+private:
+    void add(Card *card);
+};
+
 #include "../Player/Player.h"
 
 class Card {
 public:
     const std::string name;
     const std::string description;
+    const std::vector<std::string> aliases;
 
-    virtual void play(Player *issuer) const = 0;
+    virtual bool play(Player *issuer) const = 0;
 
-    Card(std::string name, std::string description);
+    Card(std::string name, std::string description, std::vector<std::string> aliases) : name(std::move(name)),
+                                                                                      description(
+                                                                                              std::move(description)),
+                                                                                      aliases(aliases) {}
+
+    const std::vector<std::string> getAliases();
 
     virtual ~Card();
 
@@ -25,77 +60,87 @@ private:
 
 class BombCard : public Card {
 public:
-    inline BombCard() : Card("Bomb", "Use to destroy half of an enemy territory's army") {}
 
-    void play(Player *issuer) const override;
+    inline BombCard() : Card("BombCard", "Use to destroy half of an enemy territory's army",
+                             {"bomb", "bombcard"}) {}
+
+    bool play(Player *issuer) const override;
+
+    static void execute(Player *issuer, Territory *territory);
 
     ~BombCard() override;
+
+
 };
 
 class BlockadeCard : public Card {
 public:
-    inline BlockadeCard() : Card("Blockade", "Use to lose control of a territory but triple its army size") {}
 
-    void play(Player *issuer) const override;
+    inline BlockadeCard() : Card("BlockadeCard", "Use to lose control of a territory but triple its army size",
+                                 {"blockade", "blockadecard"}) {}
+
+    bool play(Player *issuer) const override;
+
+    static void execute(Player *issuer, Territory *territory);
+
 
     ~BlockadeCard() override;
 };
 
 class AirliftCard : public Card {
 public:
-    inline AirliftCard() : Card("Airlift", "Use to move armies from any territory to any other") {}
 
-    void play(Player *issuer) const override;
+    inline AirliftCard() : Card("AirliftCard", "Use to move armies from any territory to any other",
+                                {"airlift", "airliftcard"}) {}
+
+    bool play(Player *issuer) const override;
+
+    static void execute(Player *issuer, int armiesSize, Territory *territoryPlayer, Territory *territoryTarget);
+
 
     ~AirliftCard() override;
 };
 
 class NegotiateCard : public Card {
 public:
-    inline NegotiateCard() : Card("Negotiate", "Use to prevent attacks between you and another player") {}
 
-    void play(Player *issuer) const override;
+    inline NegotiateCard() : Card("NegotiateCard", "Use to prevent attacks between you and another player",
+                                  {"negotiate", "negotiatecard"}) {}
+
+    bool play(Player *issuer) const override;
+
+    static void execute(Player *issuer, Player *target);
+
 
     ~NegotiateCard() override;
 };
 
-class Hand {
-public:
-    std::vector<std::unique_ptr<Card>> cards;
-
-    /// TODO: remove by name
-    std::unique_ptr<Card> remove(std::string name);
-
-    friend std::ostream &operator<<(std::ostream &os, const Hand &hand);
-};
 
 class Deck {
 public:
-    std::unique_ptr<Card> draw();
 
-    /// TODO
-    void put(Card *);
+    explicit Deck(std::vector<Card *> cards) : cards(std::move(cards)) {}
+
+    Deck() = default;
+
+    Deck(const Deck &deck);
+
+    Deck &operator=(const Deck &deck);
+
+    ~Deck();
+
+    Card *draw();
+
+    void put(Card *card);
 
     friend std::ostream &operator<<(std::ostream &os, const Deck &deck);
 
-private:
-    std::vector<std::unique_ptr<Card>> cards;
-};
+    int getCardsSize();
 
-class CardManager {
-public:
-    void listHand();
-
-    void listDeck();
-
-    /// TODO: Play a card from hand (maybe use the name of the card?), put it in deck
-    void play(std::string name);
-
-    void draw();
+    int getRandomLocation();
 
 private:
-    Hand hand;
-    Deck deck;
+    std::vector<Card *> cards;
 };
 
 

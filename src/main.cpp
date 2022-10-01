@@ -1,25 +1,26 @@
 #include <iostream>
 #include "Cards/Card.h"
+#include "Cards/CardsDriver.h"
 #include "GameEngine/GameEngine.h"
+
+class CardsTester;
 
 // TODO Test functions
 int main() {
-  auto ge = new GameEngine("../assets/Moon.map");
+    auto ge = new GameEngine("../assets/Moon.map");
 
-  auto bombCard = new BombCard();
+    auto bombCard = new BombCard();
 
-  auto territory = ge->map->findById(0);
+    auto territory = ge->map->findById(0);
 
-  territory->setArmies(10);
+    ge->players.push_back(new Player("Bob"));
+    territory->setArmies(10);
 
-  auto bob = new Player("Bob");
-  ge->players.push_back(bob);
+    bombCard->play(ge->players[0]);
 
-  std::cout << "Armies of " + territory->getName() + " before: " << territory->getArmies() << std::endl;
 
-  bombCard->play(bob);
+    std::cout << "Armies of " + territory->getName() + " after: " << territory->getArmies() << std::endl;
 
-  ge->executeOrders();
+    ge->executeOrders();
 
-  std::cout << "Armies of " + territory->getName() + " after: " << territory->getArmies() << std::endl;
 }

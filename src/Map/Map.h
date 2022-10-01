@@ -13,174 +13,181 @@ using std::string;
 using std::vector;
 
 class Player;
+
 class Continent;
 
 extern bool debug;
 
 class Territory {
 public:
-  // Constructor with necessary parameters
-  Territory(const string &territory, Continent *continent);
+    // Constructor with necessary parameters
+    Territory(const string &territory, Continent *continent);
 
-  explicit inline Territory(const string &name) : name(Utils::trim(name)) {}
+    explicit inline Territory(const string &name) : name(Utils::trim(name)) {}
 
-  // Copy constructor
-  Territory(const Territory &orgTerritory);
+    // Copy constructor
+    Territory(const Territory &orgTerritory);
 
-  // Destructor
-  virtual ~Territory();
+    // Destructor
+    virtual ~Territory();
 
-  string longDescription();
+    string longDescription();
 
-  // Assignment operator
-  Territory &operator=(const Territory &territory);
+    // Assignment operator
+    Territory &operator=(const Territory &territory);
 
-  // Insertion operator
-  friend std::ostream &operator<<(std::ostream &os, const Territory &territory);
+    // Insertion operator
+    friend std::ostream &operator<<(std::ostream &os, const Territory &territory);
 
-  // Method to get neighbors
-  [[nodiscard]] vector<Territory *> getAdjTerritories() const;
+    // Method to get neighbors
+    [[nodiscard]] vector<Territory *> getAdjTerritories() const;
 
-  void addAdjacent(Territory *);
+    void addAdjacent(Territory *);
 
-  bool visited = false;
+    bool visited = false;
 
-  // Getters and setters
-  string getName();
+    // Getters and setters
+    string getName();
 
-  [[nodiscard]] int getId() const;
+    [[nodiscard]] int getId() const;
 
-  Continent *getContinent();
+    Continent *getContinent();
 
-  void setContinent(Continent *continent);
+    void setContinent(Continent *continent);
 
-  [[nodiscard]] int getArmies() const;
+    [[nodiscard]] int getArmies() const;
 
-  void setArmies(int);
+    void setArmies(int);
 
-  Player *getOwner();
+    Player *getOwner();
 
-  void setOwner(Player *);
+    void setOwner(Player *);
 
-  // To string method
-  [[nodiscard]] string toString() const;
+    // To string method
+    [[nodiscard]] string toString() const;
+
 protected:
-  /// Global variable for assigning territory ids.
-  /// The ids for allTerritories need to be globally unique, so this can be static.
-  static int idIncrement;
+    /// Global variable for assigning territory ids.
+    /// The ids for allTerritories need to be globally unique, so this can be static.
+    static int idIncrement;
 private:
-  vector<Territory *> adjacentTerritories;
-  // Variables
-  int id = idIncrement++;
-  string name;
-  Continent *continent = nullptr;
-  int armies = 0;
-  Player *owner = nullptr;
+    vector<Territory *> adjacentTerritories;
+    // Variables
+    int id = idIncrement++;
+    string name;
+    Continent *continent = nullptr;
+    int armies = 0;
+    Player *owner = nullptr;
 };
 
 class Continent {
 public:
-  // Constructor with necessary name and optional bonus
-  Continent(string name, int bonus);
+    // Constructor with necessary name and optional bonus
+    Continent(string name, int bonus);
 
-  // Copy constructor
-  Continent(const Continent &orgContinent);
+    // Copy constructor
+    Continent(const Continent &orgContinent);
 
-  // Destructor
-  virtual ~Continent();
+    // Destructor
+    virtual ~Continent();
 
-  // Assigment constructor
-  Continent &operator=(const Continent &continent);
+    // Assigment constructor
+    Continent &operator=(const Continent &continent);
 
-  // Insertion operator
-  friend std::ostream &operator<<(std::ostream &os, const Continent &continent);
+    // Insertion operator
+    friend std::ostream &operator<<(std::ostream &os, const Continent &continent);
 
-  // Getters and setters
+    // Getters and setters
 
-  vector<Territory *> getTerritories();
+    vector<Territory *> getTerritories();
 
-  Player *owner();
+    Player *owner();
 
-  string getName();
+    string getName();
 
-  [[nodiscard]] int getBonus() const;
+    [[nodiscard]] int getBonus() const;
 
-  // A method to add a territory to a continent
-  void addTerritoryToContinent(Territory *territory);
+    // A method to add a territory to a continent
+    void addTerritoryToContinent(Territory *territory);
 
 private:
-  vector<Territory *> territories;
-  string name;
-  int bonus;
+    vector<Territory *> territories;
+    string name;
+    int bonus;
 };
 
 class Map {
 public:
-  // Default Constructors
-  Map();
+    // Default Constructors
+    Map();
 
-  // Copy Constructor
-  Map(const Map &orgMap);
+    // Copy Constructor
+    Map(const Map &orgMap);
 
-  // Destructor
-  virtual ~Map();
+    // Destructor
+    virtual ~Map();
 
-  // Assignment operator
-  Map &operator=(const Map &map);
+    // Assignment operator
+    Map &operator=(const Map &map);
 
-  // Insertion operator
-  // Format:
-  // Territory: adjacent, adjacent, adjacent
-  // Territory1: adjacent, adjacent, adjacent
-  // Territory2: adjacent, adjacent, adjacent
-  friend std::ostream &operator<<(std::ostream &os, const Map &map);
+    // Insertion operator
+    // Format:
+    // Territory: adjacent, adjacent, adjacent
+    // Territory1: adjacent, adjacent, adjacent
+    // Territory2: adjacent, adjacent, adjacent
+    friend std::ostream &operator<<(std::ostream &os, const Map &map);
 
-  // Getters and setters
-  vector<Territory *> getAllTerritories();
+    // Getters and setters
+    vector<Territory *> getAllTerritories();
 
-  vector<Continent *> getContinents();
+    vector<Continent *> getContinents();
 
-  void addTerritoryToMap(Territory *);
+    void addTerritoryToMap(Territory *);
 
-  // A method to add a continent
-  void addContinent(Continent *continent);
+    static int getInputTerritory(std::string inputRequest);
 
-  Continent *findContinentByName(const string &continentName);
+    // A method to add a continent
+    void addContinent(Continent *continent);
 
-  Territory *findTerritoryByName(const string &continentName);
+    Continent *findContinentByName(const string &continentName);
 
-  bool allContinentsOwned();
+    Territory *findTerritoryByName(const string &continentName);
 
-  bool validate();
+    bool allContinentsOwned();
 
-  [[nodiscard]] Territory *findById(int id) const;
+    bool validate();
 
-  // private properties for Map class
+    [[nodiscard]] Territory *findById(int id) const;
+
+    // private properties for Map class
 private:
-  string name;
-  vector<Continent *> continents;
-  vector<Territory *> territories;
+    string name;
+    vector<Continent *> continents;
+    vector<Territory *> territories;
 
-  void resetTerr();
+    void resetTerr();
 
-  void assertConnected();
-  int traverseTerr(Territory *territory, int visited);
+    void assertConnected();
 
-  bool isSubgraphConnected();
-  int traverseSubgraph(Territory *territory, const string &continent, int visited);
+    int traverseTerr(Territory *territory, int visited);
 
-  bool isUniqueContinent();
+    bool isSubgraphConnected();
 
-  void assertEveryEdgeIsTwoWay();
+    int traverseSubgraph(Territory *territory, const string &continent, int visited);
+
+    bool isUniqueContinent();
+
+    void assertEveryEdgeIsTwoWay();
 
 };
 
 class MapLoader {
 public:
-  static Map *importMap(const string &path) noexcept(false);
+
+    static Map *importMap(const string &path) noexcept(false);
 
 private:
-  inline MapLoader() = default;
+    inline MapLoader() = default;
 };
 
 #endif //WARZONE_MAP_H

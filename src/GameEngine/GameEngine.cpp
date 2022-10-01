@@ -28,6 +28,16 @@ bool GameEngine::executeOrders() {
     return false;
 }
 
+
+//Player *GameEngine::findPlayerByName(std::string name) {
+//    for (auto &eachPlayer: this->players) {
+//        if (eachPlayer->name == name) {
+//            return std::make_unique<Player>(eachPlayer);
+//        }
+//    }
+//}
+
+
 void GameEngine::play() {
     initialisePlayers();
 
@@ -44,4 +54,20 @@ void GameEngine::play() {
     }
 
     std::cout << "Game is over!" << std::endl;
+}
+
+/**
+ * List the contents of the deck
+ */
+void GameEngine::listDeck() {
+    std::cout << this->deck << std::endl;
+}
+
+Player *GameEngine::findPlayerByName(std::string name) {
+    for(auto* player: this->players){
+        if(player->name == name){
+            return player;
+        }
+    }
+    return nullptr;
 }
