@@ -9,39 +9,46 @@ class Player;
 #include "../Map/Map.h"
 #include "../Orders/Order.h"
 #include "../Cards/Card.h"
+using std::vector;
+using std::cout;
+using std::endl;
+using std::string;
 
 class Hand;
 class OrderList;
 
 class Player {
 public:
-    const std::string name;
-    OrderList *orders = new OrderList();
-    Hand *hand = new Hand();
-    std::vector<Territory *> ownedTerritories = {};
-    int reinforcements = 0;
+  const string name;
+  OrderList *orders = new OrderList();
+  Hand *hand = new Hand();
+  vector<Territory *> ownedTerritories = {};
+  int reinforcements = 0;
 
-    inline explicit Player(std::string name) : name(std::move(name)) {}
+  inline explicit Player(string name) : name(std::move(name)) {}
 
-    std::vector<Territory*> getAdjacentEnemyTerritories();
+  vector<Territory *> getAdjacentEnemyTerritories();
 
-    // TODO
-    const std::vector<Territory *> toAttack();
+  // TODO
+  vector<Territory *> toAttack();
 
-    // TODO
-    const std::vector<Territory *> toDefend();
+  // TODO
+  vector<Territory *> toDefend();
 
-    // TODO
-    void issueOrder();
+  void issueOrder();
 
-    void drawFromDeck() const;
+  void issueAdvanceOrder();
 
-    void play(std::string const &cardName);
+  void issueDeployOrder();
 
-    friend std::ostream &operator<<(std::ostream &os, const Player &player);
+  void drawFromDeck() const;
+
+  void play(string const &cardName);
+
+  friend std::ostream &operator<<(std::ostream &os, const Player &player);
 
 private:
-    [[nodiscard]] Card* findCardByName(std::string name) const;
+  [[nodiscard]] Card *findCardByName(const string& cardName) const;
 };
 
 #endif //WARZONE_PLAYER_H

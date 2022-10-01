@@ -281,7 +281,7 @@ bool NegotiateCard::play(Player *issuer) const {
       cout << "- " << player->name << endl;
     }
     playerName = Utils::getInputString(
-        "Please input the name of the Player you wish to negotiate with or input \"cancel\" to cancel this card play.");
+        "Please input the name of the Player you wish to negotiate with or input \"cancel\" to cancel this card runGameLoop.");
     if (Utils::isEqualLowercase(playerName, "cancel")) {
       return false;
     }
@@ -381,6 +381,17 @@ Hand::~Hand() {
   for (auto card : this->cards) {
     delete (card);
   }
+}
+
+Card *Hand::removeByName(const string &name) {
+  for (auto card : cards) {
+    for (const auto &alias : card->getAliases())
+      if (Utils::isEqualLowercase(Utils::trim(name), alias)) {
+        remove(card);
+        return card;
+      }
+  }
+  return nullptr;
 }
 
 /**

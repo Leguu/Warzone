@@ -31,6 +31,8 @@ public:
   // Destructor
   virtual ~Territory();
 
+  string listNameAndAdjacent();
+
   string longDescription();
 
   // Assignment operator
@@ -144,7 +146,11 @@ public:
 
   void addTerritoryToMap(Territory *);
 
+  Territory *getInputTerritory(bool cancelable);
+
   Territory *getInputTerritory(const std::string &inputRequest);
+
+  Territory *getInputTerritory(const std::string &inputRequest, bool cancelable);
 
   // A method to add a continent
   void addContinent(Continent *continent);
@@ -152,6 +158,8 @@ public:
   Continent *findContinentByName(const string &continentName);
 
   Territory *findTerritoryByName(const string &continentName);
+
+  Territory *findTerritory(const string &name);
 
   bool allContinentsOwned();
 
@@ -171,11 +179,9 @@ private:
 
   int traverseTerr(Territory *territory, int visited);
 
-  bool isSubgraphConnected();
+  void assertSubgraphConnected();
 
-  int traverseSubgraph(Territory *territory, const string &continent, int visited);
-
-  bool isUniqueContinent();
+  void assertEachTerritoryHasUniqueContinent();
 
   void assertEveryEdgeIsTwoWay();
 
