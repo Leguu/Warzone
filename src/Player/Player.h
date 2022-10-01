@@ -23,7 +23,7 @@ public:
 
     inline explicit Player(std::string name) : name(std::move(name)) {}
 
-    const std::vector<Territory*> getAdjacentEnemyTerritories();
+    std::vector<Territory*> getAdjacentEnemyTerritories();
 
     // TODO
     const std::vector<Territory *> toAttack();
@@ -34,13 +34,14 @@ public:
     // TODO
     void issueOrder();
 
+    void drawFromDeck() const;
+
     void play(std::string const &cardName);
 
     friend std::ostream &operator<<(std::ostream &os, const Player &player);
 
 private:
-    Card* findCardByName(std::string name) const;
-
+    [[nodiscard]] Card* findCardByName(std::string name) const;
 };
 
 #endif //WARZONE_PLAYER_H

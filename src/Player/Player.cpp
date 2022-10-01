@@ -7,26 +7,26 @@
  * @param cardName The name of the card
  */
 void Player::play(std::string const &cardName) {
-    auto ge = GameEngine::instance();
-    auto cardToPlay = Player::findCardByName(cardName);
-    if (cardToPlay != nullptr) {
-        if (cardToPlay->play(this)) {
-            this->hand->remove(cardToPlay);
-            ge->deck->put(cardToPlay);
-        } else {
-            std::cout << "Cancelled play action" << std::endl;
-        }
+  auto ge = GameEngine::instance();
+  auto cardToPlay = Player::findCardByName(cardName);
+  if (cardToPlay != nullptr) {
+    if (cardToPlay->play(this)) {
+      this->hand->remove(cardToPlay);
+      ge->deck->put(cardToPlay);
     } else {
-        std::cout << "Error playing Card. No card of this name were found" << std::endl;
+      std::cout << "Cancelled play action" << std::endl;
     }
+  } else {
+    std::cout << "Error playing Card. No card of this name were found" << std::endl;
+  }
 }
 
 const std::vector<Territory *> Player::toAttack() {
-    return std::vector<Territory *>();
+  return std::vector<Territory *>();
 }
 
 const std::vector<Territory *> Player::toDefend() {
-    return std::vector<Territory *>();
+  return std::vector<Territory *>();
 }
 
 void Player::issueOrder() {
@@ -40,31 +40,31 @@ void Player::issueOrder() {
  * @return A pointer to the card
  */
 Card *Player::findCardByName(std::string name) const {
-    for (auto &card: this->hand->cards) {
-        for (auto cardName: card->getAliases())
-            if (Utils::isEqualLowercase(Utils::trim(cardName), name)) {
-                return card;
-            }
-    }
-    return nullptr;
+  for (auto &card : this->hand->cards) {
+    for (auto cardName : card->getAliases())
+      if (Utils::isEqualLowercase(Utils::trim(cardName), name)) {
+        return card;
+      }
+  }
+  return nullptr;
 }
 
 /**
  * Get all the enemy territories adjacent to your own
  * @return all the enemy territories adjacent to yours
  */
-const std::vector<Territory *> Player::getAdjacentEnemyTerritories() {
-    std::vector<Territory *> enemyTerritoriesAdjacent;
-    for (auto friendlyTerritory: this->ownedTerritories) {
-        for (auto adjacentTerritory: friendlyTerritory->getAdjTerritories()) {
-            if (adjacentTerritory->getOwner() != this && adjacentTerritory->getOwner() &&
-                std::find(enemyTerritoriesAdjacent.begin(), enemyTerritoriesAdjacent.end(), adjacentTerritory) ==
-                enemyTerritoriesAdjacent.end()) {
-                enemyTerritoriesAdjacent.push_back(adjacentTerritory);
-            }
-        }
+std::vector<Territory *> Player::getAdjacentEnemyTerritories() {
+  std::vector<Territory *> enemyTerritoriesAdjacent;
+  for (auto friendlyTerritory : this->ownedTerritories) {
+    for (auto adjacentTerritory : friendlyTerritory->getAdjTerritories()) {
+      if (adjacentTerritory->getOwner() != this && adjacentTerritory->getOwner() &&
+          std::find(enemyTerritoriesAdjacent.begin(), enemyTerritoriesAdjacent.end(), adjacentTerritory) ==
+              enemyTerritoriesAdjacent.end()) {
+        enemyTerritoriesAdjacent.push_back(adjacentTerritory);
+      }
     }
-    return enemyTerritoriesAdjacent;
+  }
+  return enemyTerritoriesAdjacent;
 }
 
 /**
@@ -74,6 +74,12 @@ const std::vector<Territory *> Player::getAdjacentEnemyTerritories() {
  * @return A string containing a player's information
  */
 std::ostream &operator<<(std::ostream &os, const Player &player) {
-    os  << player.name << std::endl;
-    return os;
+  os << player.name << std::endl;
+  return os;
+}
+void Player::drawFromDeck() const {
+  auto ge = GameEngine::instance();
+
+  auto card = ge->deck->draw();
+  hand->cards.push_back(card);
 }
