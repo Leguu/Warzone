@@ -6,13 +6,12 @@
 
 // ------------------ Order -------------------------
 Order::Order(Player *issuer, std::string name)
-	: name(std::move(name)),issuer(issuer) {}
+	: name(std::move(name)), issuer(issuer) {}
 
 std::ostream &operator<<(std::ostream &os, Order &order) {
   os << order.name << ": " << order.description();
   return os;
 }
-
 
 Order::~Order() = default;
 
@@ -20,10 +19,12 @@ Order::~Order() = default;
 DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)
 	: Order(issuer, "Deploy"),
 	  reinforcements(reinforcements), target(target) {}
+
 std::string DeployOrder::description() {
   return issuer->name + " deploys " + std::to_string(reinforcements) + " armies to " +
-      target->toString();
+	  target->toString();
 }
+
 void DeployOrder::validate() {// Implement check if is within territory
   if (target->getOwner() && (target->getOwner() != issuer)) {
 	throw InvalidOrderException(issuer->name + " tried to deploy in someone else's territory.");
@@ -46,10 +47,11 @@ DeployOrder::~DeployOrder() = default;
 AdvanceOrder::AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target)
 	: Order(issuer, "Advance"),
 	  armies(armies), source(source), target(target) {}
+
 std::string AdvanceOrder::description() {
   return issuer->name + " advances " + std::to_string(armies) + " armies from " + source->toString() +
-      " to " +
-      target->toString();
+	  " to " +
+	  target->toString();
 }
 
 AdvanceOrder::~AdvanceOrder() = default;
@@ -58,6 +60,7 @@ AdvanceOrder::~AdvanceOrder() = default;
 BombOrder::BombOrder(Player *issuer, Territory *target)
 	: Order(issuer, "Bomb"),
 	  target(target) {}
+
 std::string BombOrder::description() {
   return issuer->name + " bombs " + target->toString();
 }
@@ -100,8 +103,8 @@ AirliftOrder::AirliftOrder(Player *issuer, int armies, Territory *source, Territ
 	  armies(armies), source(source), target(target) {}
 std::string AirliftOrder::description() {
   return issuer->name + " airlifts " + std::to_string(armies) + " armies from " + source->toString() +
-      " to " +
-      target->toString();
+	  " to " +
+	  target->toString();
 }
 void AirliftOrder::validate() {
   if (source->getArmies() - armies < 0) {

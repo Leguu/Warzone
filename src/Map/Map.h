@@ -13,6 +13,7 @@ using std::string;
 using std::vector;
 
 class Player;
+
 class Continent;
 
 extern bool debug;
@@ -29,6 +30,8 @@ public:
 
   // Destructor
   virtual ~Territory();
+
+  string listNameAndAdjacent();
 
   string longDescription();
 
@@ -64,6 +67,7 @@ public:
 
   // To string method
   [[nodiscard]] string toString() const;
+
 protected:
   /// Global variable for assigning territory ids.
   /// The ids for allTerritories need to be globally unique, so this can be static.
@@ -142,12 +146,20 @@ public:
 
   void addTerritoryToMap(Territory *);
 
+  Territory *getInputTerritory(bool cancelable);
+
+  Territory *getInputTerritory(const std::string &inputRequest);
+
+  Territory *getInputTerritory(const std::string &inputRequest, bool cancelable);
+
   // A method to add a continent
   void addContinent(Continent *continent);
 
   Continent *findContinentByName(const string &continentName);
 
   Territory *findTerritoryByName(const string &continentName);
+
+  Territory *findTerritory(const string &name);
 
   bool allContinentsOwned();
 
@@ -164,12 +176,12 @@ private:
   void resetTerr();
 
   void assertConnected();
+
   int traverseTerr(Territory *territory, int visited);
 
-  bool isSubgraphConnected();
-  int traverseSubgraph(Territory *territory, const string &continent, int visited);
+  void assertSubgraphConnected();
 
-  bool isUniqueContinent();
+  void assertEachTerritoryHasUniqueContinent();
 
   void assertEveryEdgeIsTwoWay();
 
@@ -177,6 +189,7 @@ private:
 
 class MapLoader {
 public:
+
   static Map *importMap(const string &path) noexcept(false);
 
 private:

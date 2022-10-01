@@ -10,6 +10,7 @@ class Order;
 #include <ostream>
 #include <queue>
 #include <list>
+
 #include "../Player/Player.h"
 
 /// Thrown when an order can not be executed due to invalid state
@@ -25,15 +26,15 @@ public:
   const std::string name;
   // TODO: maybe this should be a function... maybe the number of people changes between when an order is created and it is executed
   // void Description(std::string name, std::string action, std::string territory);
- // virtual void description() = 0;
- // const std::string description;
+  // virtual void description() = 0;
+  // const std::string description;
 
   Player *issuer;
-
   Order(Player *issuer, std::string name);
 
   /// Throws InvalidOrderException if the order no longer makes sense (due to previous orders)
   virtual void validate() noexcept(false) = 0;
+
   virtual std::string description() = 0;
 
   virtual void execute() = 0;

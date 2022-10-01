@@ -9,20 +9,46 @@ class Player;
 #include "../Map/Map.h"
 #include "../Orders/Order.h"
 #include "../Cards/Card.h"
+using std::vector;
+using std::cout;
+using std::endl;
+using std::string;
+
+class Hand;
+class OrderList;
 
 class Player {
 public:
-    const std::string name;
-    std::unique_ptr<OrderList> orders = std::make_unique<OrderList>();
-    std::unique_ptr<CardManager> cardManager = std::make_unique<CardManager>();
-    std::vector<Territory *> ownedTerritories = {};
-    int reinforcements = 0;
+  const string name;
+  OrderList *orders = new OrderList();
+  Hand *hand = new Hand();
+  vector<Territory *> ownedTerritories = {};
+  int reinforcements = 0;
 
-    inline explicit Player(std::string name) : name(std::move(name)) {}
+  inline explicit Player(string name) : name(std::move(name)) {}
 
-    const std::vector<Territory *> toAttack();
+  vector<Territory *> getAdjacentEnemyTerritories();
 
-    const std::vector<Territory *> toDefend();
+  // TODO
+  vector<Territory *> toAttack();
+
+  // TODO
+  vector<Territory *> toDefend();
+
+  void issueOrder();
+
+  void issueAdvanceOrder();
+
+  void issueDeployOrder();
+
+  void drawFromDeck() const;
+
+  void play(string const &cardName);
+
+  friend std::ostream &operator<<(std::ostream &os, const Player &player);
+
+private:
+  [[nodiscard]] Card *findCardByName(const string &cardName) const;
 };
 
 #endif //WARZONE_PLAYER_H

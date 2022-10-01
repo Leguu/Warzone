@@ -7,6 +7,11 @@ class GameEngine;
 #include <memory>
 #include "../Player/Player.h"
 #include "../Orders/Order.h"
+using std::runtime_error;
+using std::string;
+using std::vector;
+using std::cout;
+using std::endl;
 
 class GameEngine {
 public:
@@ -14,34 +19,36 @@ public:
 
   std::vector<Player *> players;
   Map *map;
+  Deck *deck = new Deck();
 
   static GameEngine *instance() {
+    if (!_instance)
+      throw runtime_error("GameEngine instance not yet initialised. Did you forget to create a GameEngine first?");
     return _instance;
   }
 
-  // TODO
-  Player *findPlayerByName(std::string name);
+  static GameEngine *initialiseGame();
+
+  Player *findPlayerByName(const std::string &name);
 
   explicit GameEngine(const std::string &mapPath);
 
-  void play();
-
-  // TODO: Ask for the number of users, and input names, and id starting territory.
-  inline void initialisePlayers() {}
+  void runGameLoop();
 
   // TODO: Go through all the players and figure out what number of reinforcements they deserve.
   inline void assignReinforcements() {}
 
-  // TODO: Ask every player to issue an order, or play some cards.
-  inline void issueOrders() {}
-
-  /// This is a command
-  void listOrders() {}
+  void issueOrders();
 
   bool executeOrders();
 
+  const static string helpText;
+
 private:
   static GameEngine *_instance;
-};
 
+  GameEngine();
+
+  void initialisePlayers();
+};
 #endif //WARZONE_GAMEENGINE_H
