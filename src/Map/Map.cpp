@@ -14,22 +14,9 @@
 
 using namespace std;
 int Territory::idIncrement = 0;
-bool debug = false;
-
-Territory::Territory() {}
-
-Territory::Territory(string name, string continent) {
-    this->name = name;
-    this->continent = continent;
-    this->visited = false;
-}
 
 
-Territory::Territory(string name, string continent, vector<Territory *> adjacentTerritories) {
-    this->name = name;
-    this->continent = continent;
-    this->adjacentTerritories = adjacentTerritories;
-    this->visited = false;
+Territory::Territory(const string &name, Continent *continent) : name(Utils::trim(name)), continent(continent) {
 }
 
 Territory::Territory(const Territory &territory) {
@@ -42,22 +29,13 @@ Territory::Territory(const Territory &territory) {
     this->visited = territory.visited;
 }
 
-Territory &Territory::operator=(const Territory &territory) {
-    this->id = territory.id;
-    this->name = territory.name;
-    this->continent = territory.continent;
-    this->adjacentTerritories = territory.adjacentTerritories;
-    this->armies = territory.armies;
-    this->owner = territory.owner;
-    this->visited = territory.visited;
-    return *this;
-}
+Territory &Territory::operator=(const Territory &territory) = default;
 
 ostream &operator<<(ostream &os, const Territory &territory) {
     os << "ID of territory: " << territory.id << "\n"
        << "Name of territory: " << territory.name << "\n"
        << "Continent ID: " << territory.continent << "\n"
-       << "Owner of territory: " << *(territory.owner)
+       << "Owner of territory: " << *(territory.owner) << "\n"
        << "Number of armies: " << territory.armies << "\n";
 
     return os;
@@ -79,7 +57,7 @@ int Territory::getId() const {
     return id;
 }
 
-string Territory::getContinent() {
+Continent *Territory::getContinent() {
     return continent;
 }
 
@@ -112,6 +90,25 @@ string Territory::toString() const {
     return str;
 }
 
+void Territory::setContinent(Continent *pContinent) {
+    continent = pContinent;
+}
+
+string Territory::longDescription() {
+    auto str = name + ": ";
+    for (auto territory: adjacentTerritories) {
+        str += "* " + territory->getName() + " ";
+    }
+    return str;
+}
+
+void Territory::addAdjacent(Territory *territory) {
+    if (std::find(adjacentTerritories.begin(), adjacentTerritories.end(), territory) != adjacentTerritories.end()) {
+        throw runtime_error(name + " is already adjacent to " + territory->name);
+    }
+    adjacentTerritories.push_back(territory);
+}
+
 /*string Territory::toString() const {
     string str;
     str += "[" + to_string(id) + "] ";
@@ -126,17 +123,7 @@ string Territory::toString() const {
 
 // ------------------ Continents ------------------------
 
-Continent::Continent() {}
-
-Continent::Continent(string name, int bonus) {
-    this->name = name;
-    this->bonus = bonus;
-}
-
-Continent::Continent(string name, int armies, vector<Territory *> territories) {
-    this->name = name;
-    this->bonus = armies;
-    this->territories = territories;
+Continent::Continent(string name, int bonus) : name(Utils::trim(name)), bonus(bonus) {
 }
 
 
@@ -146,15 +133,9 @@ Continent::Continent(const Continent &orgContinent) {
     this->territories = orgContinent.territories;
 }
 
-Continent::~Continent() {
-}
+Continent::~Continent() = default;
 
-Continent &Continent::operator=(const Continent &continent) {
-    this->name = continent.name;
-    this->bonus = continent.bonus;
-    this->territories = continent.territories;
-    return *this;
-}
+Continent &Continent::operator=(const Continent &continent) = default;
 
 std::ostream &operator<<(ostream &os, const Continent &continent) {
     os << "Name of continent: " << continent.name << "\n"
@@ -178,11 +159,20 @@ void Continent::addTerritoryToContinent(Territory *territory) {
     territories.push_back(territory);
 }
 
+Player *Continent::owner() {
+    Player *p = nullptr;
+    for (auto t: territories) {
+        if (!p) {
+            p = t->getOwner();
+        }
 
-/*Player *Continent::owner() {
-    return nullptr;
-}*/
+        if (p != t->getOwner()) {
+            return nullptr;
+        }
+    }
 
+    return p;
+}
 
 Territory *Map::findById(int id) const {
     for (auto territory: territories) {
@@ -196,19 +186,7 @@ Territory *Map::findById(int id) const {
 
 // ------------------ Maps ------------------------
 
-Map::Map() {}
-
-Map::Map(string name, vector<Continent *> continents) {
-    this->name = name;
-    this->continents = continents;
-}
-
-Map::Map(string name, vector<Territory *> territories, vector<Continent *> continents) {
-    this->name = name;
-    this->territories = territories;
-    this->continents = continents;
-
-}
+Map::Map() = default;
 
 Map::Map(const Map &orgMap) {
     this->territories = orgMap.territories;
@@ -216,10 +194,10 @@ Map::Map(const Map &orgMap) {
 }
 
 Map::~Map() {
-    for (auto &p: continents) {
+    for (auto p: continents) {
         delete p;
     }
-    for (auto &p: territories) {
+    for (auto p: territories) {
         delete p;
     }
 }
@@ -231,31 +209,22 @@ Map &Map::operator=(const Map &map) {
 }
 
 std::ostream &operator<<(ostream &os, const Map &map) {
-    for (auto &pContinent: map.continents) {
-        string currContinent = pContinent->getName();
-        vector<Territory *> TerrInContinent = pContinent->getTerritories();
-        os << "--------------\n"
-           << "Territories owned in this continent: " << currContinent << endl;
+    auto divider = "---------------\n";
+    for (auto continent: map.continents) {
+        cout << divider;
+        cout << continent->getName() << endl;
+        cout << divider;
 
-        for (auto &j: TerrInContinent) {
-            string currTerrName = j->getName();
-
-            os << "\t" << currTerrName << " occupied with " << j->getArmies() << " troops "
-               << " and is owned by " << j->getOwner() << endl;
+        for (auto territory: continent->getTerritories()) {
+            cout << territory->longDescription() << endl;
         }
-        os << "--------------\n" << endl;
     }
 
     return os;
 }
 
-
 vector<Territory *> Map::getAllTerritories() {
     return territories;
-}
-
-void Map::setAllTerritories(vector<Territory *> newT) {
-    territories = newT;
 }
 
 vector<Continent *> Map::getContinents() {
@@ -264,35 +233,10 @@ vector<Continent *> Map::getContinents() {
 
 void Map::addTerritoryToMap(Territory *terr) {
     territories.push_back(terr);
-    for (auto &it: continents) {
-        if ((*it).getName() == terr->getContinent()) {
-            it->addTerritoryToContinent(terr);
-        }
-    }
-}
-
-void Map::addTerritoryToMap(string newName, const string &continent) {
-    auto newTerritory = new Territory(newName, continent);
-    territories.push_back(newTerritory);
-    for (auto &it: continents) {
-        if ((*it).getName() == continent) {
-            it->addTerritoryToContinent(newTerritory);
-        }
-    }
 }
 
 void Map::addContinent(Continent *continent) {
     continents.push_back(continent);
-}
-
-void Map::addEdge(Territory *source, Territory *dest) {
-    if (std::find(source->adjacentTerritories.begin(), source->adjacentTerritories.end(), dest)
-        != source->adjacentTerritories.end()) {
-        cout << "Found existing edge" << endl;
-    } else {
-        source->adjacentTerritories.push_back(dest);
-    }
-
 }
 
 void Map::resetTerr() {
@@ -303,45 +247,37 @@ void Map::resetTerr() {
     }
 }
 
-bool Map::isConnected() {
+void Map::assertConnected() {
     resetTerr();
-    int visited = 0;
+
+    auto previous = 0;
+
     for (auto &territory: territories) {
-        if (!territory->visited) {
-            territory->visited = true;
-            if (territory->adjacentTerritories.empty()) {
-                if (debug)
-                    cerr << "\nMap is NOT a connected graph!" << endl;
-                return false;
-            }
-            visited = traverseTerr(territory, visited);
+        if (territory->visited)
+            continue;
+
+        territory->visited = true;
+
+        auto visited = traverseTerr(territory, previous);
+
+        if (previous && visited != previous) {
+            throw runtime_error("Territory " + territory->getName() + " is isolated from the rest of the map!");
         }
-    }
-    if (debug)
-        cout << "\nTotal territories in map: " << visited << endl;
-    if (visited == territories.size()) {
-        if (debug)
-            cout << "\nMap is a connected graph!" << endl;
-        return true;
-    } else {
-        if (debug)
-            cout << "\nMap is NOT a connected graph!" << endl;
-        return false;
+
+        previous = visited;
     }
 }
 
 int Map::traverseTerr(Territory *territory, int visited) {
-    vector<Territory *> adjacentTerritories = territory->adjacentTerritories;
-    for (auto &adjTerr: adjacentTerritories) {
-        if (!adjTerr->visited) {
-            adjTerr->visited = true;
-            visited = traverseTerr(adjTerr, visited);
+    vector<Territory *> adjacentTerritories = territory->getAdjTerritories();
+
+    for (auto t: adjacentTerritories) {
+        if (!t->visited) {
+            t->visited = true;
+            visited = traverseTerr(t, visited);
         }
     }
-    if (debug) {
-        cout << "\nVisiting " << territory->getName() << endl;
-        cout << "Total territories visited: " << visited + 1 << endl;
-    }
+
     return visited + 1;
 }
 
@@ -350,49 +286,33 @@ bool Map::isSubgraphConnected() {
     for (auto &continent: continents) {
         string continentName = continent->getName();
         vector<Territory *> continentTerr = continent->getTerritories();
-        if (debug)
-            cout << "\nChecking " << continentName << " which has " << to_string(continentTerr.size()) << " members"
-                 << endl;
         int visited = 0;
         for (auto &terr: continentTerr) {
             if (!terr->visited) {
                 terr->visited = true;
-                if (terr->adjacentTerritories.empty()) {
-                    if (debug)
-                        cerr << "\nContinent " << continent->getName() << " is NOT a connected sub graph!" << endl;
+                if (terr->getAdjTerritories().empty()) {
                     return false;
                 }
                 visited = traverseSubgraph(terr, continentName, visited);
             }
         }
-        if (debug)
-            cout << "\nTotal territories in continent: " << to_string(visited) << endl;
-        if (visited == continentTerr.size()) {
-            if (debug)
-                cout << "\nContinent " << continent->getName() << " is a connected subgraph!" << endl;
-        } else {
-            if (debug)
-                cerr << "\nContinent " << continent->getName() << " is NOT a connected subgraph!" << endl;
+        if (visited != continentTerr.size()) {
             return false;
         }
     }
-    if (debug)
-        cout << "\nAll continents are connected sub graphs!" << endl;
     return true;
 }
 
-
 int Map::traverseSubgraph(Territory *territory, const string &continent, int visited) {
-    vector<Territory *> adjacentTerritories = territory->adjacentTerritories;
-    for (auto &adjTerr: adjacentTerritories) {
-        if (!adjTerr->visited && adjTerr->getContinent() == continent) {
+    vector<Territory *> adjacentTerritories = territory->getAdjTerritories();
+    for (auto adjTerr: adjacentTerritories) {
+        if (!adjTerr->getContinent()) {
+            throw runtime_error("Error while traversing subgraph: a territory doesn't have a continent!");
+        }
+        if (!adjTerr->visited && adjTerr->getContinent()->getName() == continent) {
             adjTerr->visited = true;
             visited = traverseSubgraph(adjTerr, continent, visited);
         }
-    }
-    if (debug) {
-        cout << "\nVisiting " << territory->getName() << "..." << endl;
-        cout << "Total territories visited: " << visited + 1 << endl;
     }
     return visited + 1;
 }
@@ -403,48 +323,152 @@ bool Map::isUniqueContinent() {
         vector<Territory *> currTerritories = continent->getTerritories();
         for (auto &terr: currTerritories)
             if (listOfContinents.count(terr->getName()) > 0) {
-                if (debug)
-                    cout << "\nTerritory " << terr->getName() << " is assigned more than one continent!" << endl;
                 return false;
             } else {
-                listOfContinents[terr->getName()] = terr->getContinent();
+                listOfContinents[terr->getName()] = terr->getContinent()->getName();
             }
     }
-    if (debug)
-        cout << "\nEach territory has a unique continent!" << endl;
     return true;
 }
 
-
 bool Map::validate() {
-    return (isUniqueContinent() && isConnected() && isSubgraphConnected());
+    assertEveryEdgeIsTwoWay();
+    assertConnected();
+    return (isUniqueContinent() && isSubgraphConnected());
 }
 
+Continent *Map::findContinentByName(const string &continentName) {
+    auto trimmed = Utils::trim(continentName);
+    for (auto continent: continents) {
+        if (Utils::isEqualLowercase(continent->getName(), trimmed)) {
+            return continent;
+        }
+    }
+    return nullptr;
+}
 
-Map* MapLoader::importMap(const string &path) {
-    auto allTerritories = vector<Territory *>{};
+Territory *Map::findTerritoryByName(const string &territoryName) {
+    auto trimmed = Utils::trim(territoryName);
+    for (auto territory: territories) {
+        if (Utils::isEqualLowercase(territory->getName(), trimmed)) {
+            return territory;
+        }
+    }
+    return nullptr;
+}
 
-    auto expel = new Continent("Expel", 4);
+void Map::assertEveryEdgeIsTwoWay() {
+    for (auto t: territories) {
+        for (auto adj: t->getAdjTerritories()) {
+            auto adjacents = adj->getAdjTerritories();
+            if (std::find(adjacents.begin(), adjacents.end(), t) == adjacents.end()) {
+                throw runtime_error(
+                        "Territory " + t->getName() + " is adjacent to " + adj->getName() +
+                        ", but it's not adjacent back!");
+            }
+        }
+    }
+}
 
-    auto arlia = new Territory("Arlia", "Expel");
+bool Map::allContinentsOwned() {
+    Player *p = nullptr;
+    for (auto c: continents) {
+        if (!p) {
+            p = c->owner();
+        }
 
-    auto krosse = new Territory("Krosse", "Expel");
+        if (p != c->owner()) {
+            return false;
+        }
+    }
+    return true;
+}
 
+Map *MapLoader::importMap(const string &path) {
+    ifstream file(path);
 
-    arlia->adjacentTerritories = {krosse};
-    krosse->adjacentTerritories = {arlia};
+    if (!file.is_open()) {
+        throw runtime_error("File " + path + " could not be opened!");
+    }
 
-    vector<Continent *> continents{expel};
+    string input;
+    while (getline(file, input)) {
+        if (input == "[Continents]") {
+            break;
+        }
+    }
+    if (input != "[Continents]") {
+        throw runtime_error("This map file does not have a Continents section!");
+    }
 
-    allTerritories.push_back(arlia);
-    allTerritories.push_back(krosse);
+    auto map = new Map();
 
-    expel->getTerritories() = allTerritories;
+    while (getline(file, input)) {
+        if (input[0] == ';')
+            continue;
 
-    auto map = new Map("Map", allTerritories, continents);
+        if (input == "[Territories]") {
+            break;
+        }
 
-    // Make sure to throw an exception if the map is invalid.
+        auto split = Utils::tokenizer(input, '=');
+        if (split->size() < 2) {
+            continue;
+        }
+
+        auto name = (*split)[0];
+        auto bonus = stoi((*split)[1]);
+
+        map->addContinent(new Continent(name, bonus));
+    }
+    if (input != "[Territories]") {
+        throw runtime_error("No territories section found!");
+    }
+
+    while (getline(file, input)) {
+        if (input[0] == ';')
+            continue;
+
+        auto split = Utils::tokenizer(input, ',');
+        if (split->size() < 5) {
+            continue;
+        }
+
+        auto name = (*split)[0];
+        auto continentName = (*split)[3];
+        auto continent = map->findContinentByName(continentName);
+
+        if (!continent) {
+            throw runtime_error(
+                    "Territory " + name + " references a continent " + continentName + " that does not exist!");
+        }
+
+        auto territory = map->findTerritoryByName(name);
+        if (!territory) {
+            territory = new Territory(name);
+            map->addTerritoryToMap(territory);
+        }
+        territory->setContinent(continent);
+        continent->addTerritoryToContinent(territory);
+
+        for (int i = 4; i < split->size(); i += 1) {
+            auto adjacentTerritoryName = (*split)[i];
+            auto adjacentTerritory = map->findTerritoryByName(adjacentTerritoryName);
+
+            if (!adjacentTerritory) {
+                adjacentTerritory = new Territory(adjacentTerritoryName);
+                map->addTerritoryToMap(adjacentTerritory);
+            }
+
+            territory->addAdjacent(adjacentTerritory);
+        }
+    }
+
+    if (!map->validate()) {
+        throw runtime_error("The map in '" + path
+                            +
+                            "' failed to validate. It has an unplayable map due to missing adjacencies, isolated territories, or territories that belong to more than one continent.");
+    }
 
     return map;
 }
-

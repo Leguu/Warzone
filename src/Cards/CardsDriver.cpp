@@ -80,9 +80,9 @@ void testCards() {
     ge->deck = new Deck(cards);
     auto playerOne = new Player("Bob");
     auto playerTwo = new Player("CoolerBob");
-    auto territoryOne = new Territory("potato", "potato");
-    auto territoryTwo = new Territory("coolerPotato", "potato");
-    auto territoryThree = new Territory("coolestPotato", "potato");
+    auto territoryOne = new Territory("potato");
+    auto territoryTwo = new Territory("coolerPotato");
+    auto territoryThree = new Territory("coolestPotato");
     playerOne->ownedTerritories.push_back(territoryOne);
     playerOne->ownedTerritories.push_back(territoryThree);
     playerTwo->ownedTerritories.push_back(territoryTwo);
@@ -97,9 +97,6 @@ void testCards() {
     ge->map->addTerritoryToMap(territoryOne);
     ge->map->addTerritoryToMap(territoryTwo);
     ge->map->addTerritoryToMap(territoryThree);
-    ge->map->addEdge(territoryOne, territoryTwo);
-    ge->map->addEdge(territoryOne, territoryThree);
-    ge->map->addEdge(territoryThree, territoryTwo);
     playerOne->hand = new Hand();
     while (ge->deck->getCardsSize() != 0) {
         playerOne->hand->draw();
@@ -126,8 +123,8 @@ void CardsTester::testBombCardPlay() {
     auto ge = new GameEngine("../assets/Moon.map");
     auto playerOne = new Player("Bob");
     auto playerTwo = new Player("CoolerBob");
-    auto territoryOne = new Territory("potato", "potato");
-    auto territoryTwo = new Territory("coolerPotato", "potato");
+    auto territoryOne = new Territory("potato");
+    auto territoryTwo = new Territory("coolerPotato");
     playerOne->ownedTerritories.push_back(territoryOne);
     playerTwo->ownedTerritories.push_back(territoryTwo);
     territoryOne->setOwner(playerOne);
@@ -138,7 +135,6 @@ void CardsTester::testBombCardPlay() {
     ge->map->addContinent(new Continent("potato", 5));
     ge->map->addTerritoryToMap(territoryOne);
     ge->map->addTerritoryToMap(territoryTwo);
-    ge->map->addEdge(territoryOne, territoryTwo);
     auto card = playerOne->hand->draw();
     auto orderSizeBeforePlay = playerOne->orders->getOrdersSize();
     playerOne->play(card->name);
@@ -161,7 +157,7 @@ void CardsTester::testBlockadeCardConstructor() {
 void CardsTester::testBlockadeCardPlay() {
     auto ge = new GameEngine("../assets/Moon.map");
     auto playerOne = new Player("Bob");
-    auto territoryOne = new Territory("potato", "potato");
+    auto territoryOne = new Territory("potato");
     playerOne->ownedTerritories.push_back(territoryOne);
     territoryOne->setOwner(playerOne);
     ge->deck = new Deck({new BlockadeCard()});
@@ -190,9 +186,9 @@ void CardsTester::testAirliftCardConstructor() {
 void CardsTester::testAirliftCardPlay() {
     auto ge = new GameEngine("../assets/Moon.map");
     auto playerOne = new Player("Bob");
-    auto territoryOne = new Territory("potato", "potato");
-    auto territoryTwo = new Territory("coolerPotato", "potato");
-    auto territoryThree = new Territory("uncoolPotato", "potato");
+    auto territoryOne = new Territory("potato");
+    auto territoryTwo = new Territory("coolerPotato");
+    auto territoryThree = new Territory("uncoolPotato");
     playerOne->ownedTerritories.push_back(territoryOne);
     territoryOne->setArmies(10);
     playerOne->ownedTerritories.push_back(territoryTwo);

@@ -7,20 +7,20 @@ class CardsTester;
 
 // TODO Test functions
 int main() {
-    auto ge = new GameEngine("assets/Moon.map");
+    auto ge = new GameEngine("../assets/Moon.map");
 
     auto bombCard = new BombCard();
 
     auto territory = ge->map->findById(0);
 
     ge->players.push_back(new Player("Bob"));
-
-    std::cout << "Armies of " + territory->getName() + " before: " << territory->getArmies() << std::endl;
+    territory->setArmies(10);
 
     bombCard->play(ge->players[0]);
 
-    ge->executeOrders();
 
     std::cout << "Armies of " + territory->getName() + " after: " << territory->getArmies() << std::endl;
+
+    ge->executeOrders();
 
 }
