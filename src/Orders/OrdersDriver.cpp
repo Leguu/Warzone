@@ -27,10 +27,10 @@ void testOrdersLists() {
   list.push(blockade);
   list.push(airlift);
   list.push(negotiate);
-  Utils::assertCondition(list.getNumberOfOrders() == 6, "Push operation failed: list size is not 6.");
+  Utils::assertCondition(list.getOrdersSize() == 6, "Push operation failed: list size is not 6.");
 
   list.remove(2);
-  Utils::assertCondition(list.getNumberOfOrders() == 5, "Remove operation failed: list size is not 5.");
+  Utils::assertCondition(list.getOrdersSize() == 5, "Remove operation failed: list size is not 5.");
   Utils::assertCondition(list.get(2) == blockade, "Remove operation failed: index 2 is not blockade order.");
 
   list.move(1, 2);
@@ -38,7 +38,7 @@ void testOrdersLists() {
   Utils::assertCondition(list.get(2) == advance, "Move operation failed: index 2 is not advance order.");
 
   list.executeOrders();
-  Utils::assertCondition(list.getNumberOfOrders() == 0, "Execute orders operation failed: list is not empty.");
+  Utils::assertCondition(list.getOrdersSize() == 0, "Execute orders operation failed: list is not empty.");
 }
 
 int main() {

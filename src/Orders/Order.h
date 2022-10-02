@@ -158,7 +158,7 @@ public:
 
   void executeOrders();
 
-  int getNumberOfOrders();
+  int getOrdersSize();
 
   friend std::ostream &operator<<(std::ostream &os, const OrderList &orderList);
 

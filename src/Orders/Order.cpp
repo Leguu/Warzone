@@ -176,7 +176,7 @@ void OrderList::executeOrders() {
   }
 }
 
-int OrderList::getNumberOfOrders() {
+int OrderList::getOrdersSize() {
   return this->orders.size();
 }
 
