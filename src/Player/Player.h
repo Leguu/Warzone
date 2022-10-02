@@ -14,18 +14,15 @@ using std::cout;
 using std::endl;
 using std::string;
 
-class Hand;
-class OrderList;
-
 class Player {
 public:
   const string name;
-  OrderList *orders = new OrderList();
+  OrderList *orders;
   Hand *hand = new Hand();
   vector<Territory *> ownedTerritories = {};
   int reinforcements = 0;
 
-  inline explicit Player(string name) : name(std::move(name)) {}
+  explicit Player(string name);
 
   vector<Territory *> getAdjacentEnemyTerritories();
 
@@ -48,7 +45,7 @@ public:
   friend std::ostream &operator<<(std::ostream &os, const Player &player);
 
 private:
-  [[nodiscard]] Card *findCardByName(const string& cardName) const;
+  [[nodiscard]] Card *findCardByName(const string &cardName) const;
 };
 
 #endif //WARZONE_PLAYER_H

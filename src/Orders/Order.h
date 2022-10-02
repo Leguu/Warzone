@@ -2,7 +2,6 @@
 #define WARZONE_ORDER_H
 
 class OrderList;
-
 class Order;
 
 #include <vector>
@@ -10,125 +9,153 @@ class Order;
 #include <ostream>
 #include <queue>
 #include <list>
-
-class OrderList {
-public:
-    void remove(int index);
-
-    void move(int a, int b);
-
-    Order* pop();
-
-    void push(Order* order);
-
-    int getOrdersSize();
-
-  friend std::ostream &operator<<(std::ostream &Os, const OrderList &List);
-
-private:
-    std::list<Order*> orders = {};
-};
-
 #include "../Player/Player.h"
 
 /// Thrown when an order can not be executed due to invalid state
 class InvalidOrderException : public std::runtime_error {
 public:
-    explicit InvalidOrderException(const std::string &arg);
+  explicit InvalidOrderException(const std::string &arg);
 };
 
-// Todo implement all orders
-// TODO implement a way to issue orders without card... maybe an order manager? yeah... order manager owned by gameengine (should be in GameEngine.h)
 class Order {
 public:
-    const std::string name;
-    // TODO: maybe this should be a function... maybe the number of people changes between when an order is created and it is executed
-    const std::string description;
-    Player *issuer;
+  const std::string name;
+  Player *issuer;
+  Order(Player *issuer, std::string name);
 
-    Order(Player *issuer, std::string name, std::string description) : issuer(issuer), name(name), description(description){}
+  /// Throws InvalidOrderException if the order no longer makes sense (due to previous orders)
+  virtual void validate() noexcept(false) = 0;
 
-    /// Throws InvalidOrderException if the order no longer makes sense (due to previous orders)
-    virtual void execute() noexcept(false) = 0;
+  virtual std::string description() = 0;
 
-    friend std::ostream &operator<<(std::ostream &os, const Order &order);
+  virtual void execute() = 0;
 
-    virtual ~Order();
+  friend std::ostream &operator<<(std::ostream &os, Order &order);
+
+  virtual ~Order();
 };
 
 class DeployOrder : public Order {
 public:
-    DeployOrder(Player *issuer, int reinforcements, Territory *target);
+  explicit DeployOrder(Player *issuer, int reinforcements, Territory *target);
 
-    inline void execute() override {};
+  void validate() override;
 
-    ~DeployOrder() override;
+  void execute() override;
+
+  std::string description() override;
+
+  ~DeployOrder() override;
 
 private:
-    const int reinforcements;
-    Territory *target;
+  const int reinforcements;
+  Territory *target;
 };
 
 class AdvanceOrder : public Order {
 public:
-    AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target);
+  AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target);
 
-    inline void execute() override {};
+  void validate() override {};
 
-    ~AdvanceOrder() override;
+  void execute() override {};
+
+  std::string description() override;
+
+  ~AdvanceOrder() override;
 
 private:
-    const int armies;
-    Territory *source;
-    Territory *target;
+  const int armies;
+  Territory *source;
+  Territory *target;
 };
 
 class BombOrder : public Order {
 public:
-    explicit BombOrder(Player *issuer, Territory *target);
+  explicit BombOrder(Player *issuer, Territory *target);
 
-    void execute() override;
+  void validate() override;
 
-    ~BombOrder() override;
+  void execute() override;
+
+  std::string description() override;
+
+  ~BombOrder() override;
 
 private:
-    // TODO All these Territory * could maybe be references?
-    // They should definitely not be nullable.
-    Territory *target;
+  Territory *target;
 };
 
 class BlockadeOrder : public Order {
 public:
-    explicit BlockadeOrder(Player *issuer, Territory *target);
+  explicit BlockadeOrder(Player *issuer, Territory *target);
+
+  void validate() override;
+
+  void execute() override;
+
+  std::string description() override;
+
+  ~BlockadeOrder() override;
 
 private:
-    inline void execute() override {};
-
-private:
-    Territory *target;
+  Territory *target;
 };
 
 class AirliftOrder : public Order {
 public:
-    AirliftOrder(Player *issuer, int armies, Territory *source, Territory *target);
+  AirliftOrder(Player *issuer, int armies, Territory *source, Territory *target);
 
-    inline void execute() override {};
+  void validate() override;
+
+  void execute() override;
+
+  std::string description() override;
+
+  ~AirliftOrder() override;
 
 private:
-    const int armies;
-    Territory *source;
-    Territory *target;
+  const int armies;
+  Territory *source;
+  Territory *target;
 };
 
 class NegotiateOrder : public Order {
 public:
-    explicit NegotiateOrder(Player *issuer, const Player *target);
+  explicit NegotiateOrder(Player *issuer, const Player *target);
 
-    inline void execute() override {};
+  void validate() override {};
+
+  void execute() override {};
+
+  std::string description() override;
+
+  ~NegotiateOrder() override;
 
 private:
-    const Player *const target;
+  const Player *const target;
 };
 
+class OrderList {
+public:
+  void remove(int index);
+
+  void move(int a, int b);
+
+  Order *get(int index);
+
+  Order *pop();
+
+  void push(Order *order);
+
+  void executeOrders();
+
+  int getOrdersSize();
+
+  friend std::ostream &operator<<(std::ostream &os, const OrderList &orderList);
+
+private:
+  std::vector<Order *> orders = {};
+};
 
 #endif //WARZONE_ORDER_H

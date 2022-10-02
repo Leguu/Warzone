@@ -190,3 +190,6 @@ void Player::issueDeployOrder() {
 
   cout << "Deploy order issued." << endl;
 }
+Player::Player(string name) : name(std::move(name)), orders(new OrderList()) {
+
+}

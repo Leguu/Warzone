@@ -23,8 +23,6 @@ public:
 
   static vector<string> *tokenizer(const string &s, char del);
 
-  static void assert(bool condition, const string &test);
-
   static string trim(const string &s);
 
   static string WHITESPACE;
@@ -35,12 +33,13 @@ public:
 
   static bool isEqualLowercase(const string &a, const string &b);
 
+  static void assertCondition(bool condition, const std::string message);
+
   class CancelledInputException : public std::runtime_error {
   public:
-    explicit CancelledInputException();
+	explicit CancelledInputException();
 
-    ~CancelledInputException() _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_NOTHROW override;
-
+	~CancelledInputException() override;
   };
 };
 
