@@ -17,16 +17,9 @@ public:
   explicit InvalidOrderException(const std::string &arg);
 };
 
-// Todo implement all orders
-// TODO implement a way to issue orders without card... maybe an order manager? yeah... order manager owned by gameengine (should be in GameEngine.h)
 class Order {
 public:
   const std::string name;
-  // TODO: maybe this should be a function... maybe the number of people changes between when an order is created and it is executed
-  // void Description(std::string name, std::string action, std::string territory);
-  // virtual void description() = 0;
-  // const std::string description;
-
   Player *issuer;
   Order(Player *issuer, std::string name);
 
@@ -63,9 +56,10 @@ class AdvanceOrder : public Order {
 public:
   AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target);
 
-  inline void validate() override {};
+  void validate() override {};
 
-  inline void execute() override {};
+  void execute() override {};
+
   std::string description() override;
 
   ~AdvanceOrder() override;
@@ -89,8 +83,6 @@ public:
   ~BombOrder() override;
 
 private:
-  // TODO All these Territory * could maybe be references?
-  // They should definitely not be nullable.
   Territory *target;
 };
 
@@ -132,9 +124,9 @@ class NegotiateOrder : public Order {
 public:
   explicit NegotiateOrder(Player *issuer, const Player *target);
 
-  inline void validate() override {};
+  void validate() override {};
 
-  inline void execute() override {};
+  void execute() override {};
 
   std::string description() override;
 

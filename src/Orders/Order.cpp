@@ -25,7 +25,7 @@ std::string DeployOrder::description() {
 	  target->toString();
 }
 
-void DeployOrder::validate() {// Implement check if is within territory
+void DeployOrder::validate() {
   if (target->getOwner() && (target->getOwner() != issuer)) {
 	throw InvalidOrderException(issuer->name + " tried to deploy in someone else's territory.");
   } else if (reinforcements > issuer->reinforcements) {
