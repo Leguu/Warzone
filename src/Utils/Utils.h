@@ -21,7 +21,7 @@ public:
 
   static int getInputInt(const string &prompt, bool cancelable);
 
-  static vector<string> *tokenizer(const string &s, char del);
+  static vector<string> tokenizer(const string &s, char del);
 
   static string trim(const string &s);
 
@@ -33,14 +33,17 @@ public:
 
   static bool isEqualLowercase(const string &a, const string &b);
 
-  static void assertCondition(bool condition, const std::string message);
+  static void assertCondition(bool condition, const std::string& message);
 
   class CancelledInputException : public std::runtime_error {
   public:
-	explicit CancelledInputException();
+    explicit CancelledInputException();
 
-	~CancelledInputException() override;
+    ~CancelledInputException() override;
   };
+
+private:
+  inline Utils() = default;
 };
 
 #endif //WARZONE_UTILS_H

@@ -1,24 +1,23 @@
 #ifndef WARZONE_CARD_H
 #define WARZONE_CARD_H
 
-class CardManager;
-
+class Hand;
 class Card;
 
 #include <utility>
 #include <vector>
 #include <string>
 #include <ostream>
+#include "../Player/Player.h"
 using std::string;
 
 class Hand {
 public:
-
   void remove(Card *card);
 
   std::vector<Card *> cards;
 
-  Hand() = default;;
+  explicit Hand(Player *player);
 
   Hand(const Hand &h);
 
@@ -28,13 +27,21 @@ public:
 
   Card *draw();
 
-  Card *removeByName(const string& name);
+  Card *removeByName(const string &name);
 
   ~Hand();
 
   friend std::ostream &operator<<(std::ostream &os, const Hand &hand);
 
+  /**
+   * Play a card from the deck and add it to the deck
+   * @param cardName The name of the card
+   */
+  void play(string const &cardName);
+
 private:
+  Player *player;
+
   void add(Card *card);
 };
 

@@ -20,5 +20,6 @@ int main() {
 
   auto moon = MapLoader::importMap("../assets/Moon.map");
 
+  cout << "Printing out the moon map:" << endl;
   cout << *moon << endl;
 }

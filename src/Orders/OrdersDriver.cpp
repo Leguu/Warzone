@@ -1,11 +1,10 @@
 #include <iostream>
 #include <vector>
 #include "../GameEngine/GameEngine.h"
-#include "../Utils/Utils.h"
 
 #include "Order.h"
 
-void testOrdersLists() {
+int main() {
   OrderList list = OrderList();
 
   auto ge = new GameEngine("../assets/Moon.map");
@@ -39,10 +38,6 @@ void testOrdersLists() {
 
   list.executeOrders();
   Utils::assertCondition(list.getOrdersSize() == 0, "Execute orders operation failed: list is not empty.");
-}
 
-int main() {
-  testOrdersLists();
-
-  return 0;
+  cout << "All tests passed successfully!" << endl;
 }

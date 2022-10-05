@@ -1,4 +1,5 @@
 #include "Order.h"
+#include "../GameEngine/GameEngine.h"
 
 #include <utility>
 #include <iostream>
@@ -6,7 +7,7 @@
 
 // ------------------ Order -------------------------
 Order::Order(Player *issuer, std::string name)
-	: name(std::move(name)), issuer(issuer) {}
+    : name(std::move(name)), issuer(issuer) {}
 
 std::ostream &operator<<(std::ostream &os, Order &order) {
   os << order.name << ": " << order.description();
@@ -17,21 +18,21 @@ Order::~Order() = default;
 
 // ------------------ DeployOrder ------------------------
 DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)
-	: Order(issuer, "Deploy"),
-	  reinforcements(reinforcements), target(target) {}
+    : Order(issuer, "Deploy"),
+      reinforcements(reinforcements), target(target) {}
 
 std::string DeployOrder::description() {
   return issuer->name + " deploys " + std::to_string(reinforcements) + " armies to " +
-	  target->toString();
+      target->toString();
 }
 
 void DeployOrder::validate() {
   if (target->getOwner() && (target->getOwner() != issuer)) {
-	throw InvalidOrderException(issuer->name + " tried to deploy in someone else's territory.");
+    throw InvalidOrderException(issuer->name + " tried to deploy in someone else's territory.");
   } else if (reinforcements > issuer->reinforcements) {
-	throw InvalidOrderException(issuer->name + " does not have the specified number of reinforcements. Player has "
-									+ std::to_string(issuer->reinforcements) + " reinforcements, but requested "
-									+ std::to_string(reinforcements) + " reinforcements.");
+    throw InvalidOrderException(issuer->name + " does not have the specified number of reinforcements. Player has "
+                                    + std::to_string(issuer->reinforcements) + " reinforcements, but requested "
+                                    + std::to_string(reinforcements) + " reinforcements.");
   }
 }
 
@@ -45,21 +46,21 @@ DeployOrder::~DeployOrder() = default;
 
 // ------------------ AdvanceOrder ------------------------
 AdvanceOrder::AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target)
-	: Order(issuer, "Advance"),
-	  armies(armies), source(source), target(target) {}
+    : Order(issuer, "Advance"),
+      armies(armies), source(source), target(target) {}
 
 std::string AdvanceOrder::description() {
   return issuer->name + " advances " + std::to_string(armies) + " armies from " + source->toString() +
-	  " to " +
-	  target->toString();
+      " to " +
+      target->toString();
 }
 
 AdvanceOrder::~AdvanceOrder() = default;
 
 // ------------------ BombOrder ------------------------
 BombOrder::BombOrder(Player *issuer, Territory *target)
-	: Order(issuer, "Bomb"),
-	  target(target) {}
+    : Order(issuer, "Bomb"),
+      target(target) {}
 
 std::string BombOrder::description() {
   return issuer->name + " bombs " + target->toString();
@@ -67,7 +68,7 @@ std::string BombOrder::description() {
 
 void BombOrder::validate() {
   if (target->getOwner() && (target->getOwner()->name == issuer->name)) {
-	throw InvalidOrderException(issuer->name + " attempts to bomb himself! What an idiot.");
+    throw InvalidOrderException(issuer->name + " attempts to bomb himself! What an idiot.");
   }
 }
 
@@ -80,8 +81,8 @@ BombOrder::~BombOrder() = default;
 
 // ------------------ BlockadeOrder ------------------------
 BlockadeOrder::BlockadeOrder(Player *issuer, Territory *target)
-	: Order(issuer, "Blockade"),
-	  target(target) {}
+    : Order(issuer, "Blockade"),
+      target(target) {}
 
 std::string BlockadeOrder::description() {
   return issuer->name + " blockades " + target->toString();
@@ -89,7 +90,7 @@ std::string BlockadeOrder::description() {
 
 void BlockadeOrder::validate() {
   if (target->getOwner() && (target->getOwner() != issuer)) {
-	throw InvalidOrderException(issuer->name + " does not own territory " + target->getName());
+    throw InvalidOrderException(issuer->name + " does not own territory " + target->getName());
   }
 }
 
@@ -102,22 +103,22 @@ BlockadeOrder::~BlockadeOrder() = default;
 
 // ------------------ AirliftOrder ------------------------
 AirliftOrder::AirliftOrder(Player *issuer, int armies, Territory *source, Territory *target)
-	: Order(issuer, "Airlift"),
-	  armies(armies), source(source), target(target) {}
+    : Order(issuer, "Airlift"),
+      armies(armies), source(source), target(target) {}
 
 std::string AirliftOrder::description() {
   return issuer->name + " airlifts " + std::to_string(armies) + " armies from " + source->toString() +
-	  " to " +
-	  target->toString();
+      " to " +
+      target->toString();
 }
 
 void AirliftOrder::validate() {
   if (source->getArmies() - armies < 0) {
-	throw InvalidOrderException(
-		issuer->name + "'s source territory (" + source->getName() + ") does not have " + std::to_string(armies)
-			+ " number of army members.");
+    throw InvalidOrderException(
+        issuer->name + "'s source territory (" + source->getName() + ") does not have " + std::to_string(armies)
+            + " number of army members.");
   } else if (target->getOwner() && (target->getOwner() != issuer)) {
-	throw InvalidOrderException(issuer->name + " does not own territory " + target->getName());
+    throw InvalidOrderException(issuer->name + " does not own territory " + target->getName());
   }
 }
 
@@ -133,8 +134,8 @@ AirliftOrder::~AirliftOrder() = default;
 
 // ------------------ NegotiateOrder ------------------------
 NegotiateOrder::NegotiateOrder(Player *issuer, const Player *target)
-	: Order(issuer, "Negotiate"),
-	  target(target) {}
+    : Order(issuer, "Negotiate"),
+      target(target) {}
 
 std::string NegotiateOrder::description() {
   return issuer->name + " negotiates with " + target->name;
@@ -149,7 +150,7 @@ void OrderList::push(Order *order) {
 
 Order *OrderList::pop() {
   if (this->orders.empty())
-	return nullptr;
+    return nullptr;
   auto order = this->orders.front();
   this->orders.erase(this->orders.begin());
   return order;
@@ -165,14 +166,14 @@ void OrderList::remove(int index) {
 
 void OrderList::move(int a, int b) {
   if ((0 <= a && a < this->orders.size()) && (0 <= b && b < this->orders.size())) {
-	std::swap(this->orders[a], this->orders[b]);
+    std::swap(this->orders[a], this->orders[b]);
   }
 }
 
 void OrderList::executeOrders() {
   while (!this->orders.empty()) {
-	auto order = pop();
-	order->execute();
+    auto order = pop();
+    order->execute();
   }
 }
 
@@ -185,15 +186,15 @@ std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {
   auto divider = "--------------------------------------------------------------------------------";
 
   std::cout << divider << "\n" << std::left << std::setw(3) << "Id | " << std::left << std::setw(10) << "Name"
-			<< "| Description"
-			<< "\n" << divider << std::endl;
+            << "| Description"
+            << "\n" << divider << std::endl;
 
   for (auto order : orderList.orders) {
-	std::cout << std::left << std::setw(3) << std::to_string(i) << "| " << std::left << std::setw(10)
-			  << order->name
-			  << "| " + order->description()
-			  << std::endl;
-	++i;
+    std::cout << std::left << std::setw(3) << std::to_string(i) << "| " << std::left << std::setw(10)
+              << order->name
+              << "| " + order->description()
+              << std::endl;
+    ++i;
   }
 
   std::cout << divider << std::endl;

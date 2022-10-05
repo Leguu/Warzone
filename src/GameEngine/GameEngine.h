@@ -15,19 +15,14 @@ using std::endl;
 
 class GameEngine {
 public:
-  static const bool debug = true;
-
-  std::vector<Player *> players;
-  Map *map;
+  vector<Player *> players = vector<Player *>();
   Deck *deck = new Deck();
 
-  static GameEngine *instance() {
-    if (!_instance)
-      throw runtime_error("GameEngine instance not yet initialised. Did you forget to create a GameEngine first?");
-    return _instance;
-  }
+  Map *map = nullptr;
 
-  static GameEngine *initialiseGame();
+  static GameEngine *instance();
+
+  void initialiseGame();
 
   Player *findPlayerByName(const std::string &name);
 
@@ -35,8 +30,7 @@ public:
 
   void runGameLoop();
 
-  // TODO: Go through all the players and figure out what number of reinforcements they deserve.
-  inline void assignReinforcements() {}
+  void assignReinforcements();
 
   void issueOrders();
 
@@ -44,11 +38,32 @@ public:
 
   const static string helpText;
 
-private:
-  static GameEngine *_instance;
+  // Dumb
+
+  void stupidGameLoopThatTheProfWants();
 
   GameEngine();
+private:
+  enum GameState {
+    START,
+    MAP_LOADED,
+    MAP_VALIDATED,
+    PLAYERS_ADDED,
+    ASSIGN_REINFORCEMENTS,
+    ISSUE_ORDERS,
+    EXECUTE_ORDERS,
+    WIN
+  };
+
+  const static string wrongStateTransitionMessage;
+
+  static GameEngine *_instance;
+  GameState state = START;
 
   void initialisePlayers();
+  void stupidLoadMap(const string &input);
+  void stupidValidateMap();
+  void stupidAddPlayer(const string &playerName);
+  void stupidAssignCountries();
 };
 #endif //WARZONE_GAMEENGINE_H

@@ -11,39 +11,46 @@
  */
 void testCards() {
   std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard,
-							   new NegotiateCard, new BlockadeCard, new BlockadeCard};
+                               new NegotiateCard, new BlockadeCard, new BlockadeCard};
   auto ge = new GameEngine("../assets/Moon.map");
   ge->deck = new Deck(cards);
+
   auto playerOne = new Player("Bob");
   auto playerTwo = new Player("CoolerBob");
+
   auto territoryOne = new Territory("potato");
   auto territoryTwo = new Territory("coolerPotato");
   auto territoryThree = new Territory("coolestPotato");
-  playerOne->ownedTerritories.push_back(territoryOne);
-  playerOne->ownedTerritories.push_back(territoryThree);
-  playerTwo->ownedTerritories.push_back(territoryTwo);
+
+  territoryOne->setOwner(playerOne);
+  territoryThree->setOwner(playerOne);
+  territoryTwo->setOwner(playerTwo);
+
   territoryOne->addAdjacent(territoryTwo);
   territoryOne->addAdjacent(territoryThree);
   territoryTwo->addAdjacent(territoryOne);
   territoryTwo->addAdjacent(territoryThree);
   territoryThree->addAdjacent(territoryTwo);
   territoryThree->addAdjacent(territoryOne);
-  territoryOne->setOwner(playerOne);
+
   territoryOne->setArmies(20);
-  territoryThree->setOwner(playerOne);
   territoryThree->setArmies(15);
-  territoryTwo->setOwner(playerTwo);
+
   ge->players.push_back(playerOne);
   ge->players.push_back(playerTwo);
+
   ge->map->addContinent(new Continent("potato", 5));
   ge->map->addTerritoryToMap(territoryOne);
   ge->map->addTerritoryToMap(territoryTwo);
   ge->map->addTerritoryToMap(territoryThree);
+
   while (ge->deck->getCardsSize() != 0) {
-	playerOne->hand->draw();
+    playerOne->hand->draw();
   }
   while (!playerOne->hand->cards.empty()) {
-	playerOne->play(playerOne->hand->cards[0]->name);
+    auto cardName = playerOne->hand->cards[0]->name;
+    cout << "Playing " << cardName << endl;
+    playerOne->hand->play(cardName);
   }
   std::cout << "Content of Deck after every card has been played: " << *ge->deck << std::endl;
   std::cout << "Content of the hand after card has been played: " << *playerOne->hand << std::endl;
@@ -80,7 +87,7 @@ void testBombCardPlay() {
   territoryTwo->addAdjacent(territoryOne);
   auto card = playerOne->hand->draw();
   auto orderSizeBeforePlay = playerOne->orders->getOrdersSize();
-  playerOne->play(card->name);
+  playerOne->hand->play(card->name);
   auto orderSizeAfterPlay = playerOne->orders->getOrdersSize();
   Utils::assertCondition(orderSizeBeforePlay + 1 == orderSizeAfterPlay, "testBombCardPlay");
 }
@@ -91,7 +98,7 @@ void testBombCardPlay() {
 void testBlockadeCardConstructor() {
   auto card = new BlockadeCard();
   std::cout << "Blockade Card built successfully : name : " << card->name << ", desc: " << card->description
-			<< std::endl;
+            << std::endl;
 }
 
 /**
@@ -108,7 +115,7 @@ void testBlockadeCardPlay() {
   ge->map->addTerritoryToMap(territoryOne);
   auto card = playerOne->hand->draw();
   auto orderSizeBeforePlay = playerOne->orders->getOrdersSize();
-  playerOne->play(card->name);
+  playerOne->hand->play(card->name);
   auto orderSizeAfterPlay = playerOne->orders->getOrdersSize();
   Utils::assertCondition(orderSizeBeforePlay + 1 == orderSizeAfterPlay, "testBlockadeCardPlay");
 
@@ -120,7 +127,7 @@ void testBlockadeCardPlay() {
 void testAirliftCardConstructor() {
   auto card = new AirliftCard();
   std::cout << "Airlift Card built successfully : name : " << card->name << ", desc: " << card->description
-			<< std::endl;
+            << std::endl;
 }
 
 /**
@@ -145,7 +152,7 @@ void testAirliftCardPlay() {
   ge->map->addTerritoryToMap(territoryThree);
   auto card = playerOne->hand->draw();
   auto orderSizeBeforePlay = playerOne->orders->getOrdersSize();
-  playerOne->play(card->name);
+  playerOne->hand->play(card->name);
   auto orderSizeAfterPlay = playerOne->orders->getOrdersSize();
   Utils::assertCondition(orderSizeBeforePlay + 1 == orderSizeAfterPlay, "testAirliftCardPlay");
 }
@@ -156,7 +163,7 @@ void testAirliftCardPlay() {
 void testNegotiateCardConstructor() {
   auto card = new NegotiateCard();
   std::cout << "Negotiate Card built successfully : name : " << card->name << ", desc: " << card->description
-			<< std::endl;
+            << std::endl;
 }
 
 /**
@@ -175,7 +182,7 @@ void testNegotiateCardPlay() {
   ge->players.push_back(playerFour);
   auto card = playerOne->hand->draw();
   auto orderSizeBeforePlay = playerOne->orders->getOrdersSize();
-  playerOne->play(card->name);
+  playerOne->hand->play(card->name);
   auto orderSizeAfterPlay = playerOne->orders->getOrdersSize();
   Utils::assertCondition(orderSizeBeforePlay + 1 == orderSizeAfterPlay, "testAirliftCardPlay");
 
@@ -185,16 +192,16 @@ void testNegotiateCardPlay() {
  * Test the Hand constructor
  */
 void testHandConstructor() {
-  auto hand = new Hand();
+  auto hand = new Hand(new Player("Bob"));
   std::cout << "Hand successfully built, should be empty. Number of cards held in hand: " << hand->cards.size()
-			<< std::endl;
+            << std::endl;
 }
 
 /**
  * Test the Hand Listhand function
  */
 void testListHand() {
-  auto hand = new Hand();
+  auto hand = new Hand(new Player("Bob"));
   hand->listHand();
   std::cout << "Finished printing Hand\n" << std::endl;
 }
@@ -204,7 +211,7 @@ void testListHand() {
  */
 void testDeckConstructor() {
   std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard,
-							   new BlockadeCard};
+                               new BlockadeCard};
   auto deck = new Deck(cards);
   std::cout << "Deck successfully built, should contain a n>0 number of cards: " << deck->getCardsSize() << std::endl;
 }
@@ -214,7 +221,7 @@ void testDeckConstructor() {
  */
 void testDeckDraw() {
   std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard,
-							   new BlockadeCard};
+                               new BlockadeCard};
   auto ge = new GameEngine("../assets/Moon.map");
   ge->deck = new Deck(cards);
   auto initialDeckSize = ge->deck->getCardsSize();
@@ -228,7 +235,7 @@ void testDeckDraw() {
  */
 void testDeckPut() {
   std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard,
-							   new BlockadeCard};
+                               new BlockadeCard};
   auto deck = new Deck(cards);
   auto card = new BlockadeCard();
   auto initialDeckSize = deck->getCardsSize();
@@ -242,7 +249,7 @@ void testDeckPut() {
  */
 void testDeckToString() {
   std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard,
-							   new BlockadeCard};
+                               new BlockadeCard};
   auto deck = new Deck(cards);
   std::cout << *deck << std::endl;
   std::cout << "Finished printing Deck\n" << std::endl;
@@ -253,13 +260,14 @@ void testDeckToString() {
  */
 void testHandToString() {
   std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard,
-							   new BlockadeCard};
+                               new BlockadeCard};
   auto deck = new Deck(cards);
-  auto hand = new Hand();
+  auto bob = new Player("Bob");
+  auto hand = new Hand(bob);
   auto ge = new GameEngine("../assets/Moon.map");
   ge->deck = deck;
   while (deck->getCardsSize() != 0) {
-	hand->draw();
+    hand->draw();
   }
   std::cout << *hand << std::endl;
   std::cout << "Finished printing Hand\n" << std::endl;
@@ -307,13 +315,14 @@ void testNegotiateCardToString() {
  */
 void testHandRemove() {
   std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new BombCard(), new NegotiateCard,
-							   new BlockadeCard};
+                               new BlockadeCard};
   auto deck = new Deck(cards);
-  auto hand = new Hand();
+  auto bob = new Player("Bob");
+  auto hand = new Hand(bob);
   auto ge = new GameEngine("../assets/Moon.map");
   ge->deck = deck;
   while (deck->getCardsSize() != 0) {
-	hand->draw();
+    hand->draw();
   }
   auto addedHandSize = hand->cards.size();
   hand->remove(new BombCard());
@@ -330,66 +339,65 @@ int main() {
   /* ---------------------------- Testing All Methods ---------------------------- */
   int input = 0;
   while (true) {
-	std::cout << "Please input:" << std::endl;
-	std::cout << "1 to call testCards function" << std::endl;
-	std::cout << "2 to test all constructors" << std::endl;
-	std::cout << "3 to test all Play functions" << std::endl;
-	std::cout << "4 to test all Cards interaction functions" << std::endl;
-	std::cout << "5 to test all toString functions" << std::endl;
-	std::cout << "6 to test asserts functions" << std::endl;
-	std::cout << "-1 to exit" << std::endl;
-	input = Utils::getInputInt("");
-	if (input == 1) {
-	  std::cout << divider << std::endl;
-	  std::cout << "Cards Driver : TestCards method" << std::endl;
-	  std::cout << divider << std::endl;
-	  testCards();
-	} else if (input == 2) {
-	  std::cout << divider << std::endl;
-	  std::cout << "Testing Cards.cpp Constructors" << std::endl;
-	  std::cout << divider << std::endl;
-	  testBombCardConstructor();
-	  testBlockadeCardConstructor();
-	  testAirliftCardConstructor();
-	  testNegotiateCardConstructor();
-	  testDeckConstructor();
-	  testHandConstructor();
-	} else if (input == 3) {
-	  std::cout << divider << std::endl;
-	  std::cout << "Testing Cards.cpp Play functions" << std::endl;
-	  std::cout << divider << std::endl;
-	  testBombCardPlay();
-	  testBlockadeCardPlay();
-	  testAirliftCardPlay();
-	  testNegotiateCardPlay();
-	} else if (input == 4) {
-	  std::cout << divider << std::endl;
-	  std::cout << "Testing Cards.cpp Card Interaction functions" << std::endl;
-	  std::cout << divider << std::endl;
-	  testHandRemove();
-	  testDeckDraw();
-	  testDeckPut();
-	} else if (input == 5) {
-	  std::cout << divider << std::endl;
-	  std::cout << "Testing Cards.cpp toString functions" << std::endl;
-	  std::cout << divider << std::endl;
-	  testDeckToString();
-	  testHandToString();
-	  testBombCardToString();
-	  testBlockadeCardToString();
-	  testAirliftCardToString();
-	  testNegotiateCardToString();
-	  testListHand();
-	} else if (input == 6) {
-	  std::cout << divider << std::endl;
-	  std::cout << "Testing the assert functions..." << std::endl;
-	  std::cout << divider << std::endl;
+    std::cout << "Please input:" << std::endl;
+    std::cout << "1 to call testCards function" << std::endl;
+    std::cout << "2 to test all constructors" << std::endl;
+    std::cout << "3 to test all Play functions" << std::endl;
+    std::cout << "4 to test all Cards interaction functions" << std::endl;
+    std::cout << "5 to test all toString functions" << std::endl;
+    std::cout << "6 to test asserts functions" << std::endl;
+    std::cout << "-1 to exit" << std::endl;
+    input = Utils::getInputInt("");
+    if (input == 1) {
+      std::cout << divider << std::endl;
+      std::cout << "Cards Driver : TestCards method" << std::endl;
+      std::cout << divider << std::endl;
+      testCards();
+    } else if (input == 2) {
+      std::cout << divider << std::endl;
+      std::cout << "Testing Cards.cpp Constructors" << std::endl;
+      std::cout << divider << std::endl;
+      testBombCardConstructor();
+      testBlockadeCardConstructor();
+      testAirliftCardConstructor();
+      testNegotiateCardConstructor();
+      testDeckConstructor();
+      testHandConstructor();
+    } else if (input == 3) {
+      std::cout << divider << std::endl;
+      std::cout << "Testing Cards.cpp Play functions" << std::endl;
+      std::cout << divider << std::endl;
+      testBombCardPlay();
+      testBlockadeCardPlay();
+      testAirliftCardPlay();
+      testNegotiateCardPlay();
+    } else if (input == 4) {
+      std::cout << divider << std::endl;
+      std::cout << "Testing Cards.cpp Card Interaction functions" << std::endl;
+      std::cout << divider << std::endl;
+      testHandRemove();
+      testDeckDraw();
+      testDeckPut();
+    } else if (input == 5) {
+      std::cout << divider << std::endl;
+      std::cout << "Testing Cards.cpp toString functions" << std::endl;
+      std::cout << divider << std::endl;
+      testDeckToString();
+      testHandToString();
+      testBombCardToString();
+      testBlockadeCardToString();
+      testAirliftCardToString();
+      testNegotiateCardToString();
+      testListHand();
+    } else if (input == 6) {
+      std::cout << divider << std::endl;
+      std::cout << "Testing the assert functions..." << std::endl;
+      std::cout << divider << std::endl;
 
-	  Utils::assertCondition(true, "This test should not fail.");
-	  Utils::assertCondition(false, "This test should fail!");
+      Utils::assertCondition(true, "This test should not fail.");
+      Utils::assertCondition(false, "This test should fail!");
     } else if (input == -1) {
       exit(-1);
     }
   }
-
 }

@@ -69,8 +69,15 @@ Player *Territory::getOwner() {
 }
 
 void Territory::setOwner(Player *newOwner) {
+  if (owner) {
+    std::remove(owner->ownedTerritories.begin(),
+                owner->ownedTerritories.end(),
+                this); // NOLINT(bugprone-unused-return-value)
+  }
   owner = newOwner;
-  newOwner->ownedTerritories.push_back(this);
+  if (newOwner) {
+    newOwner->ownedTerritories.push_back(this);
+  }
 }
 
 string Territory::toString() const {
@@ -107,9 +114,9 @@ void Territory::addAdjacent(Territory *territory) {
 string Territory::longDescription() {
   string str;
   str += "Description for territory [" + to_string(id) + "] " + name + "\n";
-  str += "Continent: " + this->continent->getName() + "\n";
-  str += "Owner:     " + this->owner->name + "\n";
-  str += "Armies:    " + to_string(this->armies) + "\n";
+  str += "Continent: " + continent->getName() + "\n";
+  str += "Owner:     " + (owner ? owner->name : "none") + "\n";
+  str += "Armies:    " + to_string(armies) + "\n";
   str += "Adjacent:  ";
   for (auto t : adjacentTerritories) {
     str += "* " + t->getName() + " ";
@@ -308,7 +315,8 @@ void Map::assertEachTerritoryHasUniqueContinent() {
 }
 
 bool Map::validate() {
-  assertEveryEdgeIsTwoWay();
+  // Prof says that one-way adjacencies are allowed
+//  assertEveryEdgeIsTwoWay();
   assertConnected();
   assertSubgraphConnected();
   assertEachTerritoryHasUniqueContinent();
@@ -367,8 +375,6 @@ Territory *Map::getInputTerritory(bool cancelable) {
     cout << " Type \"cancel\" to cancel this input." << endl;
   }
 
-  int value;
-
   while (true) {
     auto input = Utils::getInputString();
 
@@ -386,14 +392,6 @@ Territory *Map::getInputTerritory(bool cancelable) {
     return territory;
   }
   throw Utils::CancelledInputException();
-}
-
-/**
- * Ask user for input about the territory and throw exception if he asks to leave
- * @return id of the territory he wants to select
- */
-Territory *Map::getInputTerritory(const std::string &inputRequest) {
-  return getInputTerritory(inputRequest, true);
 }
 
 Territory *Map::getInputTerritory(const string &inputRequest, bool cancelable) {
@@ -443,12 +441,12 @@ Map *MapLoader::importMap(const string &path) {
     }
 
     auto split = Utils::tokenizer(input, '=');
-    if (split->size() < 2) {
+    if (split.size() < 2) {
       continue;
     }
 
-    auto name = (*split)[0];
-    auto bonus = stoi((*split)[1]);
+    auto name = split[0];
+    auto bonus = stoi(split[1]);
 
     map->addContinent(new Continent(name, bonus));
   }
@@ -461,12 +459,12 @@ Map *MapLoader::importMap(const string &path) {
       continue;
 
     auto split = Utils::tokenizer(input, ',');
-    if (split->size() < 5) {
+    if (split.size() < 5) {
       continue;
     }
 
-    auto name = (*split)[0];
-    auto continentName = (*split)[3];
+    auto name = split[0];
+    auto continentName = split[3];
     auto continent = map->findContinentByName(continentName);
 
     if (!continent) {
@@ -482,8 +480,8 @@ Map *MapLoader::importMap(const string &path) {
     territory->setContinent(continent);
     continent->addTerritoryToContinent(territory);
 
-    for (int i = 4; i < split->size(); i += 1) {
-      auto adjacentTerritoryName = (*split)[i];
+    for (int i = 4; i < split.size(); i += 1) {
+      auto adjacentTerritoryName = split[i];
       auto adjacentTerritory = map->findTerritoryByName(adjacentTerritoryName);
 
       if (!adjacentTerritory) {

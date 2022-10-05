@@ -40,13 +40,13 @@ int Utils::getInputInt(const string &prompt) {
   return getInputInt(prompt, false);
 }
 
-vector<string> *Utils::tokenizer(const string &s, char del) {
-  auto vec = new vector<string>();
+vector<string> Utils::tokenizer(const string &s, char del) {
+  auto vec = vector<string>();
   auto ss = std::stringstream(s);
   string word;
   while (!ss.eof()) {
 	getline(ss, word, del);
-	vec->push_back(word);
+	vec.push_back(word);
   }
   return vec;
 }
@@ -84,7 +84,7 @@ string Utils::toLowercase(const string &a) {
   return aStr;
 }
 
-void Utils::assertCondition(bool condition, const std::string message) {
+void Utils::assertCondition(bool condition, const std::string& message) {
   if (!condition) {
 	throw std::runtime_error(message);
   }

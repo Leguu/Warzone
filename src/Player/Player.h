@@ -18,7 +18,7 @@ class Player {
 public:
   const string name;
   OrderList *orders;
-  Hand *hand = new Hand();
+  Hand *hand;
   vector<Territory *> ownedTerritories = {};
   int reinforcements = 0;
 
@@ -40,12 +40,7 @@ public:
 
   void drawFromDeck() const;
 
-  void play(string const &cardName);
-
   friend std::ostream &operator<<(std::ostream &os, const Player &player);
-
-private:
-  [[nodiscard]] Card *findCardByName(const string &cardName) const;
 };
 
 #endif //WARZONE_PLAYER_H

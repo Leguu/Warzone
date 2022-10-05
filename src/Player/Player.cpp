@@ -2,27 +2,20 @@
 #include "../GameEngine/GameEngine.h"
 #include <iostream>
 
-/**
- * Play a card from the deck and add it to the deck
- * @param cardName The name of the card
- */
-void Player::play(string const &cardName) {
-  auto ge = GameEngine::instance();
-  auto card = hand->removeByName(cardName);
-  if (card != nullptr) {
-    card->play(this);
-    ge->deck->put(card);
-  } else {
-    cout << "Could not find that card. Are you sure you have it in your hand?" << endl;
-  }
-}
-
 vector<Territory *> Player::toAttack() {
-  return {};
+  auto adjacentEnemies = vector<Territory *>();
+  for (auto t : ownedTerritories) {
+    for (auto adj : t->getAdjTerritories()) {
+      if (adj->getOwner() && adj->getOwner() != this) {
+        adjacentEnemies.push_back(adj);
+      }
+    }
+  }
+  return adjacentEnemies;
 }
 
 vector<Territory *> Player::toDefend() {
-  return {};
+  return ownedTerritories;
 }
 
 /**
@@ -61,6 +54,7 @@ void Player::drawFromDeck() const {
 }
 
 void Player::issueOrder() {
+  cout << name << ", it is your turn!" << endl;
   auto ge = GameEngine::instance();
   while (true) {
     auto input = Utils::toLowercase(Utils::trim(Utils::getInputString()));
@@ -78,13 +72,13 @@ void Player::issueOrder() {
         issueAdvanceOrder();
       } else if (input == "deploy") {
         issueDeployOrder();
-      } else if ((*tokenized)[0] == "play") {
+      } else if (tokenized[0] == "play") {
         auto cardName = input.substr(5);
 
-        play(cardName);
+        hand->play(cardName);
       } else if (input == "map") {
         cout << *ge->map << endl;
-      } else if ((*tokenized)[0] == "territory") {
+      } else if (tokenized[0] == "territory") {
         auto territoryName = input.substr(10);
         auto territory = ge->map->findTerritory(territoryName);
 
@@ -96,6 +90,10 @@ void Player::issueOrder() {
         cout << territory->longDescription() << endl;
       } else if (input == "done") {
         return;
+      } else {
+        cout
+            << "Your input did not correspond to any command. Use 'help' if you need descriptions of commands that are available to you."
+            << endl;
       }
     } catch (Utils::CancelledInputException &) {
       cout << "Cancelled that command." << endl;
@@ -122,7 +120,7 @@ void Player::issueAdvanceOrder() {
     target = ge->map->getInputTerritory(true);
 
     if (std::find(source->getAdjTerritories().begin(), source->getAdjTerritories().end(), target)
-        != source->getAdjTerritories().end()) {
+        == source->getAdjTerritories().end()) {
       cout << "That territory is not adjacent to your chosen territory, sorry.";
       continue;
     }
@@ -190,6 +188,6 @@ void Player::issueDeployOrder() {
 
   cout << "Deploy order issued." << endl;
 }
-Player::Player(string name) : name(std::move(name)), orders(new OrderList()) {
+Player::Player(string name) : name(std::move(name)), orders(new OrderList()), hand(new Hand(this)) {
 
 }
