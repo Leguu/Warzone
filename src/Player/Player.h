@@ -41,6 +41,10 @@ public:
   void drawFromDeck() const;
 
   friend std::ostream &operator<<(std::ostream &os, const Player &player);
+
+  virtual ~Player();
 };
+
+void testPlayers();
 
 #endif //WARZONE_PLAYER_H

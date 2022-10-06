@@ -30,7 +30,7 @@ public:
 
   void runGameLoop();
 
-  void assignReinforcements();
+  void assignReinforcements() const;
 
   void issueOrders();
 
@@ -43,6 +43,8 @@ public:
   void stupidGameLoopThatTheProfWants();
 
   GameEngine();
+
+  virtual ~GameEngine();
 private:
   enum GameState {
     START,

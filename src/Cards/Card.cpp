@@ -383,6 +383,9 @@ Hand::~Hand() {
   }
 }
 
+/// Remove a card by name
+/// \param name name of card to remove
+/// \return card with the same name
 Card *Hand::removeByName(const string &name) {
   for (auto card : cards) {
     for (const auto &alias : card->getAliases())
@@ -393,6 +396,9 @@ Card *Hand::removeByName(const string &name) {
   }
   return nullptr;
 }
+
+/// Play a card by name. Removes it from hand and puts it in the deck
+/// \param cardName name of card to play
 void Hand::play(const string &cardName) {
   auto ge = GameEngine::instance();
   auto card = removeByName(cardName);
@@ -403,8 +409,20 @@ void Hand::play(const string &cardName) {
     cout << "Could not find that card. Are you sure you have it in your hand?" << endl;
   }
 }
-Hand::Hand(Player *player) : player(player) {
 
+Hand::Hand(Player *player) : player(player) {}
+
+/// Removes a card from the hand and puts in the deck without running the "play" function. Useful if you want to test the Hand functions without user input. Identical to Hand::play.
+/// \param name name of card to play
+void Hand::debugPlay(const string &name) {
+  auto ge = GameEngine::instance();
+  auto card = removeByName(name);
+  if (card != nullptr) {
+//    card->play(player);
+    ge->deck->put(card);
+  } else {
+    cout << "Could not find that card. Are you sure you have it in your hand?" << endl;
+  }
 }
 
 /**
@@ -417,4 +435,64 @@ Deck::~Deck() {
     this->cards[counter] = nullptr;
     counter = counter + 1;
   }
+}
+
+/**
+ * Verify that we can create a valid deck, draw all its cards, runGameLoop them, and everything is functional
+ */
+void testCards() {
+  std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new NegotiateCard(), new BlockadeCard()};
+  auto ge = new GameEngine("../assets/Moon.map");
+  ge->deck = new Deck(cards);
+
+  auto playerOne = new Player("Bob");
+  auto playerTwo = new Player("CoolerBob");
+
+  auto territoryOne = new Territory("potato");
+  auto territoryTwo = new Territory("coolerPotato");
+  auto territoryThree = new Territory("coolestPotato");
+
+  territoryOne->setOwner(playerOne);
+  territoryThree->setOwner(playerOne);
+  territoryTwo->setOwner(playerTwo);
+
+  territoryOne->addAdjacent(territoryTwo);
+  territoryOne->addAdjacent(territoryThree);
+  territoryTwo->addAdjacent(territoryOne);
+  territoryTwo->addAdjacent(territoryThree);
+  territoryThree->addAdjacent(territoryTwo);
+  territoryThree->addAdjacent(territoryOne);
+
+  territoryOne->setArmies(20);
+  territoryThree->setArmies(15);
+
+  ge->players.push_back(playerOne);
+  ge->players.push_back(playerTwo);
+
+  ge->map->addContinent(new Continent("potato", 5));
+  ge->map->addTerritoryToMap(territoryOne);
+  ge->map->addTerritoryToMap(territoryTwo);
+  ge->map->addTerritoryToMap(territoryThree);
+
+  Utils::assertCondition(playerOne->hand->cards.empty(), "player has no cards");
+
+  while (ge->deck->getCardsSize() != 0) {
+    playerOne->hand->draw();
+  }
+
+  Utils::assertCondition(playerOne->hand->cards.size() == cards.size(), "player drew all the cards in the deck");
+
+  while (!playerOne->hand->cards.empty()) {
+    auto cardName = playerOne->hand->cards[0]->name;
+    cout << "Playing " << cardName << endl;
+    // We use debugPlay instead of play so that we don't have to put a bunch of user input
+    playerOne->hand->debugPlay(cardName);
+  }
+
+  Utils::assertCondition(playerOne->hand->cards.empty(), "all the cards were removed from the player's hand");
+  Utils::assertCondition(ge->deck->getCardsSize() == cards.size(), "all the cards were put in the deck");
+
+  cout << "All tests passed!" << endl;
+
+  delete ge;
 }

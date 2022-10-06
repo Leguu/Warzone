@@ -42,6 +42,10 @@ void DeployOrder::execute() {
   this->target->setArmies(this->target->getArmies() + reinforcements);
 }
 
+DeployOrder::DeployOrder(const DeployOrder &other) : Order(other.issuer, other.name),
+                                                     reinforcements(other.reinforcements), target(other.target) {
+}
+
 DeployOrder::~DeployOrder() = default;
 
 // ------------------ AdvanceOrder ------------------------
@@ -54,6 +58,8 @@ std::string AdvanceOrder::description() {
       " to " +
       target->toString();
 }
+AdvanceOrder::AdvanceOrder(const AdvanceOrder &other)
+    : Order(other.issuer, other.name), armies(other.armies), source(other.source), target(other.target) {}
 
 AdvanceOrder::~AdvanceOrder() = default;
 
@@ -77,6 +83,8 @@ void BombOrder::execute() {
   this->target->setArmies(this->target->getArmies() / 2);
 }
 
+BombOrder::BombOrder(const BombOrder &other) : Order(other.issuer, other.name), target(other.target) {}
+
 BombOrder::~BombOrder() = default;
 
 // ------------------ BlockadeOrder ------------------------
@@ -98,6 +106,8 @@ void BlockadeOrder::execute() {
   validate();
   this->target->setArmies(this->target->getArmies() * 3);
 }
+
+BlockadeOrder::BlockadeOrder(const BlockadeOrder &other) : Order(other.issuer, other.name), target(other.target) {}
 
 BlockadeOrder::~BlockadeOrder() = default;
 
@@ -129,6 +139,8 @@ void AirliftOrder::execute() {
   this->source->setArmies(sourceArmies - armies);
   this->target->setArmies(targetArmies + armies);
 }
+AirliftOrder::AirliftOrder(const AirliftOrder &other) : Order(other.issuer, other.name), target(other.target),
+                                                        source(other.source), armies(other.armies) {}
 
 AirliftOrder::~AirliftOrder() = default;
 
@@ -140,6 +152,8 @@ NegotiateOrder::NegotiateOrder(Player *issuer, const Player *target)
 std::string NegotiateOrder::description() {
   return issuer->name + " negotiates with " + target->name;
 }
+
+NegotiateOrder::NegotiateOrder(const NegotiateOrder &o) : Order(o.issuer, o.name), target(o.target) {}
 
 NegotiateOrder::~NegotiateOrder() = default;
 
@@ -161,12 +175,16 @@ Order *OrderList::get(int index) {
 }
 
 void OrderList::remove(int index) {
+  auto order = orders[index];
   this->orders.erase(this->orders.begin() + index);
+  delete order;
 }
 
 void OrderList::move(int a, int b) {
   if ((0 <= a && a < this->orders.size()) && (0 <= b && b < this->orders.size())) {
     std::swap(this->orders[a], this->orders[b]);
+  } else {
+    throw runtime_error("Index out of bounds!");
   }
 }
 
@@ -174,11 +192,12 @@ void OrderList::executeOrders() {
   while (!this->orders.empty()) {
     auto order = pop();
     order->execute();
+    delete order;
   }
 }
 
 int OrderList::getOrdersSize() {
-  return this->orders.size();
+  return orders.size();
 }
 
 std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {
@@ -201,5 +220,50 @@ std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {
   return os;
 }
 
+OrderList::OrderList(const OrderList &o) {
+  orders = o.orders;
+}
+
+OrderList::OrderList() = default;
+
 // ------------------ Exception ------------------------
 InvalidOrderException::InvalidOrderException(const std::string &arg) : runtime_error(arg) {}
+
+void testOrdersLists() {
+  OrderList list = OrderList();
+
+  auto ge = new GameEngine("../assets/Moon.map");
+  const auto territoryS = ge->map->findTerritory("Byrgius");
+  const auto territoryT = ge->map->findTerritory("Bay of dew");
+  auto player1 = Player("Bob");
+  auto player2 = Player("Alice");
+
+  auto deploy = new DeployOrder(&player1, 0, territoryT);
+  auto advance = new AdvanceOrder(&player1, 5, territoryS, territoryT);
+  auto bomb = new BombOrder(&player1, territoryT);
+  auto blockade = new BlockadeOrder(&player1, territoryT);
+  auto airlift = new AirliftOrder(&player1, 0, territoryS, territoryT);
+  auto negotiate = new NegotiateOrder(&player1, &player2);
+
+  list.push(deploy);
+  list.push(advance);
+  list.push(bomb);
+  list.push(blockade);
+  list.push(airlift);
+  list.push(negotiate);
+  Utils::assertCondition(list.getOrdersSize() == 6, "Push operation failed: list size is not 6.");
+
+  list.remove(2);
+  Utils::assertCondition(list.getOrdersSize() == 5, "Remove operation failed: list size is not 5.");
+  Utils::assertCondition(list.get(2) == blockade, "Remove operation failed: index 2 is not blockade order.");
+
+  list.move(1, 2);
+  Utils::assertCondition(list.get(1) == blockade, "Move operation failed: index 1 is not blockade order.");
+  Utils::assertCondition(list.get(2) == advance, "Move operation failed: index 2 is not advance order.");
+
+  list.executeOrders();
+  Utils::assertCondition(list.getOrdersSize() == 0, "Execute orders operation failed: list is not empty.");
+
+  cout << "All tests passed successfully!" << endl;
+  delete ge;
+}

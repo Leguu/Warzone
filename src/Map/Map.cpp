@@ -36,9 +36,7 @@ ostream &operator<<(ostream &os, const Territory &territory) {
   return os;
 }
 
-Territory::~Territory() {
-  delete owner;
-}
+Territory::~Territory() = default;
 
 vector<Territory *> Territory::getAdjTerritories() const {
   return adjacentTerritories;
@@ -319,6 +317,7 @@ bool Map::validate() {
 //  assertEveryEdgeIsTwoWay();
   assertConnected();
   assertSubgraphConnected();
+  assertEveryTerritoryHasContinent();
   assertEachTerritoryHasUniqueContinent();
   return true;
 }
@@ -413,6 +412,14 @@ Territory *Map::findTerritory(const string &input) {
   return nullptr;
 }
 
+void Map::assertEveryTerritoryHasContinent() {
+  for (auto t : territories) {
+    if (!t->getContinent()) {
+      throw runtime_error("Territory " + t->getName() + " does not have a continent, was it initialised properly?");
+    }
+  }
+}
+
 Map *MapLoader::importMap(const string &path) {
   ifstream file(path);
 
@@ -451,6 +458,7 @@ Map *MapLoader::importMap(const string &path) {
     map->addContinent(new Continent(name, bonus));
   }
   if (input != "[Territories]") {
+    delete map;
     throw runtime_error("No territories section found!");
   }
 
@@ -468,6 +476,7 @@ Map *MapLoader::importMap(const string &path) {
     auto continent = map->findContinentByName(continentName);
 
     if (!continent) {
+      delete map;
       throw runtime_error(
           "Territory " + name + " references a continent " + continentName + " that does not exist!");
     }
@@ -493,11 +502,27 @@ Map *MapLoader::importMap(const string &path) {
     }
   }
 
-  if (!map->validate()) {
-    throw runtime_error("The map in '" + path
-                            +
-                                "' failed to validate. It has an unplayable map due to missing adjacencies, isolated territories, or territories that belong to more than one continent.");
+  try {
+    map->validate();
+  } catch (runtime_error &e) {
+    delete map;
+    throw e;
   }
 
   return map;
+}
+
+void testLoadMaps() {
+  for (const auto &file : directory_iterator{"../assets/"}) {
+    auto path = file.path().string();
+    try {
+      MapLoader::importMap(path);
+      Utils::assertCondition(!path.contains("Invalid"), "map is valid");
+    } catch (runtime_error &e) {
+      Utils::assertCondition(path.contains("Invalid"), path + " map is invalid");
+      cout << "Map '" << path << "' was invalid because " << e.what() << endl;
+    }
+  }
+
+  cout << "All tests passed" << endl;
 }

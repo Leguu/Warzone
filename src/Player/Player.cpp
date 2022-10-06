@@ -46,6 +46,7 @@ std::ostream &operator<<(std::ostream &os, const Player &player) {
   os << player.name << endl;
   return os;
 }
+
 void Player::drawFromDeck() const {
   auto ge = GameEngine::instance();
 
@@ -190,4 +191,29 @@ void Player::issueDeployOrder() {
 }
 Player::Player(string name) : name(std::move(name)), orders(new OrderList()), hand(new Hand(this)) {
 
+}
+
+Player::~Player() {
+  delete hand;
+  delete orders;
+}
+
+void testPlayers() {
+  auto ge = new GameEngine();
+  ge->map = MapLoader::importMap("../assets/Moon.map");
+
+  auto bob = new Player("Bob");
+
+  auto john = new Player("John");
+
+  ge->map->findTerritory("Byrgius")->setOwner(bob);
+  ge->map->findTerritory("Bay of Dew")->setOwner(john);
+
+  Utils::assertCondition(!bob->toAttack().empty(), "to attack not empty");
+
+  Utils::assertCondition(!bob->toDefend().empty(), "to defend not empty");
+
+  bob->issueOrder();
+
+  delete ge;
 }

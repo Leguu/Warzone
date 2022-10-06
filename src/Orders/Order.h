@@ -10,6 +10,7 @@ class Order;
 #include <queue>
 #include <list>
 #include "../Player/Player.h"
+using std::runtime_error;
 
 /// Thrown when an order can not be executed due to invalid state
 class InvalidOrderException : public std::runtime_error {
@@ -37,7 +38,9 @@ public:
 
 class DeployOrder : public Order {
 public:
-  explicit DeployOrder(Player *issuer, int reinforcements, Territory *target);
+  DeployOrder(Player *issuer, int reinforcements, Territory *target);
+
+  DeployOrder(const DeployOrder &other);
 
   void validate() override;
 
@@ -64,6 +67,8 @@ public:
 
   ~AdvanceOrder() override;
 
+  AdvanceOrder(const AdvanceOrder &other);
+
 private:
   const int armies;
   Territory *source;
@@ -82,6 +87,8 @@ public:
 
   ~BombOrder() override;
 
+  BombOrder(const BombOrder &other);
+
 private:
   Territory *target;
 };
@@ -98,6 +105,8 @@ public:
 
   ~BlockadeOrder() override;
 
+  BlockadeOrder(const BlockadeOrder &other);
+
 private:
   Territory *target;
 };
@@ -113,6 +122,8 @@ public:
   std::string description() override;
 
   ~AirliftOrder() override;
+
+  AirliftOrder(const AirliftOrder &other);
 
 private:
   const int armies;
@@ -131,6 +142,8 @@ public:
   std::string description() override;
 
   ~NegotiateOrder() override;
+
+  NegotiateOrder(const NegotiateOrder &o);
 
 private:
   const Player *const target;
@@ -154,8 +167,13 @@ public:
 
   friend std::ostream &operator<<(std::ostream &os, const OrderList &orderList);
 
+  OrderList();
+  OrderList(const OrderList &o);
+
 private:
   std::vector<Order *> orders = {};
 };
+
+void testOrdersLists();
 
 #endif //WARZONE_ORDER_H

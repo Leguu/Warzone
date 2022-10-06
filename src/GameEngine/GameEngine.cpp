@@ -22,7 +22,8 @@ GameEngine::GameEngine(const std::string &mp) {
   _instance = this;
 }
 
-/// @returns Game Over
+/// Execute all the orders
+/// \return whether win condition has been reached
 bool GameEngine::executeOrders() {
   cout << endl << "Executing orders..." << endl;
 
@@ -71,6 +72,7 @@ Player *GameEngine::findPlayerByName(const std::string &name) {
   }
   return nullptr;
 }
+
 void GameEngine::initialisePlayers() {
   cout << *map << endl;
   cout << "Input the name of every single player, and then type \"done\" when finished." << endl;
@@ -163,8 +165,20 @@ GameEngine *GameEngine::instance() {
   return _instance;
 }
 
-void GameEngine::assignReinforcements() {
-  // TODO
+void GameEngine::assignReinforcements() const {
+  for (auto t : map->getAllTerritories()) {
+    auto owner = t->getOwner();
+    if (owner) {
+      owner->reinforcements += 1;
+    }
+  }
+
+  for (auto c : map->getContinents()) {
+    auto owner = c->owner();
+    if (owner) {
+      owner->reinforcements += c->getBonus();
+    }
+  }
 }
 
 void GameEngine::stupidGameLoopThatTheProfWants() {
@@ -172,8 +186,9 @@ void GameEngine::stupidGameLoopThatTheProfWants() {
 
   string input;
 
+  cout << "Game has begun!" << endl;
   while (state != WIN) {
-    input = Utils::getInputString();
+    input = Utils::getInputString("Input your command");
     auto split = Utils::tokenizer(input, ' ');
 
     if (split.empty()) {
@@ -215,8 +230,8 @@ void GameEngine::stupidGameLoopThatTheProfWants() {
         continue;
       }
 
-      state = ASSIGN_REINFORCEMENTS;
       assignReinforcements();
+      state = ASSIGN_REINFORCEMENTS;
     } else {
       cout << "Type the right command, dumbass" << endl;
     }
@@ -298,4 +313,13 @@ void GameEngine::stupidAssignCountries() {
   state = ASSIGN_REINFORCEMENTS;
 
   assignReinforcements();
+}
+
+GameEngine::~GameEngine() {
+  _instance = nullptr;
+  for (auto p : players) {
+    delete p;
+  }
+  delete deck;
+  delete map;
 }

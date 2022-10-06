@@ -39,13 +39,38 @@ public:
    */
   void play(string const &cardName);
 
+  void debugPlay(string const &name);
+
 private:
   Player *player;
 
   void add(Card *card);
 };
 
-#include "../Player/Player.h"
+class Deck {
+public:
+
+  explicit Deck(std::vector<Card *> cards) : cards(std::move(cards)) {}
+
+  Deck() = default;
+
+  Deck(const Deck &deck);
+
+  Deck &operator=(const Deck &deck);
+
+  ~Deck();
+
+  Card *draw();
+
+  void put(Card *card);
+
+  friend std::ostream &operator<<(std::ostream &os, const Deck &deck);
+
+  unsigned long long int getCardsSize();
+
+private:
+  std::vector<Card *> cards = vector<Card *>();
+};
 
 class Card {
 public:
@@ -79,7 +104,6 @@ public:
   static void execute(Player *issuer, Territory *territory);
 
   ~BombCard() override;
-
 };
 
 class BlockadeCard : public Card {
@@ -121,29 +145,6 @@ public:
   ~NegotiateCard() override;
 };
 
-class Deck {
-public:
-
-  explicit Deck(std::vector<Card *> cards) : cards(std::move(cards)) {}
-
-  Deck() = default;
-
-  Deck(const Deck &deck);
-
-  Deck &operator=(const Deck &deck);
-
-  ~Deck();
-
-  Card *draw();
-
-  void put(Card *card);
-
-  friend std::ostream &operator<<(std::ostream &os, const Deck &deck);
-
-  unsigned long long int getCardsSize();
-
-private:
-  std::vector<Card *> cards = vector<Card *>();
-};
+void testCards();
 
 #endif //WARZONE_CARD_H

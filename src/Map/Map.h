@@ -7,8 +7,10 @@
 #include <vector>
 #include <set>
 #include <memory>
+#include <filesystem>
 #include "../Utils/Utils.h"
 
+using std::filesystem::directory_iterator;
 using std::string;
 using std::vector;
 
@@ -185,6 +187,7 @@ private:
 
   void assertEveryEdgeIsTwoWay();
 
+  void assertEveryTerritoryHasContinent();
 };
 
 class MapLoader {
@@ -195,5 +198,7 @@ public:
 private:
   inline MapLoader() = default;
 };
+
+void testLoadMaps();
 
 #endif //WARZONE_MAP_H
