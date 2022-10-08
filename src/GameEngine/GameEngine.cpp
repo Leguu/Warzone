@@ -15,8 +15,12 @@ const string GameEngine::helpText =
     "territory <name> - display some information about a territory\n"
     "done - indicate that you're finished with your turn";
 
-const string GameEngine::wrongStateTransitionMessage = "Wrong state, dumbass";
+const string GameEngine::wrongStateTransitionMessage = "Wrong state";
 
+/**
+ * GameEngine constructor used to create a singleton game engine used to manage the game
+ * @param mp the map
+ */
 GameEngine::GameEngine(const std::string &mp) {
   map = MapLoader::importMap(mp);
   _instance = this;
@@ -46,6 +50,9 @@ bool GameEngine::executeOrders() {
   return false;
 }
 
+/**
+ * Game loop to run the game
+ */
 void GameEngine::runGameLoop() {
   cout << "Welcome to Warzone! Type in \"help\" at any time to have a list of commands" << endl;
   while (true) {
@@ -64,6 +71,11 @@ void GameEngine::runGameLoop() {
   cout << "Game is over!" << endl;
 }
 
+/**
+ * Find a player by name
+ * @param name The name of the player
+ * @return The player object
+ */
 Player *GameEngine::findPlayerByName(const std::string &name) {
   for (auto *player : this->players) {
     if (player->name == name) {
@@ -73,6 +85,9 @@ Player *GameEngine::findPlayerByName(const std::string &name) {
   return nullptr;
 }
 
+/**
+ * Ask for all the players and initialize them
+ */
 void GameEngine::initialisePlayers() {
   cout << *map << endl;
   cout << "Input the name of every single player, and then type \"done\" when finished." << endl;
@@ -130,10 +145,17 @@ void GameEngine::initialisePlayers() {
          << " reinforcements to start with." << endl;
   }
 }
+
+/**
+ * Empty constructor to create the game engine singleton variable
+ */
 GameEngine::GameEngine() {
   _instance = this;
 }
 
+/**
+ * Initialize the game
+ */
 void GameEngine::initialiseGame() {
   while (true) {
     auto path = Utils::getInputString("Input the path of the map. Leave empty for a default map.");
@@ -153,18 +175,28 @@ void GameEngine::initialiseGame() {
   initialisePlayers();
 }
 
+/**
+ * Issue the orders
+ */
 void GameEngine::issueOrders() {
   for (auto player : players) {
     player->issueOrder();
   }
 }
 
+/**
+ * Get an instance of the game engine object
+ * @return instance of the game engine object
+ */
 GameEngine *GameEngine::instance() {
   if (!_instance)
     throw runtime_error("GameEngine instance not yet initialised. Did you forget to create a GameEngine first?");
   return _instance;
 }
 
+/**
+ * Assign the reinforcements to all territories
+ */
 void GameEngine::assignReinforcements() const {
   for (auto t : map->getAllTerritories()) {
     auto owner = t->getOwner();
@@ -181,6 +213,9 @@ void GameEngine::assignReinforcements() const {
   }
 }
 
+/**
+ * Game loop the teacher wants
+ */
 void GameEngine::stupidGameLoopThatTheProfWants() {
   state = START;
 
@@ -198,7 +233,7 @@ void GameEngine::stupidGameLoopThatTheProfWants() {
     auto command = Utils::toLowercase(Utils::trim(split[0]));
 
     if (command == "loadmap") {
-      stupidLoadMap(Utils::trim(input.substr(7)));
+      stupidLoadMap("../assets/" + Utils::trim(input.substr(7)) + ".map");
     } else if (command == "validatemap") {
       stupidValidateMap();
     } else if (command == "addplayer") {
@@ -233,12 +268,16 @@ void GameEngine::stupidGameLoopThatTheProfWants() {
       assignReinforcements();
       state = ASSIGN_REINFORCEMENTS;
     } else {
-      cout << "Type the right command, dumbass" << endl;
+      cout << "Type the right command" << endl;
     }
     cout << "-----------------------------" << endl;
   }
 
 }
+/**
+ * Load the map like the teacher wants
+ * @param input the map name
+ */
 void GameEngine::stupidLoadMap(const string &input) {
   if (state != MAP_LOADED && state != START) {
     cout << wrongStateTransitionMessage << endl;
@@ -259,7 +298,9 @@ void GameEngine::stupidLoadMap(const string &input) {
 
   state = MAP_LOADED;
 }
-
+/**
+ * Validate the map like the teacher wants
+ */
 void GameEngine::stupidValidateMap() {
   if (state != MAP_LOADED) {
     cout << wrongStateTransitionMessage << endl;
@@ -275,6 +316,10 @@ void GameEngine::stupidValidateMap() {
   state = MAP_VALIDATED;
 }
 
+/**
+ * Add player like teacher wants
+ * @param playerName The player name
+ */
 void GameEngine::stupidAddPlayer(const string &playerName) {
   if (state != MAP_VALIDATED && state != PLAYERS_ADDED) {
     cout << wrongStateTransitionMessage << endl;
@@ -291,6 +336,9 @@ void GameEngine::stupidAddPlayer(const string &playerName) {
   state = PLAYERS_ADDED;
 }
 
+/**
+ * Assign the countries like the teacher wants
+ */
 void GameEngine::stupidAssignCountries() {
   if (state != PLAYERS_ADDED) {
     cout << wrongStateTransitionMessage << endl;
@@ -315,6 +363,9 @@ void GameEngine::stupidAssignCountries() {
   assignReinforcements();
 }
 
+/**
+ * Destructor for the game engine
+ */
 GameEngine::~GameEngine() {
   _instance = nullptr;
   for (auto p : players) {

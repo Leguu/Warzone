@@ -15,9 +15,18 @@
 using namespace std;
 int Territory::idIncrement = 0;
 
+/**
+ * Territory constructor
+ * @param name name of the territory
+ * @param continent name of the continent it bleongs
+ */
 Territory::Territory(const string &name, Continent *continent) : name(Utils::trim(name)), continent(continent) {
 }
 
+/**
+ * Copy constructor for Territory
+ * @param territory The territory it's copying
+ */
 Territory::Territory(const Territory &territory) {
   this->id = territory.id;
   this->name = territory.name;
@@ -28,44 +37,90 @@ Territory::Territory(const Territory &territory) {
   this->visited = territory.visited;
 }
 
+/**
+ * Overload for the = operator on territory
+ * @param territory the territory we are comparing to
+ * @return Copy constructor used to create new territory
+ */
 Territory &Territory::operator=(const Territory &territory) = default;
 
+/**
+ * Overload of the output operator
+ * @param os The OSStream we will be appending to
+ * @param territory The territory we will print
+ * @return A string containing the content's of the territory
+ */
 ostream &operator<<(ostream &os, const Territory &territory) {
   os << territory.toString();
 
   return os;
 }
 
+/**
+ * Territory destructor
+ */
 Territory::~Territory() = default;
 
+/**
+ * Get all adjacent territories
+ * @return all adjacent territories
+ */
 vector<Territory *> Territory::getAdjTerritories() const {
   return adjacentTerritories;
 }
 
+/**
+ * Get the name of the territory
+ * @return
+ */
 string Territory::getName() {
   return name;
 }
 
+/**
+ * Get the id of the territory
+ * @return id of the territory
+ */
 int Territory::getId() const {
   return id;
 }
 
+/**
+ * Get the continent the territory belongs to
+ * @return the continent the territory belongs to
+ */
 Continent *Territory::getContinent() {
   return continent;
 }
 
+/**
+ * Get the armies on the territory
+ * @return the armies on the territory
+ */
 int Territory::getArmies() const {
   return armies;
 }
 
+/**
+ * Set the armies on the territories
+ * @param num the new armies on the territories
+ */
 void Territory::setArmies(int num) {
   armies = num;
 }
 
+/**
+ * Get the owner of the territory
+ * @return the owner (Player object) of the territory
+ */
 Player *Territory::getOwner() {
   return owner;
 }
 
+/**
+ * Set the owner of a territory
+ * @param newOwner The new player object who owns this territory
+ */
 void Territory::setOwner(Player *newOwner) {
   if (owner) {
     std::remove(owner->ownedTerritories.begin(),
@@ -78,6 +133,10 @@ void Territory::setOwner(Player *newOwner) {
   }
 }
 
+/**
+ * Print a territory to string
+ * @return the territory information in string format
+ */
 string Territory::toString() const {
   string str;
   str += "[" + to_string(id) + "] ";
@@ -90,10 +149,18 @@ string Territory::toString() const {
   return str;
 }
 
+/**
+ * Set the continent of a territory
+ * @param pContinent the new continent it belongs to
+ */
 void Territory::setContinent(Continent *pContinent) {
   continent = pContinent;
 }
 
+/**
+ * List the name of adjacent territories
+ * @return the name of adjacent territories
+ */
 string Territory::listNameAndAdjacent() {
   auto str = name + ": ";
   for (auto territory : adjacentTerritories) {
@@ -102,6 +169,10 @@ string Territory::listNameAndAdjacent() {
   return str;
 }
 
+/**
+ * Add a territory as one of this territory's adjacent territories
+ * @param territory the new adjacent territory
+ */
 void Territory::addAdjacent(Territory *territory) {
   if (std::find(adjacentTerritories.begin(), adjacentTerritories.end(), territory) != adjacentTerritories.end()) {
     throw runtime_error(name + " is already adjacent to " + territory->name);
@@ -109,6 +180,10 @@ void Territory::addAdjacent(Territory *territory) {
   adjacentTerritories.push_back(territory);
 }
 
+/**
+ * Get a large description of the territory
+ * @return String with the long description of the territory
+ */
 string Territory::longDescription() {
   string str;
   str += "Description for territory [" + to_string(id) + "] " + name + "\n";
@@ -124,42 +199,84 @@ string Territory::longDescription() {
 
 
 // ------------------ Continents ------------------------
-
+/**
+ * Constructor for a continent
+ * @param name the name of the continent
+ * @param bonus the bonus rewarded from owning this continent
+ */
 Continent::Continent(string name, int bonus) : name(Utils::trim(name)), bonus(bonus) {
 }
 
+/**
+ * Copy constructor for a continent
+ * @param orgContinent The continent that will be copied
+ */
 Continent::Continent(const Continent &orgContinent) {
   this->name = orgContinent.name;
   this->bonus = orgContinent.bonus;
   this->territories = orgContinent.territories;
 }
 
+/**
+ * Destructor for the continent
+ */
 Continent::~Continent() = default;
 
+/**
+ * = operator overload for a continent
+ * @param continent The continent that this continent will be equal to
+ * @return new Continent based on the copy constructor
+ */
 Continent &Continent::operator=(const Continent &continent) = default;
 
+/**
+ * Function to print to console the content's of a continent
+ * @param os The OSStream we will be appending to
+ * @param hand  The continent that will be examined
+ * @return A string containing the content's of the continent
+ */
 std::ostream &operator<<(ostream &os, const Continent &continent) {
   os << "Name of continent: " << continent.name << "\n"
      << "Bonus: " << continent.bonus << "\n";
   return os;
 }
 
+/**
+ * Get all territories a continent owns
+ * @return
+ */
 vector<Territory *> Continent::getTerritories() {
   return territories;
 }
 
+/**
+ * Get the name of a continent
+ * @return  the name of the continent
+ */
 string Continent::getName() {
   return name;
 }
 
+/**
+ * Get the bonus a continent has
+ * @return the bonus a continent has
+ */
 int Continent::getBonus() const {
   return bonus;
 }
 
+/**
+ * Add a territory to a continent
+ * @param territory The territory that will be added
+ */
 void Continent::addTerritoryToContinent(Territory *territory) {
   territories.push_back(territory);
 }
 
+/**
+ * Find the owner of a continent if there is any
+ * @return the owner of a continent if there is any
+ */
 Player *Continent::owner() {
   Player *p = nullptr;
   for (auto t : territories) {
@@ -175,6 +292,11 @@ Player *Continent::owner() {
   return p;
 }
 
+/**
+ * Find a territory by ID
+ * @param id the id used to look for a territory
+ * @return The territory if there exists one with this ID
+ */
 Territory *Map::findById(int id) const {
   for (auto territory : territories) {
     if (territory->getId() == id) {
@@ -187,13 +309,23 @@ Territory *Map::findById(int id) const {
 
 // ------------------ Maps ------------------------
 
+/**
+ * Constructor for a map
+ */
 Map::Map() = default;
 
+/**
+ * Copy constructor for a map
+ * @param orgMap The map that will be copied
+ */
 Map::Map(const Map &orgMap) {
   this->territories = orgMap.territories;
   this->continents = orgMap.continents;
 }
 
+/**
+ * Destructor for a map
+ */
 Map::~Map() {
   for (auto p : continents) {
     delete p;
@@ -203,12 +335,23 @@ Map::~Map() {
   }
 }
 
+/**
+ * = operator overload for a map
+ * @param continent The map that this map will be equal to
+ * @return new map based on the copy constructor
+ */
 Map &Map::operator=(const Map &map) {
   this->territories = map.territories;
   this->continents = map.continents;
   return *this;
 }
 
+/**
+ * Function to print to console the content's of a map
+ * @param os The OSStream we will be appending to
+ * @param hand  The map that will be examined
+ * @return A string containing the content's of the map
+ */
 std::ostream &operator<<(ostream &os, const Map &map) {
   auto divider = "---------------\n";
   for (auto continent : map.continents) {
@@ -224,22 +367,40 @@ std::ostream &operator<<(ostream &os, const Map &map) {
   return os;
 }
 
+/**
+ * Get all territories within a map
+ * @return all territories within a map
+ */
 vector<Territory *> Map::getAllTerritories() {
   return territories;
 }
 
+/**
+ * Get all continents within a map
+ * @return all continents within a map
+ */
 vector<Continent *> Map::getContinents() {
   return continents;
 }
 
+/**
+ * Add a territory to a map
+ * @param terr The territory that will be added to the map
+ */
 void Map::addTerritoryToMap(Territory *terr) {
   territories.push_back(terr);
 }
 
+/**
+ * Add a continent to a map
+ * @param terr The continent that will be added to the map
+ */
 void Map::addContinent(Continent *continent) {
   continents.push_back(continent);
 }
-
+/**
+ * Reset the visited status of a territory
+ */
 void Map::resetTerr() {
   for (auto &territory : territories) {
     if (territory->visited) {
@@ -248,6 +409,9 @@ void Map::resetTerr() {
   }
 }
 
+/**
+ * Verify which maps are isolated
+ */
 void Map::assertConnected() {
   resetTerr();
 
@@ -269,6 +433,12 @@ void Map::assertConnected() {
   }
 }
 
+/**
+ * Traverse the entire map
+ * @param territory The starting territory
+ * @param visited the count of the territories that have been visited
+ * @return the number of territories visited
+ */
 int Map::traverseTerr(Territory *territory, int visited) {
   vector<Territory *> adjacentTerritories = territory->getAdjTerritories();
 
@@ -282,6 +452,9 @@ int Map::traverseTerr(Territory *territory, int visited) {
   return visited + 1;
 }
 
+/**
+ * Verify if a territory can be reached within each continents
+ */
 void Map::assertSubgraphConnected() {
   for (auto continent : continents) {
     if (continent->getTerritories().size() <= 1) {
@@ -300,6 +473,9 @@ void Map::assertSubgraphConnected() {
   }
 }
 
+/**
+ * Verify that each territory belongs to only one continent
+ */
 void Map::assertEachTerritoryHasUniqueContinent() {
   map<string, string> listOfContinents;
   for (auto continent : continents) {
@@ -312,6 +488,10 @@ void Map::assertEachTerritoryHasUniqueContinent() {
   }
 }
 
+/**
+ * Validate the map
+ * @return boolean whether or not the map is valid
+ */
 bool Map::validate() {
   // Prof says that one-way adjacencies are allowed
 //  assertEveryEdgeIsTwoWay();
@@ -322,6 +502,11 @@ bool Map::validate() {
   return true;
 }
 
+/**
+ * Find a continent by name
+ * @param continentName  the name of the continent
+ * @return The continent
+ */
 Continent *Map::findContinentByName(const string &continentName) {
   auto trimmed = Utils::trim(continentName);
   for (auto continent : continents) {
@@ -332,6 +517,11 @@ Continent *Map::findContinentByName(const string &continentName) {
   return nullptr;
 }
 
+/**
+ * Find a territory by name
+ * @param territoryName  the name of the territory
+ * @return the territory
+ */
 Territory *Map::findTerritoryByName(const string &territoryName) {
   auto trimmed = Utils::trim(territoryName);
   for (auto territory : territories) {
@@ -342,6 +532,9 @@ Territory *Map::findTerritoryByName(const string &territoryName) {
   return nullptr;
 }
 
+/**
+ * Verify if every edge is two way
+ */
 void Map::assertEveryEdgeIsTwoWay() {
   for (auto t : territories) {
     for (auto adj : t->getAdjTerritories()) {
@@ -355,6 +548,10 @@ void Map::assertEveryEdgeIsTwoWay() {
   }
 }
 
+/**
+ * Verify all continents that are owned by a specific player
+ * @return
+ */
 bool Map::allContinentsOwned() {
   Player *p = nullptr;
   for (auto c : continents) {
@@ -369,6 +566,11 @@ bool Map::allContinentsOwned() {
   return p;
 }
 
+/**
+ * Ask user for input to find a territory
+ * @param cancelable boolean to see if this action is cancelable
+ * @return The territory if it has been found
+ */
 Territory *Map::getInputTerritory(bool cancelable) {
   if (cancelable) {
     cout << " Type \"cancel\" to cancel this input." << endl;
@@ -393,11 +595,22 @@ Territory *Map::getInputTerritory(bool cancelable) {
   throw Utils::CancelledInputException();
 }
 
+/**
+ * Ask user for input to find a territory
+ * @param inputRequest The input the user asked for
+ * @param cancelable boolean to see if this action is cancelable
+ * @return Territory user looked for
+ */
 Territory *Map::getInputTerritory(const string &inputRequest, bool cancelable) {
   cout << inputRequest;
   return getInputTerritory(cancelable);
 }
 
+/**
+ * Find a territory based on a user input
+ * @param input the user input
+ * @return the territory
+ */
 Territory *Map::findTerritory(const string &input) {
   try {
     auto value = std::stoi(input);
@@ -412,6 +625,9 @@ Territory *Map::findTerritory(const string &input) {
   return nullptr;
 }
 
+/**
+ * Verify that every territory belongs to a continent
+ */
 void Map::assertEveryTerritoryHasContinent() {
   for (auto t : territories) {
     if (!t->getContinent()) {
@@ -420,6 +636,11 @@ void Map::assertEveryTerritoryHasContinent() {
   }
 }
 
+/**
+ * Read a map file and import it
+ * @param path The path to the map file
+ * @return A loaded map object
+ */
 Map *MapLoader::importMap(const string &path) {
   ifstream file(path);
 
@@ -512,17 +733,3 @@ Map *MapLoader::importMap(const string &path) {
   return map;
 }
 
-void testLoadMaps() {
-  for (const auto &file : directory_iterator{"../assets/"}) {
-    auto path = file.path().string();
-    try {
-      MapLoader::importMap(path);
-      Utils::assertCondition(!path.contains("Invalid"), "map is valid");
-    } catch (runtime_error &e) {
-      Utils::assertCondition(path.contains("Invalid"), path + " map is invalid");
-      cout << "Map '" << path << "' was invalid because " << e.what() << endl;
-    }
-  }
-
-  cout << "All tests passed" << endl;
-}
