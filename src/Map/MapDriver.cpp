@@ -10,11 +10,8 @@
 #include "Map.h"
 #include "../Player/Player.h"
 
-int main(){
-    MapDriver::testLoadMaps();
-}
 
-void MapDriver::testLoadMaps() {
+void testLoadMaps() {
     for (const auto &file : directory_iterator{"../assets/"}) {
         auto path = file.path().string();
         try {

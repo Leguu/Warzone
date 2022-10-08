@@ -1,21 +1,16 @@
 //
 // Created by danie on 2022-10-08.
 //
-#include "CardsDriver.h"
 #include <iostream>
 #include "Card.h"
 #include "../GameEngine/GameEngine.h"
 using std::cout;
 using std::endl;
 
-int main() {
-    CardsDriver::testCards();
-}
-
 /**
  * Verify that we can create a valid deck, draw all its cards, runGameLoop them, and everything is functional
  */
-void CardsDriver::testCards() {
+void testCards() {
     std::vector<Card *> cards = {new BombCard(), new AirliftCard(), new NegotiateCard(), new BlockadeCard()};
     auto ge = new GameEngine("../assets/Moon.map");
     ge->deck = new Deck(cards);

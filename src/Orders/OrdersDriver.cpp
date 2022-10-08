@@ -2,16 +2,12 @@
 // Created by danie on 2022-10-08.
 //
 
-#include "OrdersDriver.h"
 #include "Order.h"
 #include "../GameEngine/GameEngine.h"
 #include <iostream>
 
-int main(){
-    OrdersDriver::testOrdersLists();
-}
 
-void OrdersDriver::testOrdersLists() {
+void testOrdersLists() {
     OrderList list = OrderList();
 
     auto ge = new GameEngine("../assets/Moon.map");

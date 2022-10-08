@@ -2,16 +2,12 @@
 // Created by danie on 2022-10-08.
 //
 
-#include "PlayerDriver.h"
 #include "Player.h"
 #include "../GameEngine/GameEngine.h"
 #include <iostream>
 
-int main(){
-    PlayerDriver::testPlayers();
-}
 
-void PlayerDriver::testPlayers() {
+void testPlayers() {
     auto ge = new GameEngine();
     ge->map = MapLoader::importMap("../assets/Moon.map");
 
