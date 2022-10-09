@@ -2,6 +2,10 @@
 #include "../GameEngine/GameEngine.h"
 #include <iostream>
 
+/**
+ * Find all adjacent enemy territories
+ * @return all adjacent enemy territories
+ */
 vector<Territory *> Player::toAttack() {
   auto adjacentEnemies = vector<Territory *>();
   for (auto t : ownedTerritories) {
@@ -14,6 +18,10 @@ vector<Territory *> Player::toAttack() {
   return adjacentEnemies;
 }
 
+/**
+ * Find all territories the player owns
+ * @return all territories the player owns
+ */
 vector<Territory *> Player::toDefend() {
   return ownedTerritories;
 }
@@ -47,6 +55,9 @@ std::ostream &operator<<(std::ostream &os, const Player &player) {
   return os;
 }
 
+/**
+ * Draw a card from the deck
+ */
 void Player::drawFromDeck() const {
   auto ge = GameEngine::instance();
 
@@ -54,6 +65,9 @@ void Player::drawFromDeck() const {
   hand->cards.push_back(card);
 }
 
+/**
+ * Issue all your orders while its your turn
+ */
 void Player::issueOrder() {
   cout << name << ", it is your turn!" << endl;
   auto ge = GameEngine::instance();
@@ -102,6 +116,9 @@ void Player::issueOrder() {
   }
 }
 
+/**
+ * Issue an advance order
+ */
 void Player::issueAdvanceOrder() {
   auto ge = GameEngine::instance();
   cout << "You can advance from: ";
@@ -152,6 +169,9 @@ void Player::issueAdvanceOrder() {
   cout << "Advance order issued." << endl;
 }
 
+/**
+ * Issue a deploy order
+ */
 void Player::issueDeployOrder() {
   auto ge = GameEngine::instance();
   cout << "You can deploy to: ";
@@ -189,31 +209,19 @@ void Player::issueDeployOrder() {
 
   cout << "Deploy order issued." << endl;
 }
+/**
+ * Player constructor
+ * @param name The name of the player
+ */
 Player::Player(string name) : name(std::move(name)), orders(new OrderList()), hand(new Hand(this)) {
 
 }
 
+/**
+ * Player destructor
+ */
 Player::~Player() {
   delete hand;
   delete orders;
 }
 
-void testPlayers() {
-  auto ge = new GameEngine();
-  ge->map = MapLoader::importMap("../assets/Moon.map");
-
-  auto bob = new Player("Bob");
-
-  auto john = new Player("John");
-
-  ge->map->findTerritory("Byrgius")->setOwner(bob);
-  ge->map->findTerritory("Bay of Dew")->setOwner(john);
-
-  Utils::assertCondition(!bob->toAttack().empty(), "to attack not empty");
-
-  Utils::assertCondition(!bob->toDefend().empty(), "to defend not empty");
-
-  bob->issueOrder();
-
-  delete ge;
-}

@@ -1,5 +1,11 @@
 #include "GameEngine/GameEngine.h"
 #include "Cards/Card.h"
+#include "Orders/OrdersDriver.cpp"
+#include "Player/PlayerDriver.cpp"
+#include "Map/MapDriver.cpp"
+#include "Cards/CardsDriver.cpp"
+#include "GameEngine/GameEngineDriver.cpp"
+
 
 int main() {
   while (true) {
