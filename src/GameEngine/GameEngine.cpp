@@ -220,9 +220,9 @@ void GameEngine::stupidGameLoopThatTheProfWants() {
     state = START;
     const string commands =
             "Available commands:\n"
-            "LoadMap <map name> - Load a map\n"
+            "LoadMap <Map Name> - Load a map\n"
             "ValidateMap - Validate the map has been loaded successfully\n"
-            "AddPlayer <name> - Add a player\n"
+            "AddPlayer <Name> - Add a player\n"
             "AssignCountries - Assign countries to each player in the game\n"
             "IssueOrder - Issue an order\n"
             "EndIssueOrders - Finish issuing orders\n"
