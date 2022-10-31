@@ -9,6 +9,7 @@
 #include <memory>
 #include <filesystem>
 #include "../Utils/Utils.h"
+#include <random>
 
 using std::filesystem::directory_iterator;
 using std::string;
@@ -188,6 +189,8 @@ private:
   void assertEveryEdgeIsTwoWay();
 
   void assertEveryTerritoryHasContinent();
+
+  friend class MapLoader;
 };
 
 class MapLoader {

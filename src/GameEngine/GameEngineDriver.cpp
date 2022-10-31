@@ -5,6 +5,6 @@
 #include "GameEngine.h"
 
 void testGameStates() {
-    auto ge = new GameEngine();
-    ge->stupidGameLoopThatTheProfWants();
+  auto ge = new GameEngine();
+  ge->startupPhase();
 }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <random>
 #include "GameEngine.h"
 
 GameEngine *GameEngine::_instance = nullptr;
@@ -28,7 +29,7 @@ GameEngine::GameEngine(const std::string &mp) {
 
 /// Execute all the orders
 /// \return whether win condition has been reached
-bool GameEngine::executeOrders() {
+bool GameEngine::executeOrdersPhase() {
   cout << endl << "Executing orders..." << endl;
 
   for (auto &player : this->players) {
@@ -53,14 +54,14 @@ bool GameEngine::executeOrders() {
 /**
  * Game loop to run the game
  */
-void GameEngine::runGameLoop() {
+void GameEngine::mainGameLoop() {
   cout << "Welcome to Warzone! Type in \"help\" at any time to have a list of commands" << endl;
   while (true) {
-    assignReinforcements();
+    reinforcementPhase();
 
-    issueOrders();
+    issueOrdersPhase();
 
-    auto gameOver = executeOrders();
+    auto gameOver = executeOrdersPhase();
 
     // If the game is over
     if (gameOver) {
@@ -86,67 +87,6 @@ Player *GameEngine::findPlayerByName(const std::string &name) {
 }
 
 /**
- * Ask for all the players and initialize them
- */
-void GameEngine::initialisePlayers() {
-  cout << *map << endl;
-  cout << "Input the name of every single player, and then type \"done\" when finished." << endl;
-  cout << "You will also need to choose their starting territory. Use the map representation above to begin!" << endl;
-  while (true) {
-    auto name = Utils::getInputString("Input the player name");
-
-    if (Utils::isEqualLowercase(name, "done") || name.empty()) {
-      if (players.size() < 2) {
-        cout << "You have to input at least 2 players" << endl;
-        continue;
-      }
-      return;
-    }
-
-    auto player = new Player(name);
-
-    try {
-      while (true) {
-        auto reinforcements = Utils::getInputInt("How many reinforcements will this player start with?", true);
-
-        if (reinforcements < 0) {
-          cout << "Input a value greater than or equal to 0" << endl;
-          continue;
-        }
-
-        player->reinforcements = reinforcements;
-        break;
-      }
-    } catch (Utils::CancelledInputException &) {
-      continue;
-    }
-
-    Territory *territory;
-    try {
-      while (true) {
-        territory = map->getInputTerritory("What territory does this player start in?", true);
-
-        if (territory->getOwner()) {
-          cout << "That territory already has an owner... Try again" << endl;
-          continue;
-        }
-
-        break;
-      }
-    } catch (Utils::CancelledInputException &) {
-      continue;
-    }
-
-    territory->setOwner(player);
-
-    this->players.push_back(player);
-    cout << "Player " << player->name << " starts off in territory " << territory->getName() << " with "
-         << player->reinforcements
-         << " reinforcements to start with." << endl;
-  }
-}
-
-/**
  * Empty constructor to create the game engine singleton variable
  */
 GameEngine::GameEngine() {
@@ -154,31 +94,9 @@ GameEngine::GameEngine() {
 }
 
 /**
- * Initialize the game
- */
-void GameEngine::initialiseGame() {
-  while (true) {
-    auto path = Utils::getInputString("Input the path of the map. Leave empty for a default map.");
-
-    if (path.empty()) {
-      path = "../assets/Moon.map";
-    }
-
-    try {
-      map = MapLoader::importMap(path);
-      break;
-    } catch (runtime_error &e) {
-      cout << "There was an error with that map: " << e.what() << endl;
-    }
-  }
-
-  initialisePlayers();
-}
-
-/**
  * Issue the orders
  */
-void GameEngine::issueOrders() {
+void GameEngine::issueOrdersPhase() {
   for (auto player : players) {
     player->issueOrder();
   }
@@ -197,7 +115,7 @@ GameEngine *GameEngine::instance() {
 /**
  * Assign the reinforcements to all territories
  */
-void GameEngine::assignReinforcements() const {
+void GameEngine::reinforcementPhase() const {
   for (auto p : players) {
     auto reinforcementsToAssign = 0;
 
@@ -215,83 +133,84 @@ void GameEngine::assignReinforcements() const {
   }
 }
 
-/**
- * Game loop the teacher wants
- */
-void GameEngine::stupidGameLoopThatTheProfWants() {
+void GameEngine::startupPhase() {
   state = START;
   const string commands =
       "Available commands:\n"
       "LoadMap <Map Name> - Load a map\n"
       "ValidateMap - Validate the map has been loaded successfully\n"
       "AddPlayer <Name> - Add a player\n"
-      "AssignCountries - Assign countries to each player in the game\n"
-      "IssueOrder - Issue an order\n"
-      "EndIssueOrders - Finish issuing orders\n"
-      "EndExecOrders - End your turn and execute the orders\n";
+      "GameStart - Start the game\n"
+      "Replay - Restart the game\n"
+      "Quit - Quit the game";
 
-  string input;
+  Command *input;
 
-  cout << "Game has begun!" << endl;
-  while (state != WIN) {
-    input = Utils::getInputString("Input your command, write \"help\" for help");
-    auto split = Utils::tokenizer(input, ' ');
+  while (true) {
+    input = commandProcessor->getCommand("Input your command, write \"help\" for help");
 
-    if (split.empty()) {
-      return;
+    if (input == nullptr) {
+      continue;
     }
-    auto command = Utils::toLowercase(Utils::trim(split[0]));
-    auto lowerCaseCommand = Utils::toLowercase(command);
-    if (lowerCaseCommand == "loadmap") {
-      stupidLoadMap("../assets/" + Utils::trim(input.substr(7)) + ".map");
-    } else if (lowerCaseCommand == "help") {
+
+    if (*input == "loadmap") {
+      loadMap("../assets/" + input->getArg() + ".map");
+    } else if (*input == "help") {
       cout << commands << endl;
-    } else if (lowerCaseCommand == "validatemap") {
-      stupidValidateMap();
-    } else if (lowerCaseCommand == "addplayer") {
-      stupidAddPlayer(Utils::trim(input.substr(9)));
-    } else if (lowerCaseCommand == "assigncountries") {
-      stupidAssignCountries();
-    } else if (lowerCaseCommand == "issueorder") {
-      if (state != ASSIGN_REINFORCEMENTS) {
-        cout << wrongStateTransitionMessage << endl;
-        continue;
-      }
-      for (auto p : players) {
-        p->issueOrder();
-      }
-      state = ISSUE_ORDERS;
-    } else if (lowerCaseCommand == "endissueorders") {
-      if (state != ISSUE_ORDERS) {
-        cout << wrongStateTransitionMessage << endl;
-        continue;
-      }
-      if (executeOrders()) {
-        state = WIN;
-      } else {
-        state = EXECUTE_ORDERS;
-      }
-    } else if (lowerCaseCommand == "endexecorders") {
-      if (state != EXECUTE_ORDERS) {
+    } else if (*input == "validatemap") {
+      validateMap();
+    } else if (*input == "addplayer") {
+      addPlayer(input->getArg());
+    } else if (*input == "gamestart") {
+      if (state != GameState::PLAYERS_ADDED) {
         cout << wrongStateTransitionMessage << endl;
         continue;
       }
 
-      assignReinforcements();
-      state = ASSIGN_REINFORCEMENTS;
+      if (players.size() < 2) {
+        cout << "You can't have a game of less than 2 players, unless you're schizophrenic" << endl;
+        continue;
+      }
+
+      auto rng = std::default_random_engine();
+      std::shuffle(players.begin(), players.end(), rng);
+
+      assignCountries();
+
+      for (auto p : players) {
+        p->hand->draw();
+        p->hand->draw();
+      }
+
+      mainGameLoop();
+
+      state = GameState::WIN;
+    } else if (*input == "quit") {
+      if (state != GameState::WIN) {
+        cout << wrongStateTransitionMessage << endl;
+        continue;
+      }
+
+      return;
+    } else if (*input == "replay") {
+      if (state != GameState::WIN) {
+        cout << wrongStateTransitionMessage << endl;
+        continue;
+      }
+
+      return;
     } else {
       cout << "Type the right command" << endl;
     }
     cout << "-----------------------------" << endl;
   }
-
 }
 
 /**
  * Load the map like the teacher wants
  * @param input the map name
  */
-void GameEngine::stupidLoadMap(const string &input) {
+void GameEngine::loadMap(const string &input) {
   if (state != MAP_LOADED && state != START) {
     cout << wrongStateTransitionMessage << endl;
     return;
@@ -315,7 +234,7 @@ void GameEngine::stupidLoadMap(const string &input) {
 /**
  * Validate the map like the teacher wants
  */
-void GameEngine::stupidValidateMap() {
+void GameEngine::validateMap() {
   if (state != MAP_LOADED) {
     cout << wrongStateTransitionMessage << endl;
     return;
@@ -334,9 +253,14 @@ void GameEngine::stupidValidateMap() {
  * Add player like teacher wants
  * @param playerName The player name
  */
-void GameEngine::stupidAddPlayer(const string &playerName) {
+void GameEngine::addPlayer(const string &playerName) {
   if (state != MAP_VALIDATED && state != PLAYERS_ADDED) {
     cout << wrongStateTransitionMessage << endl;
+    return;
+  }
+
+  if (players.size() >= 6) {
+    cout << "Can't add more than 6 players!" << endl;
     return;
   }
 
@@ -353,28 +277,13 @@ void GameEngine::stupidAddPlayer(const string &playerName) {
 /**
  * Assign the countries like the teacher wants
  */
-void GameEngine::stupidAssignCountries() {
-  if (state != PLAYERS_ADDED) {
-    cout << wrongStateTransitionMessage << endl;
-    return;
+void GameEngine::assignCountries() {
+  auto i = 0;
+  // Territories are randomly shuffled by the Map class, so this operation is valid
+  for (auto t : map->getAllTerritories()) {
+    t->setOwner(players[i]);
+    i = (i + 1) % players.size();
   }
-
-  if (players.size() < 2) {
-    cout << "Can't have a game with fewer than 2 players, unless you're schizophrenic" << endl;
-    return;
-  }
-
-  for (auto p : players) {
-    auto territory = map->getInputTerritory("Set the starting territory for player " + p->name, false);
-
-    territory->setOwner(p);
-
-    cout << "Territory set for player " << p->name << endl;
-  }
-
-  state = ASSIGN_REINFORCEMENTS;
-
-  assignReinforcements();
 }
 
 /**
@@ -388,3 +297,4 @@ GameEngine::~GameEngine() {
   delete deck;
   delete map;
 }
+

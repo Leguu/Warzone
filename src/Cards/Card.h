@@ -15,7 +15,7 @@ class Hand {
 public:
   void remove(Card *card);
 
-  std::vector<Card *> cards;
+  std::vector<Card *> cards = {};
 
   explicit Hand(Player *player);
 

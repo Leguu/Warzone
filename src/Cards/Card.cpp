@@ -100,7 +100,7 @@ bool BombCard::play(Player *issuer) const {
       cout << "* " << *adjacentEnemyTerritory << " ";
     }
     cout << endl;
-    auto territory = ge->map->getInputTerritory("Please input the ID of the territory you will bomb.", true);
+    auto territory = ge->map->getInputTerritory("Please input the ID of the territory you will bomb.");
     if (territory->getOwner() == issuer) {
       cout << "Error: Cannot bomb your own territory!" << endl << endl;
       continue;
@@ -158,7 +158,7 @@ bool BlockadeCard::play(Player *issuer) const {
       cout << "Name: " << playerTerritory->getName() << ", ID : " << playerTerritory->getId() << endl;
     }
     auto territory =
-        ge->map->getInputTerritory("Please input the ID of the territory you will Blockade.", true);
+        ge->map->getInputTerritory("Please input the ID of the territory you will Blockade.");
     if (territory->getOwner() != issuer) {
       cout << "Error: Cannot blockade territory you don't own!" << endl << endl;
       continue;
@@ -199,13 +199,13 @@ bool AirliftCard::play(Player *issuer) const {
       cout << "Name: " << territory->getName() << ", ID : " << territory->getId() << endl;
     }
     auto territoryOrigin = ge->map->getInputTerritory(
-        "Please input the ID of the territory you will airlift.", true);
+        "Please input the ID of the territory you will airlift.");
     if (territoryOrigin->getOwner() != issuer) {
       cout << "Error: Cannot airlift from a territory you don't own!" << endl << endl;
       continue;
     }
     auto territoryTarget = ge->map->getInputTerritory(
-        "Please input the ID of the destination territory", true);
+        "Please input the ID of the destination territory");
     if (territoryTarget->getOwner() != issuer) {
       cout << "Error: Cannot airlift to a territory you don't own!" << endl << endl;
       continue;
@@ -251,6 +251,10 @@ void AirliftCard::execute(Player *issuer, int armiesSize, Territory *territoryOr
 Card *Hand::draw() {
   auto ge = GameEngine::instance();
   auto card = ge->deck->draw();
+  if (card == nullptr) {
+    cout << "There are no more cards to draw in the deck!" << endl;
+    return nullptr;
+  }
   this->add(card);
   return card;
 }
@@ -383,9 +387,6 @@ Hand::~Hand() {
   }
 }
 
-/// Remove a card by name
-/// \param name name of card to remove
-/// \return card with the same name
 Card *Hand::removeByName(const string &name) {
   for (auto card : cards) {
     for (const auto &alias : card->getAliases())
@@ -397,8 +398,10 @@ Card *Hand::removeByName(const string &name) {
   return nullptr;
 }
 
-/// Play a card by name. Removes it from hand and puts it in the deck
-/// \param cardName name of card to play
+/**
+ * Play a card from the deck and add it to the deck
+ * @param cardName The name of the card
+ */
 void Hand::play(const string &cardName) {
   auto ge = GameEngine::instance();
   auto card = removeByName(cardName);
@@ -436,5 +439,3 @@ Deck::~Deck() {
     counter = counter + 1;
   }
 }
-
-

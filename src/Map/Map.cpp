@@ -730,6 +730,9 @@ Map *MapLoader::importMap(const string &path) {
     throw e;
   }
 
+  auto rng = std::default_random_engine();
+  std::shuffle(map->territories.begin(), map->territories.end(), rng);
+
   return map;
 }
 
