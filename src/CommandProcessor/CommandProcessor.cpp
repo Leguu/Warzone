@@ -2,6 +2,7 @@
 
 #include <utility>
 #include "../Utils/Utils.h"
+#include "../GameEngine/GameEngine.h"
 
 
 /**
@@ -88,6 +89,7 @@ Command *CommandProcessor::readCommand() {
 
 bool CommandProcessor::validate(Command * command) {
 
+    auto engine = GameEngine::instance();
 //    if (engine != nullptr && command != nullptr) {
 //    }
 

@@ -6,4 +6,4 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_executable(Warzone src/MainDriver.cpp src/Player/Player.cpp src/Player/Player.h src/Map/Map.cpp src/Map/Map.h src/Orders/Order.cpp src/Orders/Order.h src/Cards/Card.cpp src/Cards/Card.h src/GameEngine/GameEngine.cpp src/GameEngine/GameEngine.h src/Utils/Utils.cpp src/Utils/Utils.h src/CommandProcessor/CommandProcessor.cpp src/CommandProcessor/CommandProcessor.h)
 
-add_executable(CommandProc src/CommandProcessor/CommandProcessor.cpp src/CommandProcessor/CommandProcessorDriver.cpp src/Utils/Utils.cpp)
+add_executable(CommandProc src/CommandProcessor/CommandProcessor.cpp src/CommandProcessor/CommandProcessorDriver.cpp src/Utils/Utils.cpp src/GameEngine/GameEngine.cpp)

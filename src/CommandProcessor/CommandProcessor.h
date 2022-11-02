@@ -15,11 +15,6 @@ using std::ifstream;
 using std::streampos;
 using std::ostream;
 
-class CommandProcessor;
-
-// forward declared
-class GameEngine;
-
 // Command class
 class Command {
 public:
@@ -59,8 +54,6 @@ private:
 class CommandProcessor {
 public:
 
-    // TODO cannot get an instance
-    //   GameEngine * gameEngine;
     CommandProcessor();
 
     CommandProcessor(const CommandProcessor &);
