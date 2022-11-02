@@ -8,6 +8,8 @@ class GameEngine;
 #include "../Player/Player.h"
 #include "../Orders/Order.h"
 #include "../Logging/LoggingObserver.h"
+#include "../CommandProcessor/CommandProcessor.h"
+
 using std::runtime_error;
 using std::string;
 using std::vector;
@@ -16,14 +18,13 @@ using std::endl;
 
 class GameEngine : public ILoggable, public Subject {
 private:
+private:
     enum GameState {
         START,
         MAP_LOADED,
         MAP_VALIDATED,
         PLAYERS_ADDED,
         ASSIGN_REINFORCEMENTS,
-        ISSUE_ORDERS,
-        EXECUTE_ORDERS,
         WIN
     };
 
@@ -32,47 +33,50 @@ private:
     static GameEngine *_instance;
     GameState state = START;
 
-    void initialisePlayers();
-    void stupidLoadMap(const string &input);
-    void stupidValidateMap();
-    void stupidAddPlayer(const string &playerName);
-    void stupidAssignCountries();
-    std::string stateToString(const GameState gamestate);
+    void loadMap(const string &input);
+
+    void validateMap();
+
+    void addPlayer(const string &playerName);
+
+    void assignCountries();
+
+    std::string stateToString(const GameEngine::GameState gamestate);
 
 
 public:
-  vector<Player *> players = vector<Player *>();
-  Deck *deck = new Deck();
+    vector<Player *> players = vector<Player *>();
+    Deck *deck = new Deck({new BombCard, new BombCard, new AirliftCard, new AirliftCard, new BlockadeCard,
+                           new BlockadeCard, new NegotiateCard});
+    CommandProcessor *commandProcessor = new CommandProcessor();
 
-  Map *map = nullptr;
+    Map *map = nullptr;
 
-  static GameEngine *instance();
+    static GameEngine *instance();
 
-  void initialiseGame();
+    Player *findPlayerByName(const std::string &name);
 
-  Player *findPlayerByName(const std::string &name);
+    explicit GameEngine(const std::string &mapPath);
 
-  explicit GameEngine(const std::string &mapPath);
+    void reinforcementPhase() const;
 
-  void runGameLoop();
+    void issueOrdersPhase();
 
-  void assignReinforcements() const;
+    bool executeOrdersPhase();
 
-  void issueOrders();
+    const static string helpText;
 
-  bool executeOrders();
+    std::string stringToLog() override;
 
-  const static string helpText;
+    // Dumb
+    void startupPhase();
 
-  std::string stringToLog() override;
+    void mainGameLoop();
 
-  // Dumb
+    GameEngine();
 
-  void stupidGameLoopThatTheProfWants();
-
-  GameEngine();
-
-  virtual ~GameEngine();
+    virtual ~GameEngine();
 
 };
+
 #endif //WARZONE_GAMEENGINE_H

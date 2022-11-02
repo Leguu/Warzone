@@ -6,5 +6,5 @@
 
 void testGameStates() {
     auto ge = new GameEngine();
-    ge->stupidGameLoopThatTheProfWants();
+    ge->startupPhase();
 }

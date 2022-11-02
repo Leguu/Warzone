@@ -7,10 +7,10 @@
 #include "GameEngine/GameEngineDriver.cpp"
 #include "Logging/LoggingObserverDriver.cpp"
 
-
 int main() {
   while (true) {
-    auto input = Utils::getInputString("What do you want to test? cards, map, orders, players, game, logging. Type quit to quit");
+    auto
+        input = Utils::getInputString("What do you want to test? cards, map, orders, players, game. Type quit to quit");
 
     if (input == "cards") {
       testCards();
@@ -24,7 +24,7 @@ int main() {
         testLoggingObserver();
     } else if (input == "game") {
       auto ge = new GameEngine();
-      ge->stupidGameLoopThatTheProfWants();
+      ge->startupPhase();
     } else if (input == "quit") {
       break;
     } else {

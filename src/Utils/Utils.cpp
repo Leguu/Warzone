@@ -12,25 +12,25 @@ string Utils::getInputString(const string &prompt) {
 int Utils::getInputInt(const string &prompt, bool cancelable) {
   cout << prompt;
   if (cancelable) {
-	cout << " Type in \"cancel\" to cancel this input.";
+    cout << " Type in \"cancel\" to cancel this input.";
   }
   cout << endl;
   int value;
 
   while (true) {
-	auto input = getInputString();
+    auto input = getInputString();
 
-	if (cancelable && Utils::isEqualLowercase(input, "cancel")) {
-	  throw CancelledInputException();
-	}
+    if (cancelable && Utils::isEqualLowercase(input, "cancel")) {
+      throw CancelledInputException();
+    }
 
-	try {
-	  value = stoi(input);
-	  break;
-	} catch (std::invalid_argument &e) {
-	  cout << "Your input has to be a number!" << endl;
-	  continue;
-	}
+    try {
+      value = stoi(input);
+      break;
+    } catch (std::invalid_argument &e) {
+      cout << "Your input has to be a number!" << endl;
+      continue;
+    }
   }
 
   return value;
@@ -42,11 +42,11 @@ int Utils::getInputInt(const string &prompt) {
 
 vector<string> Utils::tokenizer(const string &s, char del) {
   auto vec = vector<string>();
-  auto ss = std::stringstream(s);
+  auto ss = std::stringstream(Utils::trim(s));
   string word;
   while (!ss.eof()) {
-	getline(ss, word, del);
-	vec.push_back(word);
+    getline(ss, word, del);
+    vec.push_back(word);
   }
   return vec;
 }
@@ -84,9 +84,9 @@ string Utils::toLowercase(const string &a) {
   return aStr;
 }
 
-void Utils::assertCondition(bool condition, const std::string& message) {
+void Utils::assertCondition(bool condition, const std::string &message) {
   if (!condition) {
-	throw std::runtime_error(message);
+    throw std::runtime_error(message);
   }
 }
 

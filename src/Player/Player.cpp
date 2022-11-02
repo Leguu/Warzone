@@ -2,11 +2,15 @@
 #include "../GameEngine/GameEngine.h"
 #include <iostream>
 
+<<<<<<< HEAD
 /**
  * Find all adjacent enemy territories
  * @return all adjacent enemy territories
  */
 vector<Territory *> Player::toAttack() {
+=======
+vector<Territory *> Player::toAttack() const {
+>>>>>>> f52f86f19fa7a202f51f29e41a615334ee3b57a7
   auto adjacentEnemies = vector<Territory *>();
   for (auto t : ownedTerritories) {
     for (auto adj : t->getAdjTerritories()) {
@@ -18,11 +22,15 @@ vector<Territory *> Player::toAttack() {
   return adjacentEnemies;
 }
 
+<<<<<<< HEAD
 /**
  * Find all territories the player owns
  * @return all territories the player owns
  */
 vector<Territory *> Player::toDefend() {
+=======
+vector<Territory *> Player::toDefend() const {
+>>>>>>> f52f86f19fa7a202f51f29e41a615334ee3b57a7
   return ownedTerritories;
 }
 
@@ -54,10 +62,13 @@ std::ostream &operator<<(std::ostream &os, const Player &player) {
   os << player.name << endl;
   return os;
 }
+<<<<<<< HEAD
 
 /**
  * Draw a card from the deck
  */
+=======
+>>>>>>> f52f86f19fa7a202f51f29e41a615334ee3b57a7
 void Player::drawFromDeck() const {
   auto ge = GameEngine::instance();
 
@@ -69,7 +80,6 @@ void Player::drawFromDeck() const {
  * Issue all your orders while its your turn
  */
 void Player::issueOrder() {
-  cout << name << ", it is your turn!" << endl;
   auto ge = GameEngine::instance();
   while (true) {
     auto input = Utils::toLowercase(Utils::trim(Utils::getInputString()));
@@ -90,7 +100,7 @@ void Player::issueOrder() {
       } else if (tokenized[0] == "play") {
         auto cardName = input.substr(5);
 
-        hand->play(cardName);
+//        play(cardName);
       } else if (input == "map") {
         cout << *ge->map << endl;
       } else if (tokenized[0] == "territory") {
@@ -105,10 +115,6 @@ void Player::issueOrder() {
         cout << territory->longDescription() << endl;
       } else if (input == "done") {
         return;
-      } else {
-        cout
-            << "Your input did not correspond to any command. Use 'help' if you need descriptions of commands that are available to you."
-            << endl;
       }
     } catch (Utils::CancelledInputException &) {
       cout << "Cancelled that command." << endl;
@@ -209,6 +215,7 @@ void Player::issueDeployOrder() {
 
   cout << "Deploy order issued." << endl;
 }
+<<<<<<< HEAD
 /**
  * Player constructor
  * @param name The name of the player
@@ -225,3 +232,9 @@ Player::~Player() {
   delete orders;
 }
 
+=======
+Player::Player(string name) : name(std::move(name)), orders(new OrderList()) {
+  this->hand = new Hand(this);
+}
+Player::~Player() = default;
+>>>>>>> f52f86f19fa7a202f51f29e41a615334ee3b57a7

@@ -20,17 +20,15 @@ public:
   OrderList *orders;
   Hand *hand;
   vector<Territory *> ownedTerritories = {};
-  int reinforcements = 0;
+  int reinforcements = 50;
 
   explicit Player(string name);
 
   vector<Territory *> getAdjacentEnemyTerritories();
 
-  // TODO
-  vector<Territory *> toAttack();
+  [[nodiscard]] vector<Territory *> toAttack() const;
 
-  // TODO
-  vector<Territory *> toDefend();
+  [[nodiscard]] vector<Territory *> toDefend() const;
 
   void issueOrder();
 
@@ -42,7 +40,7 @@ public:
 
   friend std::ostream &operator<<(std::ostream &os, const Player &player);
 
-  virtual ~Player();
+  ~Player();
 };
 
 void testPlayers();

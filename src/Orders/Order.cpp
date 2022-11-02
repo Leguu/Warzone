@@ -49,6 +49,7 @@ std::string OrderList::stringToLog() {
 }
 
 /**
+
  * Order destructor
  */
 Order::~Order() = default;
@@ -64,10 +65,10 @@ DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)
         : Order(issuer, "Deploy"),
           reinforcements(reinforcements), target(target) {}
 
-          /**
-           * Description of the deploy order
-           * @return String containing the description
-           */
+/**
+ * Description of the deploy order
+ * @return String containing the description
+ */
 std::string DeployOrder::description() {
     return issuer->name + " deploys " + std::to_string(reinforcements) + " armies to " +
            target->toString();
@@ -121,10 +122,10 @@ AdvanceOrder::AdvanceOrder(Player *issuer, int armies, Territory *source, Territ
         : Order(issuer, "Advance"),
           armies(armies), source(source), target(target) {}
 
-          /**
-           * Description of the advance order
-           * @return String with the description of the advance order
-           */
+/**
+ * Description of the advance order
+ * @return String with the description of the advance order
+ */
 std::string AdvanceOrder::description() {
     return issuer->name + " advances " + std::to_string(armies) + " armies from " + source->toString() +
            " to " +
@@ -138,9 +139,9 @@ std::string AdvanceOrder::description() {
 AdvanceOrder::AdvanceOrder(const AdvanceOrder &other)
         : Order(other.issuer, other.name), armies(other.armies), source(other.source), target(other.target) {}
 
-        /**
-         * Destructor for advance order
-         */
+/**
+ * Destructor for advance order
+ */
 AdvanceOrder::~AdvanceOrder() = default;
 
 // ------------------ BombOrder ------------------------
@@ -153,10 +154,10 @@ BombOrder::BombOrder(Player *issuer, Territory *target)
         : Order(issuer, "Bomb"),
           target(target) {}
 
-          /**
-           * Description of the bomb order
-           * @return string with the description
-           */
+/**
+ * Description of the bomb order
+ * @return string with the description
+ */
 std::string BombOrder::description() {
     return issuer->name + " bombs " + target->toString();
 }
@@ -200,10 +201,10 @@ BlockadeOrder::BlockadeOrder(Player *issuer, Territory *target)
         : Order(issuer, "Blockade"),
           target(target) {}
 
-          /**
-           * Description of the blockade order
-           * @return String with the description
-           */
+/**
+ * Description of the blockade order
+ * @return String with the description
+ */
 std::string BlockadeOrder::description() {
     return issuer->name + " blockades " + target->toString();
 }
@@ -249,10 +250,10 @@ AirliftOrder::AirliftOrder(Player *issuer, int armies, Territory *source, Territ
         : Order(issuer, "Airlift"),
           armies(armies), source(source), target(target) {}
 
-          /**
-           * Description of the airlift order
-           * @return String with the description
-           */
+/**
+ * Description of the airlift order
+ * @return String with the description
+ */
 std::string AirliftOrder::description() {
     return issuer->name + " airlifts " + std::to_string(armies) + " armies from " + source->toString() +
            " to " +
@@ -290,6 +291,7 @@ void AirliftOrder::execute() {
  */
 AirliftOrder::AirliftOrder(const AirliftOrder &other) : Order(other.issuer, other.name), target(other.target),
                                                         source(other.source), armies(other.armies) {}
+
 /**
  * Airlift order destructor
  */
@@ -305,10 +307,10 @@ NegotiateOrder::NegotiateOrder(Player *issuer, const Player *target)
         : Order(issuer, "Negotiate"),
           target(target) {}
 
-          /**
-           * Description of the negotiate order
-           * @return String with the description
-           */
+/**
+ * Description of the negotiate order
+ * @return String with the description
+ */
 std::string NegotiateOrder::description() {
     return issuer->name + " negotiates with " + target->name;
 }
