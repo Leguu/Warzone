@@ -5,6 +5,8 @@
 #include <vector>
 #include <memory>
 #include <iostream>
+#include "../Logging/LoggingObserver.h"
+
 using std::string;
 using std::vector;
 using std::cout;
@@ -12,36 +14,45 @@ using std::endl;
 
 class CommandProcessor;
 
-class Command {
+class Command : public ILoggable, public Subject {
 public:
-  [[nodiscard]] const string &getCommand() const;
-  [[nodiscard]] const string &getArg() const;
-  [[nodiscard]] const string &getEffect() const;
+    [[nodiscard]] const string &getCommand() const;
 
-  bool operator!=(const string &rhs) const;
-  bool operator==(const string &rhs) const;
+    [[nodiscard]] const string &getArg() const;
 
-  void setEffect(const string &Effect);
+    [[nodiscard]] const string &getEffect() const;
+
+    bool operator!=(const string &rhs) const;
+
+    bool operator==(const string &rhs) const;
+
+    void setEffect(const string &Effect);
+
+    std::string stringToLog() override;
+
 
 private:
-  string command;
-  string arg;
-  string effect;
+    string command;
+    string arg;
+    string effect;
 
-  friend class CommandProcessor;
+    friend class CommandProcessor;
 };
 
-class CommandProcessor {
-  Command *getCommand();
+class CommandProcessor : public ILoggable, public Subject {
+    Command *getCommand();
 
 public:
-  [[nodiscard]] Command * getCommand(const string &prompt);
+    [[nodiscard]] Command *getCommand(const string &prompt);
+
+    std::string stringToLog() override;
+
 private:
-  static Command *readCommand();
+    static Command *readCommand();
 
-  void saveCommand(Command *command);
+    void saveCommand(Command *command);
 
-  vector<Command *> commands;
+    vector<Command *> commands;
 };
 
 #endif //WARZONE_SRC_COMMANDPROCESSOR_COMMANDPROCESSOR_H
