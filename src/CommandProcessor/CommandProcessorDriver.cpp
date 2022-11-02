@@ -1,15 +1,16 @@
 #include <iostream>
 #include <istream>
 #include "CommandProcessor.h"
+#include "../GameEngine/GameEngine.h"
 
-int main() {
+void testCommandProcessor() {
+  auto ge = new GameEngine();
+  auto *cp = new CommandProcessor();
+  cp->getCommand();
+  auto list = cp->getCommandList();
 
-    CommandProcessor * cp = new CommandProcessor();
-    cp->getCommand();
-    auto list = cp->getCommandList();
-
-    for (auto i : list) {
-        std::cout << *i;
-    }
-    return 0;
+  for (auto i : list) {
+    std::cout << *i;
+    cp->validate(i);
+  }
 }
