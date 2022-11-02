@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include "../Logging/LogObserver.h"
 
 // ------------------ Order -------------------------
 /**
@@ -13,7 +14,9 @@
  * @param name the name of the order
  */
 Order::Order(Player *issuer, std::string name)
-        : name(std::move(name)), issuer(issuer) {}
+        : name(std::move(name)), issuer(issuer) {
+    this->Attach(LogObserver::instance());
+}
 
 /**
  * Function to print to console the content's of the order
@@ -33,8 +36,8 @@ std::ostream &operator<<(std::ostream &os, Order &order) {
 std::string Order::stringToLog() {
     std::ofstream file;
     file.open("../logs/gamelog.txt", std::ios_base::app);
-    file << "Order Executed: " << this->name << std::endl << std::endl;
-    return "Order Executed: " + this->name;
+    file << "Order Executed: \"" << this->name << "\" by Player \"" << this->issuer->name << "\"" <<std::endl << std::endl;
+    return "Order Executed: \"" + this->name + "\" by Player \"" + this->issuer->name + "\"";
 }
 
 /**
@@ -43,16 +46,19 @@ std::string Order::stringToLog() {
  */
 std::string OrderList::stringToLog() {
     std::ofstream file;
+    auto lastOrder = this->orders[this->getOrdersSize() - 1];
     file.open("../logs/gamelog.txt", std::ios_base::app);
-    file << "Order Issued: " << this->orders[this->getOrdersSize() - 1]->name << std::endl << std::endl;
-    return "Order Issued: " + this->orders[this->getOrdersSize() - 1]->name;
+    file << "Order Issued: \"" << lastOrder->name << "\" by Player \"" << lastOrder->issuer->name << "\"" << std::endl << std::endl;
+    return "Order Issued: \"" + lastOrder->name + "\" by Player \"" + lastOrder->issuer->name + "\"";
 }
 
 /**
 
  * Order destructor
  */
-Order::~Order() = default;
+Order::~Order() {
+    this->Detach(LogObserver::instance());
+}
 
 // ------------------ DeployOrder ------------------------
 /**
@@ -334,7 +340,7 @@ NegotiateOrder::~NegotiateOrder() = default;
  */
 void OrderList::push(Order *order) {
     this->orders.push_back(order);
-    this->Notify(order);
+    this->Notify(this);
 }
 
 /**
@@ -432,12 +438,22 @@ std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {
  */
 OrderList::OrderList(const OrderList &o) {
     orders = o.orders;
+    this->Attach(LogObserver::instance());
 }
 
 /**
  * Order list default constructor
  */
-OrderList::OrderList() = default;
+OrderList::OrderList() {
+    this->Attach(LogObserver::instance());
+}
+
+/**
+ * Destructor for OrderList
+ */
+OrderList::~OrderList() {
+    this->Detach(LogObserver::instance());
+}
 
 // ------------------ Exception ------------------------
 /**

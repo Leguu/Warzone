@@ -173,6 +173,7 @@ public:
 
   OrderList();
   OrderList(const OrderList &o);
+  ~OrderList();
 
 private:
   std::vector<Order *> orders = {};

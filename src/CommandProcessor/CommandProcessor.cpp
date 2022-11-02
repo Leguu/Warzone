@@ -26,7 +26,7 @@ Command *CommandProcessor::readCommand() {
             continue;
         }
 
-        if (tokens[0] == "loadmap" || tokens[0] == "addplayer") {
+        if (Utils::isEqualLowercase(tokens[0] ,"loadmap") || Utils::isEqualLowercase(tokens[0] ,"addplayer")) {
             if (tokens.size() == 1) {
                 cout << "This command is missing an argument." << endl;
             }

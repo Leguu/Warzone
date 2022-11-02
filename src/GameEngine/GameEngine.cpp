@@ -2,6 +2,7 @@
 #include <fstream>
 #include <random>
 #include "GameEngine.h"
+#include "../Logging/LogObserver.h"
 
 GameEngine *GameEngine::_instance = nullptr;
 
@@ -26,6 +27,7 @@ const string GameEngine::wrongStateTransitionMessage = "Wrong state";
 GameEngine::GameEngine(const std::string &mp) {
     map = MapLoader::importMap(mp);
     _instance = this;
+    this->Attach(LogObserver::instance());
 }
 
 /// Execute all the orders
@@ -49,6 +51,7 @@ bool GameEngine::executeOrdersPhase() {
         }
     }
     cout << "... All orders have been executed" << endl << endl;
+    cout << "Next round has started" << endl << endl;
     return false;
 }
 
@@ -92,6 +95,7 @@ Player *GameEngine::findPlayerByName(const std::string &name) {
  */
 GameEngine::GameEngine() {
     _instance = this;
+    this->Attach(LogObserver::instance());
 }
 
 /**
@@ -99,6 +103,7 @@ GameEngine::GameEngine() {
  */
 void GameEngine::issueOrdersPhase() {
     for (auto player: players) {
+        cout << "It is your turn to play: " << player->name << endl;
         player->issueOrder();
     }
 }
@@ -146,25 +151,25 @@ void GameEngine::startupPhase() {
             "Quit - Quit the game";
 
     Command *input;
+    state = START;
 
     while (true) {
-        state = START;
         this->Notify(this);
         input = commandProcessor->getCommand("Input your command, write \"help\" for help");
 
         if (input == nullptr) {
             continue;
         }
-
-        if (*input == "loadmap") {
+        std::string inputText = input->getCommand();
+        if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')) ,"loadmap")) {
             loadMap("../assets/" + input->getArg() + ".map");
         } else if (*input == "help") {
             cout << commands << endl;
-        } else if (*input == "validatemap") {
+        } else if (Utils::isEqualLowercase(inputText ,"validatemap")) {
             validateMap();
-        } else if (*input == "addplayer") {
+        } else if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')) ,"addplayer")) {
             addPlayer(input->getArg());
-        } else if (*input == "gamestart") {
+        } else if (Utils::isEqualLowercase(inputText ,"gamestart")) {
             if (state != GameState::PLAYERS_ADDED) {
                 cout << wrongStateTransitionMessage << endl;
                 continue;
@@ -176,6 +181,7 @@ void GameEngine::startupPhase() {
             }
 
             auto rng = std::default_random_engine();
+            rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
             std::shuffle(players.begin(), players.end(), rng);
 
             assignCountries();
@@ -189,19 +195,18 @@ void GameEngine::startupPhase() {
 
             state = GameState::WIN;
             this->Notify(this);
-        } else if (*input == "quit") {
+        } else if (Utils::isEqualLowercase(input->getCommand() ,"quit")) {
             if (state != GameState::WIN) {
                 cout << wrongStateTransitionMessage << endl;
                 continue;
             }
 
             return;
-        } else if (*input == "replay") {
+        } else if (Utils::isEqualLowercase(input->getCommand() ,"replay")) {
             if (state != GameState::WIN) {
                 cout << wrongStateTransitionMessage << endl;
                 continue;
             }
-
             return;
         } else {
             cout << "Type the right command" << endl;
@@ -297,6 +302,7 @@ void GameEngine::assignCountries() {
  */
 GameEngine::~GameEngine() {
     _instance = nullptr;
+    this->Detach(LogObserver::instance());
     for (auto p: players) {
         delete p;
     }
@@ -317,21 +323,10 @@ std::string GameEngine::stringToLog() {
  * @return Their string value
  */
 std::string GameEngine::stateToString(const GameEngine::GameState gamestate) {
-    switch (gamestate) {
-        case GameState::START:
-            return "START";
-        case GameState::MAP_LOADED:
-            return "MAP_LOADED";
-        case GameState::MAP_VALIDATED:
-            return "MAP_VALIDATED";
-        case GameState::PLAYERS_ADDED:
-            return "PLAYERS_ADDED";
-        case GameState::ASSIGN_REINFORCEMENTS:
-            return "ASSIGN_REINFORCEMENTS";
-        case GameState::WIN:
-            return "WIN";
+    std::vector<std::string> enumNames = {"START", "MAP_LOADED", "MAP_VALIDATED", "PLAYERS_ADDED", "ASSIGN_REINFORCEMENTS", "WIN"};
+    if(gamestate < enumNames.size()){
+        return enumNames[gamestate];
     }
-    return NULL;
 }
 
 

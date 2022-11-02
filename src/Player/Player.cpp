@@ -119,7 +119,7 @@ void Player::issueAdvanceOrder() {
   auto ge = GameEngine::instance();
   cout << "You can advance from: ";
   for (auto t : ownedTerritories) {
-    cout << "* " << t->getName() << " ";
+    cout << "* " << *t << " ";
   }
   cout << endl;
   auto source = ge->map->getInputTerritory("What's your source territory?", true);
@@ -172,7 +172,7 @@ void Player::issueDeployOrder() {
   auto ge = GameEngine::instance();
   cout << "You can deploy to: ";
   for (auto t : ownedTerritories) {
-    cout << "* " << t->getName() << " ";
+    cout << "* " << *t << " ";
   }
   cout << endl;
   Territory *target;
