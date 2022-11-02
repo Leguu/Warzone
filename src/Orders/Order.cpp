@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 
 // ------------------ Order -------------------------
@@ -23,6 +24,28 @@ Order::Order(Player *issuer, std::string name)
 std::ostream &operator<<(std::ostream &os, Order &order) {
     os << order.name << ": " << order.description();
     return os;
+}
+
+/**
+ * Log the information of this order
+ * @return a String containing the information that will be logged
+ */
+std::string Order::stringToLog() {
+    std::ofstream file;
+    file.open("../logs/gamelog.txt", std::ios_base::app);
+    file << "Order Executed: " << this->name << std::endl << std::endl;
+    return "Order Executed: " + this->name;
+}
+
+/**
+ * Log the information of this order
+ * @return a String containing the information that will be logged
+ */
+std::string OrderList::stringToLog() {
+    std::ofstream file;
+    file.open("../logs/gamelog.txt", std::ios_base::app);
+    file << "Order Issued: " << this->orders[this->getOrdersSize() - 1]->name << std::endl << std::endl;
+    return "Order Issued: " + this->orders[this->getOrdersSize() - 1]->name;
 }
 
 /**
@@ -70,6 +93,7 @@ void DeployOrder::execute() {
     validate();
     this->issuer->reinforcements -= reinforcements;
     this->target->setArmies(this->target->getArmies() + reinforcements);
+    this->Notify(this);
 }
 
 /**
@@ -152,6 +176,7 @@ void BombOrder::validate() {
 void BombOrder::execute() {
     validate();
     this->target->setArmies(this->target->getArmies() / 2);
+    this->Notify(this);
 }
 
 /**
@@ -198,6 +223,7 @@ void BlockadeOrder::validate() {
 void BlockadeOrder::execute() {
     validate();
     this->target->setArmies(this->target->getArmies() * 3);
+    this->Notify(this);
 }
 
 /**
@@ -255,6 +281,7 @@ void AirliftOrder::execute() {
     int targetArmies = this->target->getArmies();
     this->source->setArmies(sourceArmies - armies);
     this->target->setArmies(targetArmies + armies);
+    this->Notify(this);
 }
 
 /**
@@ -305,6 +332,7 @@ NegotiateOrder::~NegotiateOrder() = default;
  */
 void OrderList::push(Order *order) {
     this->orders.push_back(order);
+    this->Notify(order);
 }
 
 /**

@@ -145,6 +145,4 @@ public:
   ~NegotiateCard() override;
 };
 
-void testCards();
-
 #endif //WARZONE_CARD_H

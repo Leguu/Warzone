@@ -7,13 +7,39 @@ class GameEngine;
 #include <memory>
 #include "../Player/Player.h"
 #include "../Orders/Order.h"
+#include "../Logging/LoggingObserver.h"
 using std::runtime_error;
 using std::string;
 using std::vector;
 using std::cout;
 using std::endl;
 
-class GameEngine {
+class GameEngine : public ILoggable, public Subject {
+private:
+    enum GameState {
+        START,
+        MAP_LOADED,
+        MAP_VALIDATED,
+        PLAYERS_ADDED,
+        ASSIGN_REINFORCEMENTS,
+        ISSUE_ORDERS,
+        EXECUTE_ORDERS,
+        WIN
+    };
+
+    const static string wrongStateTransitionMessage;
+
+    static GameEngine *_instance;
+    GameState state = START;
+
+    void initialisePlayers();
+    void stupidLoadMap(const string &input);
+    void stupidValidateMap();
+    void stupidAddPlayer(const string &playerName);
+    void stupidAssignCountries();
+    std::string stateToString(const GameState gamestate);
+
+
 public:
   vector<Player *> players = vector<Player *>();
   Deck *deck = new Deck();
@@ -38,6 +64,8 @@ public:
 
   const static string helpText;
 
+  std::string stringToLog() override;
+
   // Dumb
 
   void stupidGameLoopThatTheProfWants();
@@ -45,27 +73,6 @@ public:
   GameEngine();
 
   virtual ~GameEngine();
-private:
-  enum GameState {
-    START,
-    MAP_LOADED,
-    MAP_VALIDATED,
-    PLAYERS_ADDED,
-    ASSIGN_REINFORCEMENTS,
-    ISSUE_ORDERS,
-    EXECUTE_ORDERS,
-    WIN
-  };
 
-  const static string wrongStateTransitionMessage;
-
-  static GameEngine *_instance;
-  GameState state = START;
-
-  void initialisePlayers();
-  void stupidLoadMap(const string &input);
-  void stupidValidateMap();
-  void stupidAddPlayer(const string &playerName);
-  void stupidAssignCountries();
 };
 #endif //WARZONE_GAMEENGINE_H

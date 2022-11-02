@@ -5,11 +5,12 @@
 #include "Map/MapDriver.cpp"
 #include "Cards/CardsDriver.cpp"
 #include "GameEngine/GameEngineDriver.cpp"
+#include "Logging/LoggingObserverDriver.cpp"
 
 
 int main() {
   while (true) {
-    auto input = Utils::getInputString("What do you want to test? cards, map, orders, players, game. Type quit to quit");
+    auto input = Utils::getInputString("What do you want to test? cards, map, orders, players, game, logging. Type quit to quit");
 
     if (input == "cards") {
       testCards();
@@ -18,7 +19,9 @@ int main() {
     } else if (input == "orders") {
       testOrdersLists();
     } else if (input == "players") {
-      testPlayers();
+        testPlayers();
+    }else if (input == "logging"){
+        testLoggingObserver();
     } else if (input == "game") {
       auto ge = new GameEngine();
       ge->stupidGameLoopThatTheProfWants();

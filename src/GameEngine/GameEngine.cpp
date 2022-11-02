@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "GameEngine.h"
 
 GameEngine *GameEngine::_instance = nullptr;
@@ -266,8 +267,10 @@ void GameEngine::stupidGameLoopThatTheProfWants() {
             }
             if (executeOrders()) {
                 state = WIN;
+                this->Notify(this);
             } else {
                 state = EXECUTE_ORDERS;
+                this->Notify(this);
             }
         } else if (lowerCaseCommand == "endexecorders") {
             if (state != EXECUTE_ORDERS) {
@@ -277,6 +280,7 @@ void GameEngine::stupidGameLoopThatTheProfWants() {
 
             assignReinforcements();
             state = ASSIGN_REINFORCEMENTS;
+            this->Notify(this);
         } else {
             cout << "Type the right command" << endl;
         }
@@ -308,6 +312,7 @@ void GameEngine::stupidLoadMap(const string &input) {
     }
 
     state = MAP_LOADED;
+    this->Notify(this);
 }
 
 /**
@@ -326,6 +331,7 @@ void GameEngine::stupidValidateMap() {
     }
 
     state = MAP_VALIDATED;
+    this->Notify(this);
 }
 
 /**
@@ -346,6 +352,7 @@ void GameEngine::stupidAddPlayer(const string &playerName) {
     players.push_back(new Player(playerName));
 
     state = PLAYERS_ADDED;
+    this->Notify(this);
 }
 
 /**
@@ -371,9 +378,21 @@ void GameEngine::stupidAssignCountries() {
     }
 
     state = ASSIGN_REINFORCEMENTS;
-
     assignReinforcements();
+    this->Notify(this);
 }
+
+/**
+ * Log the information of this order
+ * @return a String containing the information that will be logged
+ */
+std::string GameEngine::stringToLog() {
+    std::ofstream file;
+    file.open("../logs/gamelog.txt", std::ios_base::app);
+    file << "Game State Modified: " << this->stateToString(this->state) << std::endl << std::endl;
+    return "Game State Modified: " + this->stateToString(this->state);
+}
+
 
 /**
  * Destructor for the game engine
@@ -386,3 +405,32 @@ GameEngine::~GameEngine() {
     delete deck;
     delete map;
 }
+/**
+ * Return the string value of each enum
+ * @param gamestate The enum
+ * @return Their string value
+ */
+std::string GameEngine::stateToString(const GameEngine::GameState gamestate) {
+    switch (gamestate) {
+        case GameState::START:
+            return "START";
+        case GameState::MAP_LOADED:
+            return "MAP_LOADED";
+        case GameState::MAP_VALIDATED:
+            return "MAP_VALIDATED";
+        case GameState::PLAYERS_ADDED:
+            return "PLAYERS_ADDED";
+        case GameState::ASSIGN_REINFORCEMENTS:
+            return "ASSIGN_REINFORCEMENTS";
+        case GameState::ISSUE_ORDERS:
+            return "ISSUE_ORDERS";
+        case GameState::EXECUTE_ORDERS:
+            return "EXECUTE_ORDERS";
+        case GameState::WIN:
+            return "WIN";
+    }
+    return NULL;
+}
+
+
+
