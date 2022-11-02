@@ -52,7 +52,7 @@ ostream &operator<<(ostream &os, const Command &c) {
 
 Command *CommandProcessor::getCommand() {
     auto command = readCommand();
-
+    validate(command);
     saveCommand(command);
 
     return command;
@@ -74,25 +74,57 @@ Command *CommandProcessor::readCommand() {
             command->command = Utils::trim(tokens[0]);
             command->arg = Utils::trim(line.substr(tokens[0].length()));
             return command;
-        }
-        else if (tokens[0] == "validatemap" || tokens[0] == "gamestart" || tokens[0] == "replay" || tokens[0] == "quit") {
+        } else if (tokens[0] == "validatemap" || tokens[0] == "gamestart" || tokens[0] == "replay" ||
+                   tokens[0] == "quit") {
             auto command = new Command();
             command->command = Utils::trim(line);
             return command;
-        }
-        else  {
+        } else {
             cout << "You need to input something" << endl;
             continue;
         }
     }
 }
 
-bool CommandProcessor::validate(Command * command) {
+bool CommandProcessor::validate(Command *command) {
 
     auto engine = GameEngine::instance();
-//    if (engine != nullptr && command != nullptr) {
-//    }
 
+    string badString = "Invalid command!";
+
+    if (engine != nullptr && command != nullptr) {
+
+        GameEngine::GameState currState = engine->getState();
+        string okString = "Valid command. Moving from state " + GameEngine::toString(currState);
+
+        if (command->getCommand() == "loadmap") {
+            if (currState == GameEngine::START || currState == GameEngine::MAP_LOADED) {
+                command->saveEffect(okString);
+                return true;
+            }
+        } else if (command->getCommand() == "validatemap") {
+            if (currState == GameEngine::MAP_LOADED) {
+                command->saveEffect(okString);
+                return true;
+            }
+        } else if (command->getCommand() == "addplayer") {
+            if (currState == GameEngine::MAP_VALIDATED || currState == GameEngine::PLAYERS_ADDED) {
+                command->saveEffect(okString);
+                return true;
+            }
+        } else if (command->getCommand() == "gamestart") {
+            if (currState == GameEngine::PLAYERS_ADDED) {
+                command->saveEffect(okString);
+                return true;
+            }
+        } else if (command->getCommand() == "replay" || command->getCommand() == "quit") {
+            if (currState == GameEngine::WIN) {
+                command->saveEffect(okString);
+                return true;
+            }
+        }
+    }
+    command->saveEffect(badString);
     return false;
 }
 
@@ -109,12 +141,12 @@ CommandProcessor &CommandProcessor::operator=(const CommandProcessor &commandPro
 
 ostream &operator<<(ostream &os, const CommandProcessor &commandProcessor) {
     // TODO format this
-     os << "list of commands: \n" ;
+    os << "list of commands: \n";
 
-     for (auto i: commandProcessor.commands) {
-         os << i->getCommand() << endl;
-     }
-     return os;
+    for (auto i: commandProcessor.commands) {
+        os << i->getCommand() << endl;
+    }
+    return os;
 }
 
 void CommandProcessor::saveCommand(Command *command) {

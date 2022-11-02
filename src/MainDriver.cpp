@@ -10,7 +10,7 @@
 int main() {
   while (true) {
     auto
-        input = Utils::getInputString("What do you want to test? cards, map, orders, players, game. Type quit to quit");
+        input = Utils::getInputString("What do you want to test? cards, map, orders, players, game, command. Type quit to quit");
 
     if (input == "cards") {
       testCards();

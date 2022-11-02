@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 #include "Utils.h"
 
 const string Utils::inputPrompt = ">";

@@ -16,6 +16,29 @@ using std::endl;
 
 class GameEngine {
 public:
+    enum GameState {
+        START,
+        MAP_LOADED,
+        MAP_VALIDATED,
+        PLAYERS_ADDED,
+        ASSIGN_REINFORCEMENTS,
+        WIN
+    };
+
+
+    inline static string toString(GameState g)
+    {
+        switch (g)
+        {
+            case START:   return "START";
+            case MAP_LOADED:   return "MAP_LOADED";
+            case MAP_VALIDATED: return "MAP_VALIDATED";
+            case PLAYERS_ADDED:   return "PLAYERS_ADDED";
+            case ASSIGN_REINFORCEMENTS: return "ASSIGN_REINFORCEMENTS";
+            case WIN: return "WIN";
+            default:      return "UNKNOWN_STATE";
+        }
+    }
   vector<Player *> players = vector<Player *>();
   Deck *deck = new Deck({new BombCard, new BombCard, new AirliftCard, new AirliftCard, new BlockadeCard,
                                          new BlockadeCard, new NegotiateCard});
@@ -44,15 +67,11 @@ public:
   GameEngine();
 
   virtual ~GameEngine();
+
+    GameState getState();
+    GameState setState(GameState);
+
 private:
-  enum GameState {
-    START,
-    MAP_LOADED,
-    MAP_VALIDATED,
-    PLAYERS_ADDED,
-    ASSIGN_REINFORCEMENTS,
-    WIN
-  };
 
   const static string wrongStateTransitionMessage;
 

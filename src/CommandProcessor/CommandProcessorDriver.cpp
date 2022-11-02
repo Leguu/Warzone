@@ -5,8 +5,12 @@
 
 void testCommandProcessor() {
   auto ge = new GameEngine();
+  ge->setState(GameEngine::START);
   auto *cp = new CommandProcessor();
-  cp->getCommand();
+  for (int i = 0; i < 3; i++) {
+      cp->getCommand();
+  }
+
   auto list = cp->getCommandList();
 
   for (auto i : list) {
