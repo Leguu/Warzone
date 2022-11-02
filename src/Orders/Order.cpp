@@ -5,6 +5,8 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <chrono>
+#include <ctime>
 #include "../Logging/LogObserver.h"
 
 // ------------------ Order -------------------------
@@ -36,6 +38,9 @@ std::ostream &operator<<(std::ostream &os, Order &order) {
 std::string Order::stringToLog() {
     std::ofstream file;
     file.open("../logs/gamelog.txt", std::ios_base::app);
+    auto time = std::chrono::system_clock::now();
+    std::time_t time_t = std::chrono::system_clock::to_time_t(time);
+    file << std::ctime(&time_t);
     file << "Order Executed: \"" << this->name << "\" by Player \"" << this->issuer->name << "\"" <<std::endl << std::endl;
     return "Order Executed: \"" + this->name + "\" by Player \"" + this->issuer->name + "\"";
 }
@@ -48,6 +53,9 @@ std::string OrderList::stringToLog() {
     std::ofstream file;
     auto lastOrder = this->orders[this->getOrdersSize() - 1];
     file.open("../logs/gamelog.txt", std::ios_base::app);
+    auto time = std::chrono::system_clock::now();
+    std::time_t time_t = std::chrono::system_clock::to_time_t(time);
+    file << std::ctime(&time_t);
     file << "Order Issued: \"" << lastOrder->name << "\" by Player \"" << lastOrder->issuer->name << "\"" << std::endl << std::endl;
     return "Order Issued: \"" + lastOrder->name + "\" by Player \"" + lastOrder->issuer->name + "\"";
 }

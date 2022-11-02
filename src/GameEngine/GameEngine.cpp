@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <random>
+#include <chrono>
+#include <ctime>
 #include "GameEngine.h"
 #include "../Logging/LogObserver.h"
 
@@ -313,6 +315,9 @@ GameEngine::~GameEngine() {
 std::string GameEngine::stringToLog() {
     std::ofstream file;
     file.open("../logs/gamelog.txt", std::ios_base::app);
+    auto time = std::chrono::system_clock::now();
+    std::time_t time_t = std::chrono::system_clock::to_time_t(time);
+    file << std::ctime(&time_t);
     file << "Game State Modified: " << this->stateToString(this->state) << std::endl << std::endl;
     return "Game State Modified: " + this->stateToString(this->state);
 }
