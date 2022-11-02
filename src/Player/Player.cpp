@@ -2,15 +2,11 @@
 #include "../GameEngine/GameEngine.h"
 #include <iostream>
 
-<<<<<<< HEAD
 /**
  * Find all adjacent enemy territories
  * @return all adjacent enemy territories
  */
-vector<Territory *> Player::toAttack() {
-=======
 vector<Territory *> Player::toAttack() const {
->>>>>>> f52f86f19fa7a202f51f29e41a615334ee3b57a7
   auto adjacentEnemies = vector<Territory *>();
   for (auto t : ownedTerritories) {
     for (auto adj : t->getAdjTerritories()) {
@@ -22,15 +18,12 @@ vector<Territory *> Player::toAttack() const {
   return adjacentEnemies;
 }
 
-<<<<<<< HEAD
 /**
  * Find all territories the player owns
  * @return all territories the player owns
  */
-vector<Territory *> Player::toDefend() {
-=======
+
 vector<Territory *> Player::toDefend() const {
->>>>>>> f52f86f19fa7a202f51f29e41a615334ee3b57a7
   return ownedTerritories;
 }
 
@@ -62,13 +55,10 @@ std::ostream &operator<<(std::ostream &os, const Player &player) {
   os << player.name << endl;
   return os;
 }
-<<<<<<< HEAD
 
 /**
  * Draw a card from the deck
  */
-=======
->>>>>>> f52f86f19fa7a202f51f29e41a615334ee3b57a7
 void Player::drawFromDeck() const {
   auto ge = GameEngine::instance();
 
@@ -215,26 +205,15 @@ void Player::issueDeployOrder() {
 
   cout << "Deploy order issued." << endl;
 }
-<<<<<<< HEAD
+
 /**
  * Player constructor
  * @param name The name of the player
  */
-Player::Player(string name) : name(std::move(name)), orders(new OrderList()), hand(new Hand(this)) {
-
-}
-
-/**
- * Player destructor
- */
-Player::~Player() {
-  delete hand;
-  delete orders;
-}
-
-=======
 Player::Player(string name) : name(std::move(name)), orders(new OrderList()) {
   this->hand = new Hand(this);
 }
+/**
+ * Play destructor
+ */
 Player::~Player() = default;
->>>>>>> f52f86f19fa7a202f51f29e41a615334ee3b57a7
