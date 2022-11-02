@@ -33,6 +33,7 @@ Command::Command(const Command &command) {
 Command &Command::operator=(const Command &c) {
     this->command = c.command;
     this->effect = c.effect;
+    this->arg = c.arg;
     return *this;
 }
 
@@ -43,9 +44,9 @@ Command &Command::operator=(const Command &c) {
  * @return information about the command
  */
 ostream &operator<<(ostream &os, const Command &c) {
-    return cout << "the name of the command is " << c.command << endl
-                << ", and the effect of the command is " << c.effect << endl
-                << ", it's argument is " << c.arg << endl;
+    return cout << "The name of the command is: " << c.command << endl
+                << "The effect of the command is: " << c.effect << endl
+                << "It's argument: " << c.arg << endl;
 }
 
 Command *CommandProcessor::getCommand() {
@@ -63,29 +64,36 @@ Command *CommandProcessor::readCommand() {
 
         auto tokens = Utils::tokenizer(line, ' ');
 
-        if (tokens.empty()) {
-            cout << "You need to input something" << endl;
-            continue;
-        }
-
-        if (tokens[0] == "loadmap" || tokens[0] == "validatemap" || tokens[0] == "addplayer" ||
-            tokens[0] == "gamestart" || tokens[0] == "replay" || tokens[0] == "quit") {
+        if (tokens[0] == "loadmap" || tokens[0] == "addplayer") {
             if (tokens.size() == 1) {
                 cout << "This command is missing an argument." << endl;
+                continue;
             }
             auto command = new Command();
             command->command = Utils::trim(tokens[0]);
             command->arg = Utils::trim(line.substr(tokens[0].length()));
             return command;
-        } else {
+        }
+        else if (tokens[0] == "validatemap" || tokens[0] == "gamestart" || tokens[0] == "replay" || tokens[0] == "quit") {
             auto command = new Command();
-
             command->command = Utils::trim(line);
-
             return command;
+        }
+        else  {
+            cout << "You need to input something" << endl;
+            continue;
         }
     }
 }
+
+bool CommandProcessor::validate(Command * command) {
+
+//    if (engine != nullptr && command != nullptr) {
+//    }
+
+    return false;
+}
+
 
 CommandProcessor::CommandProcessor() = default;
 
@@ -138,6 +146,10 @@ bool Command::operator!=(const string &rhs) const {
 Command *CommandProcessor::getCommand(const string &prompt) {
     cout << prompt << endl;
     return getCommand();
+}
+
+vector<Command *> CommandProcessor::getCommandList() {
+    return commands;
 }
 
 

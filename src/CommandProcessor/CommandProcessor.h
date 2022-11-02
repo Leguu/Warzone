@@ -6,7 +6,6 @@
 #include <memory>
 #include <iostream>
 #include <fstream>
-#include "../GameEngine/GameEngine.h"
 
 using std::string;
 using std::vector;
@@ -18,11 +17,13 @@ using std::ostream;
 
 class CommandProcessor;
 
+// forward declared
 class GameEngine;
 
 // Command class
 class Command {
 public:
+
     Command();
 
     Command(const Command &);
@@ -58,6 +59,8 @@ private:
 class CommandProcessor {
 public:
 
+    // TODO cannot get an instance
+    //   GameEngine * gameEngine;
     CommandProcessor();
 
     CommandProcessor(const CommandProcessor &);
@@ -68,11 +71,13 @@ public:
 
     friend ostream &operator<<(ostream &, const CommandProcessor &);
 
-    bool validate(GameEngine* , Command* );
+     bool validate( Command* );
 
     Command *getCommand();
 
     [[nodiscard]] Command *getCommand(const string &prompt);
+
+    vector<Command*> getCommandList();
 
 private:
 
