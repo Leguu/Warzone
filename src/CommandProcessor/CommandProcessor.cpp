@@ -45,17 +45,18 @@ Command &Command::operator=(const Command &c) {
  * @return information about the command
  */
 ostream &operator<<(ostream &os, const Command &c) {
-    return cout << "The name of the command is: " << c.command << endl
-                << "The effect of the command is: " << c.effect << endl
-                << "It's argument: " << c.arg << endl;
+    return cout << "Name of command is: " << c.command
+                << ", Argument: " << c.arg << endl
+                << "Effect of command is: " << c.effect << endl;
+
 }
 
 Command *CommandProcessor::getCommand() {
     auto command = readCommand();
-    if (validate(command)) {
-        saveCommand(command);
-        return command;
-    }
+    validate(command);
+    saveCommand(command);
+    return command;
+
 }
 
 Command *CommandProcessor::readCommand() {
@@ -79,7 +80,7 @@ Command *CommandProcessor::readCommand() {
             auto command = new Command();
             command->command = Utils::trim(line);
             return command;
-        } else {
+        }  else {
             cout << "You need to input something" << endl;
             continue;
         }
@@ -97,7 +98,7 @@ bool CommandProcessor::validate(Command *command) {
         GameEngine::GameState currState = engine->getState();
         string okString = "Valid command. Moving from state " + GameEngine::toString(currState);
 
-        if (command->getCommand() == "loadmap") {
+        if (command->getCommand() == "loadmap" && !command->getArg().empty()) {
             if (currState == GameEngine::START || currState == GameEngine::MAP_LOADED) {
                 command->saveEffect(okString);
                 return true;
@@ -107,7 +108,7 @@ bool CommandProcessor::validate(Command *command) {
                 command->saveEffect(okString);
                 return true;
             }
-        } else if (command->getCommand() == "addplayer") {
+        } else if (command->getCommand() == "addplayer" && !command->getArg().empty()) {
             if (currState == GameEngine::MAP_VALIDATED || currState == GameEngine::PLAYERS_ADDED) {
                 command->saveEffect(okString);
                 return true;
@@ -124,6 +125,7 @@ bool CommandProcessor::validate(Command *command) {
             }
         }
     }
+    command->saveEffect(badString);
     return false;
 }
 
@@ -252,7 +254,11 @@ string FileLineReader::readLineFromFile() {
         throw runtime_error("File " + path + " could not be opened!");
     } else if (getline(ifile, line)) {
         return line;
-    } else ifile.close();
+    } else{
+        ifile.close();
+        return line;
+    }
+
 
 }
 
@@ -261,24 +267,23 @@ Command *FileCommandProcessorAdapter::readCommand() {
     string currentLine = flr->readLineFromFile();
 
     auto tokens = Utils::tokenizer(currentLine, ' ');
-
+    auto command = new Command();
     if (tokens[0] == "loadmap" || tokens[0] == "addplayer") {
         if (tokens.size() == 1) {
-            cout << "This command is missing an argument. Moving on." << endl;
-            return nullptr;
+            cout << "This command is missing an argument. Moving on..." << endl;
         }
-        auto command = new Command();
         command->command = Utils::trim(tokens[0]);
         command->arg = Utils::trim(currentLine.substr(tokens[0].length()));
         return command;
     } else if (tokens[0] == "validatemap" || tokens[0] == "gamestart" || tokens[0] == "replay" ||
                tokens[0] == "quit") {
-        auto command = new Command();
         command->command = Utils::trim(currentLine);
         return command;
     } else {
         cout << "Some input must be here. Moving on." << endl;
-        return nullptr;
+        command->command = Utils::trim(tokens[0]);
+        command->arg = Utils::trim(currentLine.substr(tokens[0].length()));
+        return command;
     }
 }
 

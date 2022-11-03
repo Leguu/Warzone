@@ -135,7 +135,7 @@ public:
     FileLineReader *flr = nullptr;
 
 private:
-    Command *readCommand();
+    Command *readCommand() override;
 
 };
 

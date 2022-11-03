@@ -1,3 +1,7 @@
 loadmap 123.txt
+loadmap
 replay
 validatemap
+x
+
+;;asdas
