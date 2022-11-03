@@ -187,6 +187,117 @@ vector<Command *> CommandProcessor::getCommandList() {
 }
 
 
+FileCommandProcessorAdapter::FileCommandProcessorAdapter() : CommandProcessor() {
+
+}
+
+FileCommandProcessorAdapter::~FileCommandProcessorAdapter() = default;
+
+FileCommandProcessorAdapter::FileCommandProcessorAdapter(string pathIn) : CommandProcessor() {
+    path = std::move(pathIn);
+}
+
+FileCommandProcessorAdapter::FileCommandProcessorAdapter(const FileCommandProcessorAdapter &fcpa) : CommandProcessor(
+        fcpa) {
+    this->path = fcpa.path;
+    this->flr = fcpa.flr;
+}
+
+FileCommandProcessorAdapter &FileCommandProcessorAdapter::operator=(const FileCommandProcessorAdapter &fcpa) {
+    CommandProcessor::operator=(fcpa);
+    this->path = fcpa.path;
+    this->flr = fcpa.flr;
+    return *this;
+}
+
+ostream &operator<<(ostream &os, const FileCommandProcessorAdapter &fcpa) {
+    os << "The path of the file command processor adaptor is: " << fcpa.path << endl;;
+    return os;
+}
+
+
+void FileCommandProcessorAdapter::setPath(string newPath) {
+    path = std::move(newPath);
+}
+
+FileLineReader::FileLineReader() = default;
+
+FileLineReader::~FileLineReader() = default;
+
+FileLineReader::FileLineReader(string newPath) {
+    path = std::move(newPath);
+}
+
+FileLineReader::FileLineReader(const FileLineReader &flr) {
+    path = flr.path;
+}
+
+FileLineReader &FileLineReader::operator=(const FileLineReader &flr) {
+    this->path = flr.path;
+    return *this;
+}
+
+ostream &operator<<(ostream &os, const FileLineReader &flr) {
+    os << "The path of the file line reader is: " << flr.path << endl;
+    return os;
+}
+
+string FileLineReader::getPath() {
+    return path;
+}
+
+void FileLineReader::setPath(string newPath) {
+    path = std::move(newPath);
+}
+
+vector<string> FileLineReader::readLineFromFile() {
+    ifstream ifile;
+    string line;
+    vector<string> contents;
+    ifile.open(path);
+    if (!ifile) {
+        throw runtime_error("File " + path + " could not be opened!");
+    } else {
+        while (getline(ifile, line)) {
+            contents.push_back(line);
+        }
+    }
+    ifile.close();
+    return contents;
+}
+
+Command *FileCommandProcessorAdapter::readCommand() {
+
+    flr = new FileLineReader(path);
+    auto listOfCommands = flr->readLineFromFile();
+
+    for (const auto &i: listOfCommands) {
+        // TODO returning just one command from file
+        auto tokens = Utils::tokenizer(i, ' ');
+
+        if (tokens[0] == "loadmap" || tokens[0] == "addplayer") {
+            if (tokens.size() == 1) {
+                cout << "This command is missing an argument. Moving on." << endl;
+                continue;
+            }
+            auto command = new Command();
+            command->command = Utils::trim(tokens[0]);
+            command->arg = Utils::trim(i.substr(tokens[0].length()));
+            return command;
+        } else if (tokens[0] == "validatemap" || tokens[0] == "gamestart" || tokens[0] == "replay" ||
+                   tokens[0] == "quit") {
+            auto command = new Command();
+            command->command = Utils::trim(i);
+            return command;
+        } else {
+            cout << "Some input must be here. Moving on." << endl;
+            continue;
+        }
+    }
+
+    return nullptr;
+}
+
 
 
 

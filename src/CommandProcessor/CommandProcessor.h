@@ -47,6 +47,7 @@ private:
     string effect;
 
     friend class CommandProcessor;
+    friend class FileCommandProcessorAdapter;
 };
 
 // Command processor class
@@ -64,17 +65,17 @@ public:
 
     friend ostream &operator<<(ostream &, const CommandProcessor &);
 
-     bool validate( Command* );
+    bool validate(Command *);
 
     Command *getCommand();
 
     [[nodiscard]] Command *getCommand(const string &prompt);
 
-    vector<Command*> getCommandList();
+    vector<Command *> getCommandList();
 
 private:
 
-    static Command *readCommand();
+    virtual Command *readCommand();
 
     void saveCommand(Command *command);
 
@@ -85,15 +86,55 @@ private:
 
 // File line reader
 
-class FileLineReader  {
-    // TODO implement
+class FileLineReader {
+public:
+
+    FileLineReader();
+
+    explicit FileLineReader(string);
+
+    FileLineReader(const FileLineReader &);
+
+    ~FileLineReader();
+
+    FileLineReader &operator=(const FileLineReader &);
+
+    friend ostream &operator<<(ostream &os, const FileLineReader &);
+
+    string getPath();
+
+    void setPath(string);
+
+    vector<string> readLineFromFile();
+
+private:
+    string path;
 };
 
 
 // File command processor class
 
 class FileCommandProcessorAdapter : public CommandProcessor {
-    // TODO implement
+public:
+
+    FileCommandProcessorAdapter();
+
+    explicit FileCommandProcessorAdapter(string pathIn);
+
+    FileCommandProcessorAdapter(const FileCommandProcessorAdapter &);
+
+    ~FileCommandProcessorAdapter() override;
+
+    FileCommandProcessorAdapter &operator=(const FileCommandProcessorAdapter &);
+
+    friend ostream &operator<<(ostream &, const FileCommandProcessorAdapter &);
+
+    void setPath(string newPath);
+
+private:
+     Command *readCommand();
+     FileLineReader *flr = nullptr;
+     string path;
 };
 
 #endif //WARZONE_SRC_COMMANDPROCESSOR_COMMANDPROCESSOR_H
