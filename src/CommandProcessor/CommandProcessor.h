@@ -47,6 +47,7 @@ private:
     string effect;
 
     friend class CommandProcessor;
+
     friend class FileCommandProcessorAdapter;
 };
 
@@ -105,9 +106,11 @@ public:
 
     void setPath(string);
 
-    vector<string> readLineFromFile();
+    string readLineFromFile();
 
+    ifstream ifile;
 private:
+
     string path;
 };
 
@@ -119,7 +122,7 @@ public:
 
     FileCommandProcessorAdapter();
 
-    explicit FileCommandProcessorAdapter(string pathIn);
+    explicit FileCommandProcessorAdapter(string path);
 
     FileCommandProcessorAdapter(const FileCommandProcessorAdapter &);
 
@@ -129,12 +132,11 @@ public:
 
     friend ostream &operator<<(ostream &, const FileCommandProcessorAdapter &);
 
-    void setPath(string newPath);
+    FileLineReader *flr = nullptr;
 
 private:
-     Command *readCommand();
-     FileLineReader *flr = nullptr;
-     string path;
+    Command *readCommand();
+
 };
 
 #endif //WARZONE_SRC_COMMANDPROCESSOR_COMMANDPROCESSOR_H

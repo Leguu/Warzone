@@ -52,10 +52,10 @@ ostream &operator<<(ostream &os, const Command &c) {
 
 Command *CommandProcessor::getCommand() {
     auto command = readCommand();
-    validate(command);
-    saveCommand(command);
-
-    return command;
+    if (validate(command)) {
+        saveCommand(command);
+        return command;
+    }
 }
 
 Command *CommandProcessor::readCommand() {
@@ -124,7 +124,6 @@ bool CommandProcessor::validate(Command *command) {
             }
         }
     }
-    command->saveEffect(badString);
     return false;
 }
 
@@ -188,37 +187,34 @@ vector<Command *> CommandProcessor::getCommandList() {
 
 
 FileCommandProcessorAdapter::FileCommandProcessorAdapter() : CommandProcessor() {
+    flr = new FileLineReader();
 
 }
 
-FileCommandProcessorAdapter::~FileCommandProcessorAdapter() = default;
+FileCommandProcessorAdapter::~FileCommandProcessorAdapter() {
+    delete flr;
+}
 
-FileCommandProcessorAdapter::FileCommandProcessorAdapter(string pathIn) : CommandProcessor() {
-    path = std::move(pathIn);
+FileCommandProcessorAdapter::FileCommandProcessorAdapter(string path) : CommandProcessor() {
+    flr = new FileLineReader(std::move(path));
 }
 
 FileCommandProcessorAdapter::FileCommandProcessorAdapter(const FileCommandProcessorAdapter &fcpa) : CommandProcessor(
         fcpa) {
-    this->path = fcpa.path;
     this->flr = fcpa.flr;
 }
 
 FileCommandProcessorAdapter &FileCommandProcessorAdapter::operator=(const FileCommandProcessorAdapter &fcpa) {
     CommandProcessor::operator=(fcpa);
-    this->path = fcpa.path;
     this->flr = fcpa.flr;
     return *this;
 }
 
 ostream &operator<<(ostream &os, const FileCommandProcessorAdapter &fcpa) {
-    os << "The path of the file command processor adaptor is: " << fcpa.path << endl;;
+    os << "The path of the file command processor adaptor is: " << fcpa.flr->getPath() << endl;;
     return os;
 }
 
-
-void FileCommandProcessorAdapter::setPath(string newPath) {
-    path = std::move(newPath);
-}
 
 FileLineReader::FileLineReader() = default;
 
@@ -250,53 +246,42 @@ void FileLineReader::setPath(string newPath) {
     path = std::move(newPath);
 }
 
-vector<string> FileLineReader::readLineFromFile() {
-    ifstream ifile;
+string FileLineReader::readLineFromFile() {
     string line;
-    vector<string> contents;
-    ifile.open(path);
     if (!ifile) {
         throw runtime_error("File " + path + " could not be opened!");
-    } else {
-        while (getline(ifile, line)) {
-            contents.push_back(line);
-        }
-    }
-    ifile.close();
-    return contents;
+    } else if (getline(ifile, line)) {
+        return line;
+    } else ifile.close();
+
 }
 
 Command *FileCommandProcessorAdapter::readCommand() {
 
-    flr = new FileLineReader(path);
-    auto listOfCommands = flr->readLineFromFile();
+    string currentLine = flr->readLineFromFile();
 
-    for (const auto &i: listOfCommands) {
-        // TODO returning just one command from file
-        auto tokens = Utils::tokenizer(i, ' ');
+    auto tokens = Utils::tokenizer(currentLine, ' ');
 
-        if (tokens[0] == "loadmap" || tokens[0] == "addplayer") {
-            if (tokens.size() == 1) {
-                cout << "This command is missing an argument. Moving on." << endl;
-                continue;
-            }
-            auto command = new Command();
-            command->command = Utils::trim(tokens[0]);
-            command->arg = Utils::trim(i.substr(tokens[0].length()));
-            return command;
-        } else if (tokens[0] == "validatemap" || tokens[0] == "gamestart" || tokens[0] == "replay" ||
-                   tokens[0] == "quit") {
-            auto command = new Command();
-            command->command = Utils::trim(i);
-            return command;
-        } else {
-            cout << "Some input must be here. Moving on." << endl;
-            continue;
+    if (tokens[0] == "loadmap" || tokens[0] == "addplayer") {
+        if (tokens.size() == 1) {
+            cout << "This command is missing an argument. Moving on." << endl;
+            return nullptr;
         }
+        auto command = new Command();
+        command->command = Utils::trim(tokens[0]);
+        command->arg = Utils::trim(currentLine.substr(tokens[0].length()));
+        return command;
+    } else if (tokens[0] == "validatemap" || tokens[0] == "gamestart" || tokens[0] == "replay" ||
+               tokens[0] == "quit") {
+        auto command = new Command();
+        command->command = Utils::trim(currentLine);
+        return command;
+    } else {
+        cout << "Some input must be here. Moving on." << endl;
+        return nullptr;
     }
-
-    return nullptr;
 }
+
 
 
 

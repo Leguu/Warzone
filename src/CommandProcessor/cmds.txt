@@ -1,8 +1,3 @@
 loadmap 123.txt
-hello
-validatemap
-123
-
 replay
-
-;;;
+validatemap
