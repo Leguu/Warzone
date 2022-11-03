@@ -6,7 +6,7 @@
 void testCommandProcessor() {
     auto ge = new GameEngine();
     ge->setState(GameEngine::MAP_LOADED);
-    cout << "You are currently in state " << GameEngine::toString(ge->getState()) << endl;
+    cout << "You are currently in state " << GameEngine::gameStates[ge->getState()] << endl;
 
 
     while (true) {

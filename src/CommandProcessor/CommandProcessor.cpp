@@ -96,7 +96,7 @@ bool CommandProcessor::validate(Command *command) {
     if (engine != nullptr && command != nullptr) {
 
         GameEngine::GameState currState = engine->getState();
-        string okString = "Valid command. Moving from state " + GameEngine::toString(currState);
+        string okString = "Valid command. Moving from state " + GameEngine::gameStates[currState];
 
         if (command->getCommand() == "loadmap" && !command->getArg().empty()) {
             if (currState == GameEngine::START || currState == GameEngine::MAP_LOADED) {

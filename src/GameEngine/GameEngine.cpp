@@ -305,6 +305,3 @@ GameEngine::GameState GameEngine::getState() {
 GameEngine::GameState GameEngine::setState(GameEngine::GameState newState) {
     return state = newState;
 }
-
-
-
