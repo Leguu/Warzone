@@ -5,11 +5,12 @@
 #include "Map/MapDriver.cpp"
 #include "Cards/CardsDriver.cpp"
 #include "GameEngine/GameEngineDriver.cpp"
+#include "CommandProcessor/CommandProcessorDriver.cpp"
 
 int main() {
   while (true) {
     auto
-        input = Utils::getInputString("What do you want to test? cards, map, orders, players, game. Type quit to quit");
+        input = Utils::getInputString("What do you want to test? cards, map, orders, players, game, command. Type quit to quit");
 
     if (input == "cards") {
       testCards();
@@ -22,6 +23,8 @@ int main() {
     } else if (input == "game") {
       auto ge = new GameEngine();
       ge->startupPhase();
+    } else if (input == "command") {
+      testCommandProcessor();
     } else if (input == "quit") {
       break;
     } else {

@@ -8,6 +8,7 @@ class GameEngine;
 #include "../Player/Player.h"
 #include "../Orders/Order.h"
 #include "../CommandProcessor/CommandProcessor.h"
+
 using std::runtime_error;
 using std::string;
 using std::vector;
@@ -16,52 +17,65 @@ using std::endl;
 
 class GameEngine {
 public:
-  vector<Player *> players = vector<Player *>();
-  Deck *deck = new Deck({new BombCard, new BombCard, new AirliftCard, new AirliftCard, new BlockadeCard,
-                                         new BlockadeCard, new NegotiateCard});
-  CommandProcessor *commandProcessor = new CommandProcessor();
+    enum GameState {
+        START,
+        MAP_LOADED,
+        MAP_VALIDATED,
+        PLAYERS_ADDED,
+        ASSIGN_REINFORCEMENTS,
+        WIN
+    };
 
-  Map *map = nullptr;
+    static inline string gameStates[6] = {"START", "MAP_LOADED", "MAP_VALIDATED",
+                                        "PLAYERS_ADDED", "ASSIGN_REINFORCEMENTS", "WIN"};
 
-  static GameEngine *instance();
+    vector<Player *> players = vector<Player *>();
+    Deck *deck = new Deck({new BombCard, new BombCard, new AirliftCard, new AirliftCard, new BlockadeCard,
+                           new BlockadeCard, new NegotiateCard});
+    CommandProcessor *commandProcessor = new CommandProcessor();
 
-  Player *findPlayerByName(const std::string &name);
+    Map *map = nullptr;
 
-  explicit GameEngine(const std::string &mapPath);
+    static GameEngine *instance();
 
-  void reinforcementPhase() const;
+    Player *findPlayerByName(const std::string &name);
 
-  void issueOrdersPhase();
+    explicit GameEngine(const std::string &mapPath);
 
-  bool executeOrdersPhase();
+    void reinforcementPhase() const;
 
-  const static string helpText;
+    void issueOrdersPhase();
 
-  void startupPhase();
+    bool executeOrdersPhase();
 
-  void mainGameLoop();
+    const static string helpText;
 
-  GameEngine();
+    void startupPhase();
 
-  virtual ~GameEngine();
+    void mainGameLoop();
+
+    GameEngine();
+
+    virtual ~GameEngine();
+
+    GameState getState();
+
+    GameState setState(GameState);
+
 private:
-  enum GameState {
-    START,
-    MAP_LOADED,
-    MAP_VALIDATED,
-    PLAYERS_ADDED,
-    ASSIGN_REINFORCEMENTS,
-    WIN
-  };
 
-  const static string wrongStateTransitionMessage;
+    const static string wrongStateTransitionMessage;
 
-  static GameEngine *_instance;
-  GameState state = START;
+    static GameEngine *_instance;
+    GameState state = START;
 
-  void loadMap(const string &input);
-  void validateMap();
-  void addPlayer(const string &playerName);
-  void assignCountries();
+    void loadMap(const string &input);
+
+    void validateMap();
+
+    void addPlayer(const string &playerName);
+
+    void assignCountries();
 };
+
 #endif //WARZONE_GAMEENGINE_H

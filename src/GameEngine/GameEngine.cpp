@@ -298,3 +298,10 @@ GameEngine::~GameEngine() {
   delete map;
 }
 
+GameEngine::GameState GameEngine::getState() {
+    return state;
+}
+
+GameEngine::GameState GameEngine::setState(GameEngine::GameState newState) {
+    return state = newState;
+}
