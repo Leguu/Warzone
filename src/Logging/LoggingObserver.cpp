@@ -8,8 +8,8 @@ Subject::Subject() {
     _observers = new list<Observer *>;
 }
 
-Subject::~Subject() {
-    delete _observers;
+Subject::~Subject(){
+    //nothing
 }
 
 void Subject::Attach(Observer *o) {

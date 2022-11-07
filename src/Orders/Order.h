@@ -177,6 +177,7 @@ public:
 
 private:
   std::vector<Order *> orders = {};
+  friend void testLoggingObserver();
 };
 
 void testOrdersLists();

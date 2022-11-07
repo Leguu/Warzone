@@ -12,6 +12,7 @@ using std::string;
 class ILoggable{
 public:
     virtual std::string stringToLog() = 0;
+    virtual ~ILoggable() = default;
 };
 
 class Observer {

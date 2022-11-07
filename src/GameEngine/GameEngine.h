@@ -16,9 +16,9 @@ using std::vector;
 using std::cout;
 using std::endl;
 
+
 class GameEngine : public ILoggable, public Subject {
-private:
-private:
+public:
     enum GameState {
         START,
         MAP_LOADED,
@@ -28,23 +28,9 @@ private:
         WIN
     };
 
-    const static string wrongStateTransitionMessage;
+    static inline string gameStates[6] = {"START", "MAP_LOADED", "MAP_VALIDATED",
+                                          "PLAYERS_ADDED", "ASSIGN_REINFORCEMENTS", "WIN"};
 
-    static GameEngine *_instance;
-    GameState state = START;
-
-    void loadMap(const string &input);
-
-    void validateMap();
-
-    void addPlayer(const string &playerName);
-
-    void assignCountries();
-
-    std::string stateToString(const GameEngine::GameState gamestate);
-
-
-public:
     vector<Player *> players = vector<Player *>();
     Deck *deck = new Deck({new BombCard, new BombCard, new AirliftCard, new AirliftCard, new BlockadeCard,
                            new BlockadeCard, new NegotiateCard});
@@ -66,9 +52,6 @@ public:
 
     const static string helpText;
 
-    std::string stringToLog() override;
-
-    // Dumb
     void startupPhase();
 
     void mainGameLoop();
@@ -76,6 +59,30 @@ public:
     GameEngine();
 
     virtual ~GameEngine();
+
+    GameState getState();
+
+    std::string stringToLog() override;
+
+    void transition(GameEngine::GameState newState);
+
+
+private:
+
+    const static string wrongStateTransitionMessage;
+
+    static GameEngine *_instance;
+    GameState state = START;
+
+    void loadMap(const string &input);
+
+    void validateMap();
+
+    void addPlayer(const string &playerName);
+
+    void assignCountries();
+
+    friend void testLoggingObserver();
 
 };
 

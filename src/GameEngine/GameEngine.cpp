@@ -153,25 +153,24 @@ void GameEngine::startupPhase() {
             "Quit - Quit the game";
 
     Command *input;
-    state = START;
+    transition(GameState::START);
 
     while (true) {
-        this->Notify(this);
         input = commandProcessor->getCommand("Input your command, write \"help\" for help");
 
         if (input == nullptr) {
             continue;
         }
         std::string inputText = input->getCommand();
-        if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')) ,"loadmap")) {
+        if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')), "loadmap")) {
             loadMap("../assets/" + input->getArg() + ".map");
         } else if (*input == "help") {
             cout << commands << endl;
-        } else if (Utils::isEqualLowercase(inputText ,"validatemap")) {
+        } else if (Utils::isEqualLowercase(inputText, "validatemap")) {
             validateMap();
-        } else if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')) ,"addplayer")) {
+        } else if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')), "addplayer")) {
             addPlayer(input->getArg());
-        } else if (Utils::isEqualLowercase(inputText ,"gamestart")) {
+        } else if (Utils::isEqualLowercase(inputText, "gamestart")) {
             if (state != GameState::PLAYERS_ADDED) {
                 cout << wrongStateTransitionMessage << endl;
                 continue;
@@ -195,16 +194,15 @@ void GameEngine::startupPhase() {
 
             mainGameLoop();
 
-            state = GameState::WIN;
-            this->Notify(this);
-        } else if (Utils::isEqualLowercase(input->getCommand() ,"quit")) {
+            transition(GameState::WIN);
+        } else if (Utils::isEqualLowercase(input->getCommand(), "quit")) {
             if (state != GameState::WIN) {
                 cout << wrongStateTransitionMessage << endl;
                 continue;
             }
 
             return;
-        } else if (Utils::isEqualLowercase(input->getCommand() ,"replay")) {
+        } else if (Utils::isEqualLowercase(input->getCommand(), "replay")) {
             if (state != GameState::WIN) {
                 cout << wrongStateTransitionMessage << endl;
                 continue;
@@ -239,8 +237,7 @@ void GameEngine::loadMap(const string &input) {
         return;
     }
 
-    state = MAP_LOADED;
-    this->Notify(this);
+    transition(GameState::MAP_LOADED);
 }
 
 /**
@@ -257,9 +254,7 @@ void GameEngine::validateMap() {
     } catch (runtime_error &e) {
         cout << "This map is not valid: " << e.what() << endl;
     }
-
-    state = MAP_VALIDATED;
-    this->Notify(this);
+    transition(GameState::MAP_VALIDATED);
 }
 
 /**
@@ -282,9 +277,7 @@ void GameEngine::addPlayer(const string &playerName) {
         return;
     }
     players.push_back(new Player(playerName));
-
-    state = PLAYERS_ADDED;
-    this->Notify(this);
+    transition(GameState::PLAYERS_ADDED);
 }
 
 /**
@@ -318,20 +311,15 @@ std::string GameEngine::stringToLog() {
     auto time = std::chrono::system_clock::now();
     std::time_t time_t = std::chrono::system_clock::to_time_t(time);
     file << std::ctime(&time_t);
-    file << "Game State Modified: " << this->stateToString(this->state) << std::endl << std::endl;
-    return "Game State Modified: " + this->stateToString(this->state);
+    file << "Game State Modified: " << this->gameStates[this->state] << std::endl << std::endl;
+    return "Game State Modified: " + this->gameStates[this->state];
 }
 
-/**
- * Return the string value of each enum
- * @param gamestate The enum
- * @return Their string value
- */
-std::string GameEngine::stateToString(const GameEngine::GameState gamestate) {
-    std::vector<std::string> enumNames = {"START", "MAP_LOADED", "MAP_VALIDATED", "PLAYERS_ADDED", "ASSIGN_REINFORCEMENTS", "WIN"};
-    if(gamestate < enumNames.size()){
-        return enumNames[gamestate];
-    }
+GameEngine::GameState GameEngine::getState() {
+    return state;
 }
 
-
+void GameEngine::transition(GameEngine::GameState newState) {
+    this->state = newState;
+    this->Notify(this);
+}

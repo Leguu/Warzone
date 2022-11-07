@@ -8,13 +8,15 @@
 #include "Logging/LoggingObserverDriver.cpp"
 #include "Logging/LogObserver.h"
 #include "Utils/Utils.h"
+#include "CommandProcessor/CommandProcessorDriver.cpp"
+
 
 int main() {
     auto log = new LogObserver();
     while (true) {
         auto
                 input = Utils::getInputString(
-                "What do you want to test? cards, map, orders, players, game. Type quit to quit");
+                "What do you want to test? cards, map, orders, players, game, logging, command. Type quit to quit");
 
         if (Utils::isEqualLowercase(input, "cards")) {
             testCards();
@@ -26,6 +28,8 @@ int main() {
             testPlayers();
         } else if (Utils::isEqualLowercase(input, "logging")) {
             testLoggingObserver();
+        } else if (input == "command") {
+            testCommandProcessor();
         } else if (Utils::isEqualLowercase(input, "game")) {
             auto ge = new GameEngine();
             ge->startupPhase();
@@ -36,3 +40,4 @@ int main() {
         }
     }
 }
+
