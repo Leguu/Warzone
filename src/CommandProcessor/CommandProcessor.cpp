@@ -1,19 +1,26 @@
 #include "CommandProcessor.h"
-
+#include <fstream>
 #include <utility>
 #include "../Utils/Utils.h"
 #include "../GameEngine/GameEngine.h"
+#include "../Logging/LogObserver.h"
+#include <chrono>
+#include <ctime>
 
 
 /**
  * Command constructor
  */
-Command::Command() = default;
+Command::Command() {
+    this->Attach(LogObserver::instance());
+}
 
 /**
  *  Command destructor
  */
-Command::~Command() = default;
+Command::~Command() {
+    this->Detach(LogObserver::instance());
+}
 
 
 /**
@@ -66,7 +73,8 @@ Command *CommandProcessor::readCommand() {
 
         auto tokens = Utils::tokenizer(line, ' ');
 
-        if (tokens[0] == "loadmap" || tokens[0] == "addplayer") {
+
+        if (Utils::isEqualLowercase(tokens[0], "loadmap") || Utils::isEqualLowercase(tokens[0], "addplayer")) {
             if (tokens.size() == 1) {
                 cout << "This command is missing an argument." << endl;
                 continue;
@@ -75,12 +83,14 @@ Command *CommandProcessor::readCommand() {
             command->command = Utils::trim(tokens[0]);
             command->arg = Utils::trim(line.substr(tokens[0].length()));
             return command;
-        } else if (tokens[0] == "validatemap" || tokens[0] == "gamestart" || tokens[0] == "replay" ||
-                   tokens[0] == "quit") {
+
+        } else if (Utils::isEqualLowercase(tokens[0], "validatemap") ||
+                   Utils::isEqualLowercase(tokens[0], "gamestart") || Utils::isEqualLowercase(tokens[0], "replay") ||
+                   Utils::isEqualLowercase(tokens[0], "quit")) {
             auto command = new Command();
             command->command = Utils::trim(line);
             return command;
-        }  else {
+        } else {
             cout << "You need to input something" << endl;
             continue;
         }
@@ -130,13 +140,18 @@ bool CommandProcessor::validate(Command *command) {
 }
 
 
-CommandProcessor::CommandProcessor() = default;
+CommandProcessor::CommandProcessor() {
+    this->Attach(LogObserver::instance());
+}
 
 CommandProcessor::CommandProcessor(const CommandProcessor &commandProcessor) {
     this->commands = commandProcessor.commands;
+    this->Attach(LogObserver::instance());
 }
 
-CommandProcessor::~CommandProcessor() = default;
+CommandProcessor::~CommandProcessor() {
+    this->Detach(LogObserver::instance());
+}
 
 CommandProcessor &CommandProcessor::operator=(const CommandProcessor &commandProcessor) = default;
 
@@ -152,6 +167,8 @@ ostream &operator<<(ostream &os, const CommandProcessor &commandProcessor) {
 
 void CommandProcessor::saveCommand(Command *command) {
     commands.push_back(command);
+    this->Notify(this);
+
 }
 
 const string &Command::getCommand() const {
@@ -168,6 +185,7 @@ const string &Command::getEffect() const {
 
 void Command::saveEffect(const string &Effect) {
     effect = Effect;
+    this->Notify(this);
 }
 
 bool Command::operator==(const string &rhs) const {
@@ -183,6 +201,26 @@ Command *CommandProcessor::getCommand(const string &prompt) {
     return getCommand();
 }
 
+std::string CommandProcessor::stringToLog() {
+    std::ofstream file;
+    file.open("../logs/gamelog.txt", std::ios_base::app);
+    auto time = std::chrono::system_clock::now();
+    std::time_t time_t = std::chrono::system_clock::to_time_t(time);
+    file << std::ctime(&time_t);
+    file << "New Command Added: " << this->commands[this->commands.size() - 1]->command << std::endl << std::endl;
+    return "New Command Added: " + this->commands[this->commands.size() - 1]->command;
+}
+
+std::string Command::stringToLog() {
+    std::ofstream file;
+    file.open("../logs/gamelog.txt", std::ios_base::app);
+    auto time = std::chrono::system_clock::now();
+    std::time_t time_t = std::chrono::system_clock::to_time_t(time);
+    file << std::ctime(&time_t);
+    file << "Effect Modified: " << this->effect << std::endl << std::endl;
+    return "Effect Modified: " + this->effect;
+}
+
 vector<Command *> CommandProcessor::getCommandList() {
     return commands;
 }
@@ -190,20 +228,24 @@ vector<Command *> CommandProcessor::getCommandList() {
 
 FileCommandProcessorAdapter::FileCommandProcessorAdapter() : CommandProcessor() {
     flr = new FileLineReader();
+    this->Attach(LogObserver::instance());
 
 }
 
 FileCommandProcessorAdapter::~FileCommandProcessorAdapter() {
     delete flr;
+    this->Detach(LogObserver::instance());
 }
 
 FileCommandProcessorAdapter::FileCommandProcessorAdapter(string path) : CommandProcessor() {
     flr = new FileLineReader(std::move(path));
+    this->Attach(LogObserver::instance());
 }
 
 FileCommandProcessorAdapter::FileCommandProcessorAdapter(const FileCommandProcessorAdapter &fcpa) : CommandProcessor(
         fcpa) {
     this->flr = fcpa.flr;
+    this->Attach(LogObserver::instance());
 }
 
 FileCommandProcessorAdapter &FileCommandProcessorAdapter::operator=(const FileCommandProcessorAdapter &fcpa) {
@@ -254,7 +296,7 @@ string FileLineReader::readLineFromFile() {
         throw runtime_error("File " + path + " could not be opened!");
     } else if (getline(ifile, line)) {
         return line;
-    } else{
+    } else {
         ifile.close();
         return line;
     }

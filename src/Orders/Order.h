@@ -10,6 +10,7 @@ class Order;
 #include <queue>
 #include <list>
 #include "../Player/Player.h"
+#include "../Logging/LoggingObserver.h"
 using std::runtime_error;
 
 /// Thrown when an order can not be executed due to invalid state
@@ -18,11 +19,12 @@ public:
   explicit InvalidOrderException(const std::string &arg);
 };
 
-class Order {
+class Order : public ILoggable, public Subject {
 public:
   const std::string name;
   Player *issuer;
   Order(Player *issuer, std::string name);
+  std::string stringToLog() override;
 
   /// Throws InvalidOrderException if the order no longer makes sense (due to previous orders)
   virtual void validate() noexcept(false) = 0;
@@ -149,7 +151,7 @@ private:
   const Player *const target;
 };
 
-class OrderList {
+class OrderList : public ILoggable, public Subject {
 public:
   void remove(int index);
 
@@ -165,13 +167,17 @@ public:
 
   int getOrdersSize();
 
+  std::string stringToLog() override;
+
   friend std::ostream &operator<<(std::ostream &os, const OrderList &orderList);
 
   OrderList();
   OrderList(const OrderList &o);
+  ~OrderList();
 
 private:
   std::vector<Order *> orders = {};
+  friend void testLoggingObserver();
 };
 
 void testOrdersLists();

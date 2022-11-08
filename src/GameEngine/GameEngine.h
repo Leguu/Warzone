@@ -7,6 +7,7 @@ class GameEngine;
 #include <memory>
 #include "../Player/Player.h"
 #include "../Orders/Order.h"
+#include "../Logging/LoggingObserver.h"
 #include "../CommandProcessor/CommandProcessor.h"
 
 using std::runtime_error;
@@ -15,7 +16,8 @@ using std::vector;
 using std::cout;
 using std::endl;
 
-class GameEngine {
+
+class GameEngine : public ILoggable, public Subject {
 public:
     enum GameState {
         START,
@@ -27,7 +29,7 @@ public:
     };
 
     static inline string gameStates[6] = {"START", "MAP_LOADED", "MAP_VALIDATED",
-                                        "PLAYERS_ADDED", "ASSIGN_REINFORCEMENTS", "WIN"};
+                                          "PLAYERS_ADDED", "ASSIGN_REINFORCEMENTS", "WIN"};
 
     vector<Player *> players = vector<Player *>();
     Deck *deck = new Deck({new BombCard, new BombCard, new AirliftCard, new AirliftCard, new BlockadeCard,
@@ -60,7 +62,10 @@ public:
 
     GameState getState();
 
-    GameState setState(GameState);
+    std::string stringToLog() override;
+
+    void transition(GameEngine::GameState newState);
+
 
 private:
 
@@ -76,6 +81,9 @@ private:
     void addPlayer(const string &playerName);
 
     void assignCountries();
+
+    friend void testLoggingObserver();
+
 };
 
 #endif //WARZONE_GAMEENGINE_H

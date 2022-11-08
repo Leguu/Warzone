@@ -731,6 +731,7 @@ Map *MapLoader::importMap(const string &path) {
   }
 
   auto rng = std::default_random_engine();
+  rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
   std::shuffle(map->territories.begin(), map->territories.end(), rng);
 
   return map;

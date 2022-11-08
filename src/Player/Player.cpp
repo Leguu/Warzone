@@ -2,6 +2,10 @@
 #include "../GameEngine/GameEngine.h"
 #include <iostream>
 
+/**
+ * Find all adjacent enemy territories
+ * @return all adjacent enemy territories
+ */
 vector<Territory *> Player::toAttack() const {
   auto adjacentEnemies = vector<Territory *>();
   for (auto t : ownedTerritories) {
@@ -13,6 +17,11 @@ vector<Territory *> Player::toAttack() const {
   }
   return adjacentEnemies;
 }
+
+/**
+ * Find all territories the player owns
+ * @return all territories the player owns
+ */
 
 vector<Territory *> Player::toDefend() const {
   return ownedTerritories;
@@ -46,6 +55,10 @@ std::ostream &operator<<(std::ostream &os, const Player &player) {
   os << player.name << endl;
   return os;
 }
+
+/**
+ * Draw a card from the deck
+ */
 void Player::drawFromDeck() const {
   auto ge = GameEngine::instance();
 
@@ -53,6 +66,9 @@ void Player::drawFromDeck() const {
   hand->cards.push_back(card);
 }
 
+/**
+ * Issue all your orders while its your turn
+ */
 void Player::issueOrder() {
   auto ge = GameEngine::instance();
   while (true) {
@@ -96,11 +112,14 @@ void Player::issueOrder() {
   }
 }
 
+/**
+ * Issue an advance order
+ */
 void Player::issueAdvanceOrder() {
   auto ge = GameEngine::instance();
   cout << "You can advance from: ";
   for (auto t : ownedTerritories) {
-    cout << "* " << t->getName() << " ";
+    cout << "* " << *t << " ";
   }
   cout << endl;
   auto source = ge->map->getInputTerritory("What's your source territory?", true);
@@ -146,11 +165,14 @@ void Player::issueAdvanceOrder() {
   cout << "Advance order issued." << endl;
 }
 
+/**
+ * Issue a deploy order
+ */
 void Player::issueDeployOrder() {
   auto ge = GameEngine::instance();
   cout << "You can deploy to: ";
   for (auto t : ownedTerritories) {
-    cout << "* " << t->getName() << " ";
+    cout << "* " << *t << " ";
   }
   cout << endl;
   Territory *target;
@@ -183,7 +205,15 @@ void Player::issueDeployOrder() {
 
   cout << "Deploy order issued." << endl;
 }
+
+/**
+ * Player constructor
+ * @param name The name of the player
+ */
 Player::Player(string name) : name(std::move(name)), orders(new OrderList()) {
   this->hand = new Hand(this);
 }
+/**
+ * Play destructor
+ */
 Player::~Player() = default;

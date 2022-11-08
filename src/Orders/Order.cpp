@@ -3,7 +3,11 @@
 
 #include <utility>
 #include <iostream>
+#include <fstream>
 #include <iomanip>
+#include <chrono>
+#include <ctime>
+#include "../Logging/LogObserver.h"
 
 // ------------------ Order -------------------------
 /**
@@ -12,7 +16,9 @@
  * @param name the name of the order
  */
 Order::Order(Player *issuer, std::string name)
-        : name(std::move(name)), issuer(issuer) {}
+        : name(std::move(name)), issuer(issuer) {
+    this->Attach(LogObserver::instance());
+}
 
 /**
  * Function to print to console the content's of the order
@@ -26,9 +32,41 @@ std::ostream &operator<<(std::ostream &os, Order &order) {
 }
 
 /**
+ * Log the information of this order
+ * @return a String containing the information that will be logged
+ */
+std::string Order::stringToLog() {
+    std::ofstream file;
+    file.open("../logs/gamelog.txt", std::ios_base::app);
+    auto time = std::chrono::system_clock::now();
+    std::time_t time_t = std::chrono::system_clock::to_time_t(time);
+    file << std::ctime(&time_t);
+    file << "Order Executed: \"" << this->name << "\" by Player \"" << this->issuer->name << "\"" <<std::endl << std::endl;
+    return "Order Executed: \"" + this->name + "\" by Player \"" + this->issuer->name + "\"";
+}
+
+/**
+ * Log the information of this order
+ * @return a String containing the information that will be logged
+ */
+std::string OrderList::stringToLog() {
+    std::ofstream file;
+    auto lastOrder = this->orders[this->getOrdersSize() - 1];
+    file.open("../logs/gamelog.txt", std::ios_base::app);
+    auto time = std::chrono::system_clock::now();
+    std::time_t time_t = std::chrono::system_clock::to_time_t(time);
+    file << std::ctime(&time_t);
+    file << "Order Issued: \"" << lastOrder->name << "\" by Player \"" << lastOrder->issuer->name << "\"" << std::endl << std::endl;
+    return "Order Issued: \"" + lastOrder->name + "\" by Player \"" + lastOrder->issuer->name + "\"";
+}
+
+/**
+
  * Order destructor
  */
-Order::~Order() = default;
+Order::~Order() {
+    this->Detach(LogObserver::instance());
+}
 
 // ------------------ DeployOrder ------------------------
 /**
@@ -41,10 +79,10 @@ DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)
         : Order(issuer, "Deploy"),
           reinforcements(reinforcements), target(target) {}
 
-          /**
-           * Description of the deploy order
-           * @return String containing the description
-           */
+/**
+ * Description of the deploy order
+ * @return String containing the description
+ */
 std::string DeployOrder::description() {
     return issuer->name + " deploys " + std::to_string(reinforcements) + " armies to " +
            target->toString();
@@ -70,6 +108,7 @@ void DeployOrder::execute() {
     validate();
     this->issuer->reinforcements -= reinforcements;
     this->target->setArmies(this->target->getArmies() + reinforcements);
+    this->Notify(this);
 }
 
 /**
@@ -97,10 +136,10 @@ AdvanceOrder::AdvanceOrder(Player *issuer, int armies, Territory *source, Territ
         : Order(issuer, "Advance"),
           armies(armies), source(source), target(target) {}
 
-          /**
-           * Description of the advance order
-           * @return String with the description of the advance order
-           */
+/**
+ * Description of the advance order
+ * @return String with the description of the advance order
+ */
 std::string AdvanceOrder::description() {
     return issuer->name + " advances " + std::to_string(armies) + " armies from " + source->toString() +
            " to " +
@@ -114,9 +153,9 @@ std::string AdvanceOrder::description() {
 AdvanceOrder::AdvanceOrder(const AdvanceOrder &other)
         : Order(other.issuer, other.name), armies(other.armies), source(other.source), target(other.target) {}
 
-        /**
-         * Destructor for advance order
-         */
+/**
+ * Destructor for advance order
+ */
 AdvanceOrder::~AdvanceOrder() = default;
 
 // ------------------ BombOrder ------------------------
@@ -129,10 +168,10 @@ BombOrder::BombOrder(Player *issuer, Territory *target)
         : Order(issuer, "Bomb"),
           target(target) {}
 
-          /**
-           * Description of the bomb order
-           * @return string with the description
-           */
+/**
+ * Description of the bomb order
+ * @return string with the description
+ */
 std::string BombOrder::description() {
     return issuer->name + " bombs " + target->toString();
 }
@@ -152,6 +191,7 @@ void BombOrder::validate() {
 void BombOrder::execute() {
     validate();
     this->target->setArmies(this->target->getArmies() / 2);
+    this->Notify(this);
 }
 
 /**
@@ -175,10 +215,10 @@ BlockadeOrder::BlockadeOrder(Player *issuer, Territory *target)
         : Order(issuer, "Blockade"),
           target(target) {}
 
-          /**
-           * Description of the blockade order
-           * @return String with the description
-           */
+/**
+ * Description of the blockade order
+ * @return String with the description
+ */
 std::string BlockadeOrder::description() {
     return issuer->name + " blockades " + target->toString();
 }
@@ -198,6 +238,7 @@ void BlockadeOrder::validate() {
 void BlockadeOrder::execute() {
     validate();
     this->target->setArmies(this->target->getArmies() * 3);
+    this->Notify(this);
 }
 
 /**
@@ -223,10 +264,10 @@ AirliftOrder::AirliftOrder(Player *issuer, int armies, Territory *source, Territ
         : Order(issuer, "Airlift"),
           armies(armies), source(source), target(target) {}
 
-          /**
-           * Description of the airlift order
-           * @return String with the description
-           */
+/**
+ * Description of the airlift order
+ * @return String with the description
+ */
 std::string AirliftOrder::description() {
     return issuer->name + " airlifts " + std::to_string(armies) + " armies from " + source->toString() +
            " to " +
@@ -255,6 +296,7 @@ void AirliftOrder::execute() {
     int targetArmies = this->target->getArmies();
     this->source->setArmies(sourceArmies - armies);
     this->target->setArmies(targetArmies + armies);
+    this->Notify(this);
 }
 
 /**
@@ -263,6 +305,7 @@ void AirliftOrder::execute() {
  */
 AirliftOrder::AirliftOrder(const AirliftOrder &other) : Order(other.issuer, other.name), target(other.target),
                                                         source(other.source), armies(other.armies) {}
+
 /**
  * Airlift order destructor
  */
@@ -278,10 +321,10 @@ NegotiateOrder::NegotiateOrder(Player *issuer, const Player *target)
         : Order(issuer, "Negotiate"),
           target(target) {}
 
-          /**
-           * Description of the negotiate order
-           * @return String with the description
-           */
+/**
+ * Description of the negotiate order
+ * @return String with the description
+ */
 std::string NegotiateOrder::description() {
     return issuer->name + " negotiates with " + target->name;
 }
@@ -305,6 +348,7 @@ NegotiateOrder::~NegotiateOrder() = default;
  */
 void OrderList::push(Order *order) {
     this->orders.push_back(order);
+    this->Notify(this);
 }
 
 /**
@@ -402,12 +446,22 @@ std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {
  */
 OrderList::OrderList(const OrderList &o) {
     orders = o.orders;
+    this->Attach(LogObserver::instance());
 }
 
 /**
  * Order list default constructor
  */
-OrderList::OrderList() = default;
+OrderList::OrderList() {
+    this->Attach(LogObserver::instance());
+}
+
+/**
+ * Destructor for OrderList
+ */
+OrderList::~OrderList() {
+    this->Detach(LogObserver::instance());
+}
 
 // ------------------ Exception ------------------------
 /**

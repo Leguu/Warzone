@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <iostream>
+#include "../Logging/LoggingObserver.h"
 #include <fstream>
 
 using std::string;
@@ -16,7 +17,7 @@ using std::streampos;
 using std::ostream;
 
 // Command class
-class Command {
+class Command : public ILoggable, public Subject {
 public:
 
     Command();
@@ -41,19 +42,21 @@ public:
 
     void saveEffect(const string &Effect);
 
+    std::string stringToLog() override;
+
 private:
     string command;
     string arg;
     string effect;
 
     friend class CommandProcessor;
-
+    friend void testLoggingObserver();
     friend class FileCommandProcessorAdapter;
 };
 
 // Command processor class
 
-class CommandProcessor {
+class CommandProcessor : public ILoggable, public Subject {
 public:
 
     CommandProcessor();
@@ -74,14 +77,16 @@ public:
 
     vector<Command *> getCommandList();
 
+    std::string stringToLog() override;
+
+    void saveCommand(Command *command);
+
 private:
 
     virtual Command *readCommand();
 
-    void saveCommand(Command *command);
-
     vector<Command *> commands;
-
+    friend void testLoggingObserver();
     friend class FileCommandProcessorAdapter;
 };
 
