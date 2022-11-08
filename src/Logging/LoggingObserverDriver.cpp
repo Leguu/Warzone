@@ -44,7 +44,7 @@ void testLoggingObserver(){
     orderList->Notify(orderList);
     orderList->stringToLog();
 
-    cout << "Testing the Logging for all required methods" << endl;
+    cout << "Part 2: Testing the Logging for all required methods" << endl;
 
     ge->transition(GameEngine::START);
     command->command = "Part 2 Command";

@@ -9,7 +9,7 @@ Subject::Subject() {
 }
 
 Subject::~Subject(){
-    //nothing
+    _observers->clear();
 }
 
 void Subject::Attach(Observer *o) {
