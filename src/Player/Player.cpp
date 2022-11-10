@@ -70,140 +70,44 @@ void Player::drawFromDeck() const {
  * Issue all your orders while its your turn
  */
 void Player::issueOrder() {
-  auto ge = GameEngine::instance();
-  while (true) {
-    auto input = Utils::toLowercase(Utils::trim(Utils::getInputString()));
+  // --------- Deploy Order ---------
+  // keep deploying until zero reinforcements
+  int reinforcementsAfterDeploy = this->reinforcements;
+  while (reinforcementsAfterDeploy > 0) {
+    auto territories = toDefend();
 
-    auto tokenized = Utils::tokenizer(input, ' ');
+    int randomIndex = rand() % territories.size();
+    Territory *target = territories[randomIndex];
 
-    try {
-      if (input == "help") {
-        cout << GameEngine::helpText << endl;
-      } else if (input == "list hand") {
-        cout << *hand << endl;
-      } else if (input == "list orders") {
-        cout << *orders << endl;
-      } else if (input == "advance") {
-        issueAdvanceOrder();
-      } else if (input == "deploy") {
-        issueDeployOrder();
-      } else if (tokenized[0] == "play") {
-        auto cardName = input.substr(5);
+    int armies = rand() % reinforcementsAfterDeploy;
+    orders->push(new DeployOrder(this, armies, target));
 
-//        play(cardName);
-      } else if (input == "map") {
-        cout << *ge->map << endl;
-      } else if (tokenized[0] == "territory") {
-        auto territoryName = input.substr(10);
-        auto territory = ge->map->findTerritory(territoryName);
-
-        if (!territory) {
-          cout << "Couldn't find that territory, sorry" << endl;
-          continue;
-        }
-
-        cout << territory->longDescription() << endl;
-      } else if (input == "done") {
-        return;
-      }
-    } catch (Utils::CancelledInputException &) {
-      cout << "Cancelled that command." << endl;
-    }
-  }
-}
-
-/**
- * Issue an advance order
- */
-void Player::issueAdvanceOrder() {
-  auto ge = GameEngine::instance();
-  cout << "You can advance from: ";
-  for (auto t : ownedTerritories) {
-    cout << "* " << *t << " ";
-  }
-  cout << endl;
-  auto source = ge->map->getInputTerritory("What's your source territory?", true);
-
-  cout << "Where would you like to advance to? You can choose from: ";
-  for (auto t : source->getAdjTerritories()) {
-    cout << "* " << *t << " ";
-  }
-  Territory *target;
-  while (true) {
-    cout << endl;
-    target = ge->map->getInputTerritory(true);
-
-    if (std::find(source->getAdjTerritories().begin(), source->getAdjTerritories().end(), target)
-        == source->getAdjTerritories().end()) {
-      cout << "That territory is not adjacent to your chosen territory, sorry.";
-      continue;
-    }
-
-    break;
+    reinforcementsAfterDeploy -= armies;
   }
 
-  int armies;
-  while (true) {
-    armies = Utils::getInputInt(
-        "How many armies would you like to send? Territory " + source->getName() + " has "
-            + std::to_string(source->getArmies())
-            + " territories...", true);
+  // --------- Advance Order ---------
+  // move army units from one of its own territories to..
+  int randomSourceIndex = rand() % ownedTerritories.size();
+  Territory *source = ownedTerritories[randomSourceIndex];
 
-    if (armies <= 0) {
-      cout << "You have to choose a number of armies greater than 0." << endl;
-      continue;
-    } else if (armies > source->getArmies()) {
-      cout << "Your source territory does not have that many armies!" << endl;
-      continue;
-    }
+  vector<Territory *> territories;
 
-    break;
+  // randomly decide target territory
+  auto randomBoolean = rand() > (RAND_MAX / 2);
+  if (randomBoolean) {
+    territories = toDefend();
+  } else {
+    territories = toAttack();
   }
 
+  int randomTargetIndex = rand() % territories.size();
+  Territory *target = territories[randomTargetIndex];
+
+  int armies = rand() % source->getArmies();
   orders->push(new AdvanceOrder(this, armies, source, target));
 
-  cout << "Advance order issued." << endl;
-}
-
-/**
- * Issue a deploy order
- */
-void Player::issueDeployOrder() {
-  auto ge = GameEngine::instance();
-  cout << "You can deploy to: ";
-  for (auto t : ownedTerritories) {
-    cout << "* " << *t << " ";
-  }
-  cout << endl;
-  Territory *target;
-  while (true) {
-    target = ge->map->getInputTerritory("What's your target territory?", true);
-
-    if (target->getOwner() != this) {
-      cout << "You can't deploy on another player's territory." << endl;
-      continue;
-    }
-
-    break;
-  }
-
-  int armies;
-  while (true) {
-    armies = Utils::getInputInt(
-        "How many armies would you like to send? You have " + std::to_string(reinforcements) + " reinforcements.",
-        true);
-
-    if (armies <= 0) {
-      cout << "You have to choose a number of armies greater than 0." << endl;
-      continue;
-    }
-
-    break;
-  }
-
-  orders->push(new DeployOrder(this, armies, target));
-
-  cout << "Deploy order issued." << endl;
+  // if cards > 0 and random bool
+  //    issueCardOrder();
 }
 
 /**
