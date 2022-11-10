@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "../GameEngine/GameEngine.h"
 #include <iostream>
+#include <random>
 
 /**
  * Find all adjacent enemy territories
@@ -9,11 +10,11 @@
 vector<Territory *> Player::toAttack() const {
   auto adjacentEnemies = vector<Territory *>();
   for (auto t : ownedTerritories) {
-    for (auto adj : t->getAdjTerritories()) {
-      if (adj->getOwner() && adj->getOwner() != this) {
-        adjacentEnemies.push_back(adj);
-      }
-    }
+	for (auto adj : t->getAdjTerritories()) {
+	  if (adj->getOwner() && adj->getOwner() != this) {
+		adjacentEnemies.push_back(adj);
+	  }
+	}
   }
   return adjacentEnemies;
 }
@@ -26,12 +27,12 @@ vector<Territory *> Player::toAttack() const {
 vector<Territory *> Player::toDefend() const {
   auto sensitiveTerritories = vector<Territory *>();
   for (auto t : ownedTerritories) {
-    for (auto adj : t->getAdjTerritories()) {
-      if (adj->getOwner() && adj->getOwner() != this) {
-        sensitiveTerritories.push_back(t);
-        break;
-      }
-    }
+	for (auto adj : t->getAdjTerritories()) {
+	  if (adj->getOwner() && adj->getOwner() != this) {
+		sensitiveTerritories.push_back(t);
+		break;
+	  }
+	}
   }
   return sensitiveTerritories;
 }
@@ -43,13 +44,13 @@ vector<Territory *> Player::toDefend() const {
 vector<Territory *> Player::getAdjacentEnemyTerritories() {
   vector<Territory *> enemyTerritoriesAdjacent;
   for (auto friendlyTerritory : this->ownedTerritories) {
-    for (auto adjacentTerritory : friendlyTerritory->getAdjTerritories()) {
-      if (adjacentTerritory->getOwner() != this && adjacentTerritory->getOwner() &&
-          find(enemyTerritoriesAdjacent.begin(), enemyTerritoriesAdjacent.end(), adjacentTerritory) ==
-              enemyTerritoriesAdjacent.end()) {
-        enemyTerritoriesAdjacent.push_back(adjacentTerritory);
-      }
-    }
+	for (auto adjacentTerritory : friendlyTerritory->getAdjTerritories()) {
+	  if (adjacentTerritory->getOwner() != this && adjacentTerritory->getOwner() &&
+		  find(enemyTerritoriesAdjacent.begin(), enemyTerritoriesAdjacent.end(), adjacentTerritory) ==
+			  enemyTerritoriesAdjacent.end()) {
+		enemyTerritoriesAdjacent.push_back(adjacentTerritory);
+	  }
+	}
   }
   return enemyTerritoriesAdjacent;
 }
@@ -78,45 +79,54 @@ void Player::drawFromDeck() const {
 /**
  * Issue all your orders while its your turn
  */
-void Player::issueOrder() {
+bool Player::issueOrder() {
+  // Current Mechanism:
+  // ------------------
+  // 	1. Keep deploying until zero reinforcements are left. Random number each turn.
+  //    2. If user has a card in their hand, 30% chance they use it (first one available to them), otherwise they advance order.
+  //    3. If OrdersList reaches at least 5-10 moves (decided randomly), the player is done issuing orders.
+  // NOTE: All orders that are issued follow random moves for now.
+
+  // (1)
   // --------- Deploy Order ---------
-  // keep deploying until zero reinforcements
-  int reinforcementsAfterDeploy = this->reinforcements;
-  while (reinforcementsAfterDeploy > 0) {
-    auto territories = toDefend();
+  if (this->reinforcementsAfterDeploy > 0) {
+	auto territories = toDefend();
 
-    int randomIndex = rand() % territories.size();
-    Territory *target = territories[randomIndex];
+	int randomIndex = rand() % territories.size();
+	Territory *target = territories[randomIndex];
 
-    int armies = rand() % reinforcementsAfterDeploy;
-    orders->push(new DeployOrder(this, armies, target));
+	int armies = rand() % reinforcementsAfterDeploy;
+	orders->push(new DeployOrder(this, armies, target));
+	this->reinforcementsAfterDeploy -= armies;
 
-    reinforcementsAfterDeploy -= armies;
+	return false;
   }
 
-  // --------- Advance Order ---------
-  // move army units from one of its own territories to..
-  int randomSourceIndex = rand() % ownedTerritories.size();
-  Territory *source = ownedTerritories[randomSourceIndex];
-
-  vector<Territory *> territories;
-
-  // randomly decide target territory
-  auto randomBoolean = rand() > (RAND_MAX / 2);
-  if (randomBoolean) {
-    territories = toDefend();
+  // (2)
+  auto thirtyPercentBoolean = (rand() * 1.0f / RAND_MAX) < (0.3f);
+  if (!this->hand->cards.empty() && thirtyPercentBoolean) {
+	// --------- Card Order ---------
   } else {
-    territories = toAttack();
+	// --------- Advance Order ---------
+	int randomSourceIndex = rand() % this->ownedTerritories.size();
+	Territory *source = this->ownedTerritories[randomSourceIndex];
+
+	vector<Territory *> territories;
+	auto randomBoolean = rand() > (RAND_MAX / 2);
+	territories = randomBoolean ? toDefend() : toAttack();
+
+	int randomTargetIndex = rand() % territories.size();
+	Territory *target = territories[randomTargetIndex];
+
+	int armies = rand() % source->getArmies();
+	orders->push(new AdvanceOrder(this, armies, source, target));
   }
 
-  int randomTargetIndex = rand() % territories.size();
-  Territory *target = territories[randomTargetIndex];
+  // (3)
+  std::default_random_engine generator;
+  std::uniform_int_distribution<int> distribution(5, 7);
 
-  int armies = rand() % source->getArmies();
-  orders->push(new AdvanceOrder(this, armies, source, target));
-
-  // if cards > 0 and random bool
-  //    issueCardOrder();
+  return this->orders->getOrdersSize() >= distribution(generator);
 }
 
 /**

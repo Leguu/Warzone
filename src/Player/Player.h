@@ -22,6 +22,8 @@ public:
   vector<Territory *> ownedTerritories = {};
   int reinforcements = 50;
 
+  int reinforcementsAfterDeploy = reinforcements;
+
   explicit Player(string name);
 
   vector<Territory *> getAdjacentEnemyTerritories();
@@ -30,7 +32,7 @@ public:
 
   [[nodiscard]] vector<Territory *> toDefend() const;
 
-  void issueOrder();
+  bool issueOrder();
 
   void drawFromDeck() const;
 
