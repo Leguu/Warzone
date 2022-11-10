@@ -104,12 +104,14 @@ GameEngine::GameEngine() {
  * Issue the orders
  */
 void GameEngine::issueOrdersPhase() {
-  int stillIssuing = players.size();
+  auto playersList(players);
+  int stillIssuing = playersList.size();
   while (stillIssuing > 0) {
-	for (auto player : players) {
+	for (auto player : playersList) {
 	  cout << player->name << " is issuing an order" << endl;
 	  auto doneIssuing = player->issueOrder();
 	  if (doneIssuing) {
+		std::remove(playersList.begin(), playersList.end(), player);
 		stillIssuing--;
 	  }
 	}
