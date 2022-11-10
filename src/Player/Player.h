@@ -32,10 +32,6 @@ public:
 
   void issueOrder();
 
-  void issueAdvanceOrder();
-
-  void issueDeployOrder();
-
   void drawFromDeck() const;
 
   friend std::ostream &operator<<(std::ostream &os, const Player &player);

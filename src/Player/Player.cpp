@@ -24,7 +24,16 @@ vector<Territory *> Player::toAttack() const {
  */
 
 vector<Territory *> Player::toDefend() const {
-  return ownedTerritories;
+  auto sensitiveTerritories = vector<Territory *>();
+  for (auto t : ownedTerritories) {
+    for (auto adj : t->getAdjTerritories()) {
+      if (adj->getOwner() && adj->getOwner() != this) {
+        sensitiveTerritories.push_back(t);
+        break;
+      }
+    }
+  }
+  return sensitiveTerritories;
 }
 
 /**
