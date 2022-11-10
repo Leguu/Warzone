@@ -2,6 +2,7 @@
 #include "../GameEngine/GameEngine.h"
 #include <iostream>
 #include <random>
+#include <map>
 
 /**
  * Find all adjacent enemy territories
@@ -82,44 +83,26 @@ void Player::drawFromDeck() const {
 bool Player::issueOrder() {
   // Current Mechanism:
   // ------------------
-  // 	1. Keep deploying until zero reinforcements are left. Random number each turn.
-  //    2. If user has a card in their hand, 30% chance they use it (first one available to them), otherwise they advance order.
-  //    3. If OrdersList reaches at least 5-10 moves (decided randomly), the player is done issuing orders.
+  // 	1. Keep deploying until zero reinforcements are left. Random number each
+  // turn.
+  //    2. If user has a card in their hand, 30% chance they use it (first one
+  //    available to them), otherwise they advance order.
+  //    3. If OrdersList reaches at least 5-10 moves (decided randomly), the
+  //    player is done issuing orders.
   // NOTE: All orders that are issued follow random moves for now.
 
   // (1)
-  // --------- Deploy Order ---------
   if (this->reinforcementsAfterDeploy > 0) {
-	auto territories = toDefend();
-
-	int randomIndex = rand() % territories.size();
-	Territory *target = territories[randomIndex];
-
-	int armies = rand() % reinforcementsAfterDeploy;
-	orders->push(new DeployOrder(this, armies, target));
-	this->reinforcementsAfterDeploy -= armies;
-
+	issueDeployOrder();
 	return false;
   }
 
   // (2)
   auto thirtyPercentBoolean = (rand() * 1.0f / RAND_MAX) < (0.3f);
   if (!this->hand->cards.empty() && thirtyPercentBoolean) {
-	// --------- Card Order ---------
+	issueCardOrder();
   } else {
-	// --------- Advance Order ---------
-	int randomSourceIndex = rand() % this->ownedTerritories.size();
-	Territory *source = this->ownedTerritories[randomSourceIndex];
-
-	vector<Territory *> territories;
-	auto randomBoolean = rand() > (RAND_MAX / 2);
-	territories = randomBoolean ? toDefend() : toAttack();
-
-	int randomTargetIndex = rand() % territories.size();
-	Territory *target = territories[randomTargetIndex];
-
-	int armies = rand() % source->getArmies();
-	orders->push(new AdvanceOrder(this, armies, source, target));
+	issueAdvanceOrder();
   }
 
   // (3)
@@ -127,6 +110,93 @@ bool Player::issueOrder() {
   std::uniform_int_distribution<int> distribution(5, 7);
 
   return this->orders->getOrdersSize() >= distribution(generator);
+}
+
+void Player::issueDeployOrder() {
+  auto territories = toDefend();
+
+  int randomIndex = rand() % territories.size();
+  Territory *target = territories[randomIndex];
+
+  int armies = rand() % reinforcementsAfterDeploy;
+  orders->push(new DeployOrder(this, armies, target));
+  this->reinforcementsAfterDeploy -= armies;
+}
+
+void Player::issueCardOrder() {
+  auto randomCardName = this->hand->cards[0]->name;
+  this->hand->play(randomCardName);
+
+  int randomTargetIndex = rand() % this->ownedTerritories.size();
+  Territory *target = this->ownedTerritories[randomTargetIndex];
+
+  std::map<std::string, int> cardNameMap = {
+	  {"Bomb", 0}, {"Blockade", 1}, {"Airlift", 2}, {"Negotiate", 3}};
+
+  int cardIndex = (cardNameMap.count(randomCardName) > 0)
+				  ? (*cardNameMap.find(name)).second
+				  : -1;
+  switch (cardIndex) {
+  case 0: {
+	vector<Territory *> territories;
+	territories = toAttack();
+
+	int randomAttackIndex = rand() % territories.size();
+	Territory *attack = territories[randomAttackIndex];
+
+	orders->push(new BombOrder(this, attack));
+	break;
+  }
+
+  case 1: {
+	orders->push(new BlockadeOrder(this, target));
+	break;
+  }
+
+  case 2: {
+	int randomSourceIndex = rand() % this->ownedTerritories.size();
+	Territory *source = this->ownedTerritories[randomSourceIndex];
+
+	auto armies = source->getArmies();
+	std::default_random_engine generator;
+	std::uniform_int_distribution<int> distribution(0, armies + 1);
+	armies = distribution(generator);
+
+	orders->push(new AirliftOrder(this, armies, source, target));
+	break;
+  }
+
+  case 3: {
+	auto ge = GameEngine::instance();
+
+	Player *randomPlayer;
+	do {
+	  int randomPlayerIndex = rand() % ge->players.size();
+	  randomPlayer = ge->players[randomPlayerIndex];
+	} while (randomPlayer != this);
+
+	orders->push(new NegotiateOrder(this, randomPlayer));
+	break;
+  }
+
+  default: throw InvalidCardException(randomCardName + " is not a legal card.");
+	break;
+  }
+}
+
+void Player::issueAdvanceOrder() {
+  int randomSourceIndex = rand() % this->ownedTerritories.size();
+  Territory *source = this->ownedTerritories[randomSourceIndex];
+
+  vector<Territory *> territories;
+  auto randomBoolean = rand() > (RAND_MAX / 2);
+  territories = randomBoolean ? toDefend() : toAttack();
+
+  int randomTargetIndex = rand() % territories.size();
+  Territory *target = territories[randomTargetIndex];
+
+  int armies = rand() % source->getArmies();
+  orders->push(new AdvanceOrder(this, armies, source, target));
 }
 
 /**
@@ -140,3 +210,9 @@ Player::Player(string name) : name(std::move(name)), orders(new OrderList()) {
  * Play destructor
  */
 Player::~Player() = default;
+
+/**
+ * Exception for invalid card
+ * @param arg The text that will be printed on error
+ */
+InvalidCardException::InvalidCardException(const std::string &arg) : runtime_error(arg) {}

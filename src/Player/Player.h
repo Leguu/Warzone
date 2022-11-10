@@ -14,6 +14,11 @@ using std::cout;
 using std::endl;
 using std::string;
 
+class InvalidCardException : public std::runtime_error {
+public:
+  explicit InvalidCardException(const std::string &arg);
+};
+
 class Player {
 public:
   const string name;
@@ -31,6 +36,12 @@ public:
   [[nodiscard]] vector<Territory *> toAttack() const;
 
   [[nodiscard]] vector<Territory *> toDefend() const;
+
+  void issueDeployOrder();
+
+  void issueAdvanceOrder();
+
+  void issueCardOrder();
 
   bool issueOrder();
 

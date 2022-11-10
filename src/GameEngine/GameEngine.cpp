@@ -104,9 +104,15 @@ GameEngine::GameEngine() {
  * Issue the orders
  */
 void GameEngine::issueOrdersPhase() {
-  for (auto player : players) {
-	cout << "It is your turn to play: " << player->name << endl;
-	player->issueOrder();
+  int stillIssuing = players.size();
+  while (stillIssuing > 0) {
+	for (auto player : players) {
+	  cout << player->name << " is issuing an order" << endl;
+	  auto doneIssuing = player->issueOrder();
+	  if (doneIssuing) {
+		stillIssuing--;
+	  }
+	}
   }
 }
 
