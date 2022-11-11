@@ -17,7 +17,7 @@
  * @param name the name of the order
  */
 Order::Order(Player *issuer, std::string name)
-	: name(std::move(name)), issuer(issuer) {
+    : name(std::move(name)), issuer(issuer) {
   this->Attach(LogObserver::instance());
 }
 
@@ -43,10 +43,10 @@ std::string Order::stringToLog() {
   std::time_t time_t = std::chrono::system_clock::to_time_t(time);
   file << std::ctime(&time_t);
   file << "Order Executed: \"" << this->name << "\" by Player \""
-	   << this->issuer->name << "\"" << std::endl
-	   << std::endl;
+       << this->issuer->name << "\"" << std::endl
+       << std::endl;
   return "Order Executed: \"" + this->name + "\" by Player \"" +
-	  this->issuer->name + "\"";
+         this->issuer->name + "\"";
 }
 
 /**
@@ -61,10 +61,10 @@ std::string OrderList::stringToLog() {
   std::time_t time_t = std::chrono::system_clock::to_time_t(time);
   file << std::ctime(&time_t);
   file << "Order Issued: \"" << lastOrder->name << "\" by Player \""
-	   << lastOrder->issuer->name << "\"" << std::endl
-	   << std::endl;
+       << lastOrder->issuer->name << "\"" << std::endl
+       << std::endl;
   return "Order Issued: \"" + lastOrder->name + "\" by Player \"" +
-	  lastOrder->issuer->name + "\"";
+         lastOrder->issuer->name + "\"";
 }
 
 /**
@@ -81,7 +81,7 @@ Order::~Order() { this->Detach(LogObserver::instance()); }
  * @param target The target territory
  */
 DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)
-	: Order(issuer, "Deploy"), reinforcements(reinforcements), target(target) {}
+    : Order(issuer, "Deploy"), reinforcements(reinforcements), target(target) {}
 
 /**
  * Description of the deploy order
@@ -89,7 +89,7 @@ DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)
  */
 std::string DeployOrder::description() {
   return issuer->name + " deploys " + std::to_string(reinforcements) +
-	  " armies to " + target->toString();
+         " armies to " + target->toString();
 }
 
 /**
@@ -97,15 +97,15 @@ std::string DeployOrder::description() {
  */
 void DeployOrder::validate() {
   if (target->getOwner() && (target->getOwner() != issuer)) {
-	throw InvalidOrderException(
-		issuer->name + " tried to deploy in someone else's territory.");
+    throw InvalidOrderException(
+        issuer->name + " tried to deploy in someone else's territory.");
   } else if (reinforcements > issuer->reinforcements) {
-	throw InvalidOrderException(
-		issuer->name +
-			" does not have the specified number of reinforcements. Player has " +
-			std::to_string(issuer->reinforcements) +
-			" reinforcements, but requested " + std::to_string(reinforcements) +
-			" reinforcements.");
+    throw InvalidOrderException(
+        issuer->name +
+        " does not have the specified number of reinforcements. Player has " +
+        std::to_string(issuer->reinforcements) +
+        " reinforcements, but requested " + std::to_string(reinforcements) +
+        " reinforcements.");
   }
 }
 
@@ -124,8 +124,8 @@ void DeployOrder::execute() {
  * @param other the to-be-copied deploy order
  */
 DeployOrder::DeployOrder(const DeployOrder &other)
-	: Order(other.issuer, other.name), reinforcements(other.reinforcements),
-	  target(other.target) {}
+    : Order(other.issuer, other.name), reinforcements(other.reinforcements),
+      target(other.target) {}
 
 /**
  * Deploy order destructor
@@ -141,8 +141,8 @@ DeployOrder::~DeployOrder() = default;
  * @param target the target territory
  */
 AdvanceOrder::AdvanceOrder(Player *issuer, int armies, Territory *source,
-						   Territory *target)
-	: Order(issuer, "Advance"), armies(armies), source(source), target(target) {
+                           Territory *target)
+    : Order(issuer, "Advance"), armies(armies), source(source), target(target) {
 }
 
 /**
@@ -151,7 +151,7 @@ AdvanceOrder::AdvanceOrder(Player *issuer, int armies, Territory *source,
  */
 std::string AdvanceOrder::description() {
   return issuer->name + " advances " + std::to_string(armies) +
-	  " armies from " + source->toString() + " to " + target->toString();
+         " armies from " + source->toString() + " to " + target->toString();
 }
 
 /**
@@ -159,18 +159,18 @@ std::string AdvanceOrder::description() {
  */
 void AdvanceOrder::validate() {
   if (target->getOwner() && (target->getOwner() != issuer)) {
-	throw InvalidOrderException(issuer->name +
-		" tried to move someone else's territory.");
+    throw InvalidOrderException(issuer->name +
+                                " tried to move someone else's territory.");
   } else if (std::find(source->getAdjTerritories().begin(),
-					   source->getAdjTerritories().end(),
-					   target) != source->getAdjTerritories().end()) {
-	throw InvalidOrderException(
-		issuer->name + "The territory is not adjacent to the source territory");
+                       source->getAdjTerritories().end(),
+                       target) != source->getAdjTerritories().end()) {
+    throw InvalidOrderException(
+        issuer->name + "The territory is not adjacent to the source territory");
   } else if (source->getArmies() - armies < 0) {
-	throw InvalidOrderException(issuer->name + "'s source territory (" +
-		source->getName() + ") does not have " +
-		std::to_string(armies) +
-		" number of army members to advance.");
+    throw InvalidOrderException(issuer->name + "'s source territory (" +
+                                source->getName() + ") does not have " +
+                                std::to_string(armies) +
+                                " number of army members to advance.");
   }
 }
 
@@ -186,28 +186,28 @@ void AdvanceOrder::execute() {
   // 2. fight until at least one is completely
   //    swept off
   while (armies > 0 && target->getArmies() > 0) {
-	int i = 0;
-	while (i > armies) {
-	  if (Utils::weightedBoolean(60))
-		target->setArmies(target->getArmies() - 1);
-	  i++;
-	}
+    int i = 0;
+    while (i < armies) {
+      if (Utils::weightedBoolean(60))
+        target->setArmies(target->getArmies() - 1);
+      i++;
+    }
 
-	i = 0;
-	while (i > target->getArmies()) {
-	  if (Utils::weightedBoolean(70))
-		armies -= 1;
-	  i++;
-	}
+    i = 0;
+    while (i < target->getArmies()) {
+      if (Utils::weightedBoolean(70))
+        armies -= 1;
+      i++;
+    }
   }
 
   // release territory if both armies swept off
   if (armies == target->getArmies()) {
-	target->setArmies(0);
+    target->setArmies(0);
   } // draw a card if the attacker captures the territory
   else if (armies > 0 && !issuer->cardAwarded) {
-	issuer->hand->draw();
-	issuer->cardAwarded = true;
+    issuer->hand->draw();
+    issuer->cardAwarded = true;
   }
 
   this->Notify(this);
@@ -218,8 +218,8 @@ void AdvanceOrder::execute() {
  * @param other The to-be-copied object
  */
 AdvanceOrder::AdvanceOrder(const AdvanceOrder &other)
-	: Order(other.issuer, other.name), armies(other.armies),
-	  source(other.source), target(other.target) {}
+    : Order(other.issuer, other.name), armies(other.armies),
+      source(other.source), target(other.target) {}
 
 /**
  * Destructor for advance order
@@ -233,7 +233,7 @@ AdvanceOrder::~AdvanceOrder() = default;
  * @param target The bomb order target territory
  */
 BombOrder::BombOrder(Player *issuer, Territory *target)
-	: Order(issuer, "Bomb"), target(target) {}
+    : Order(issuer, "Bomb"), target(target) {}
 
 /**
  * Description of the bomb order
@@ -248,8 +248,8 @@ std::string BombOrder::description() {
  */
 void BombOrder::validate() {
   if (target->getOwner() && (target->getOwner()->name == issuer->name)) {
-	throw InvalidOrderException(issuer->name +
-		" attempts to bomb himself! What an idiot.");
+    throw InvalidOrderException(issuer->name +
+                                " attempts to bomb himself! What an idiot.");
   }
 }
 
@@ -267,7 +267,7 @@ void BombOrder::execute() {
  * @param other The to-be-copied object
  */
 BombOrder::BombOrder(const BombOrder &other)
-	: Order(other.issuer, other.name), target(other.target) {}
+    : Order(other.issuer, other.name), target(other.target) {}
 
 /**
  * Bomb order destructor
@@ -281,7 +281,7 @@ BombOrder::~BombOrder() = default;
  * @param target The target territory of the blockade order
  */
 BlockadeOrder::BlockadeOrder(Player *issuer, Territory *target)
-	: Order(issuer, "Blockade"), target(target) {}
+    : Order(issuer, "Blockade"), target(target) {}
 
 /**
  * Description of the blockade order
@@ -296,8 +296,8 @@ std::string BlockadeOrder::description() {
  */
 void BlockadeOrder::validate() {
   if (target->getOwner() && (target->getOwner() != issuer)) {
-	throw InvalidOrderException(issuer->name + " does not own territory " +
-		target->getName());
+    throw InvalidOrderException(issuer->name + " does not own territory " +
+                                target->getName());
   }
 }
 
@@ -315,7 +315,7 @@ void BlockadeOrder::execute() {
  * @param other The to-be-copied object
  */
 BlockadeOrder::BlockadeOrder(const BlockadeOrder &other)
-	: Order(other.issuer, other.name), target(other.target) {}
+    : Order(other.issuer, other.name), target(other.target) {}
 
 /**
  * Blockade order destructor
@@ -331,8 +331,8 @@ BlockadeOrder::~BlockadeOrder() = default;
  * @param target The target territory where the armies will land
  */
 AirliftOrder::AirliftOrder(Player *issuer, int armies, Territory *source,
-						   Territory *target)
-	: Order(issuer, "Airlift"), armies(armies), source(source), target(target) {
+                           Territory *target)
+    : Order(issuer, "Airlift"), armies(armies), source(source), target(target) {
 }
 
 /**
@@ -341,7 +341,7 @@ AirliftOrder::AirliftOrder(Player *issuer, int armies, Territory *source,
  */
 std::string AirliftOrder::description() {
   return issuer->name + " airlifts " + std::to_string(armies) +
-	  " armies from " + source->toString() + " to " + target->toString();
+         " armies from " + source->toString() + " to " + target->toString();
 }
 
 /**
@@ -349,16 +349,16 @@ std::string AirliftOrder::description() {
  */
 void AirliftOrder::validate() {
   if (source->getArmies() - armies < 0) {
-	throw InvalidOrderException(issuer->name + "'s source territory (" +
-		source->getName() + ") does not have " +
-		std::to_string(armies) +
-		" number of army members.");
+    throw InvalidOrderException(issuer->name + "'s source territory (" +
+                                source->getName() + ") does not have " +
+                                std::to_string(armies) +
+                                " number of army members.");
   } else if (source->getOwner() && (source->getOwner() != issuer)) {
-	throw InvalidOrderException(issuer->name + " does not own territory " +
-		source->getName());
+    throw InvalidOrderException(issuer->name + " does not own territory " +
+                                source->getName());
   } else if (target->getOwner() && (target->getOwner() != issuer)) {
-	throw InvalidOrderException(issuer->name + " does not own territory " +
-		target->getName());
+    throw InvalidOrderException(issuer->name + " does not own territory " +
+                                target->getName());
   }
 }
 
@@ -379,8 +379,8 @@ void AirliftOrder::execute() {
  * @param other The to-be-copied object
  */
 AirliftOrder::AirliftOrder(const AirliftOrder &other)
-	: Order(other.issuer, other.name), target(other.target),
-	  source(other.source), armies(other.armies) {}
+    : Order(other.issuer, other.name), target(other.target),
+      source(other.source), armies(other.armies) {}
 
 /**
  * Airlift order destructor
@@ -394,7 +394,7 @@ AirliftOrder::~AirliftOrder() = default;
  * @param target The target player to negotiate with
  */
 NegotiateOrder::NegotiateOrder(Player *issuer, const Player *target)
-	: Order(issuer, "Negotiate"), target(target) {}
+    : Order(issuer, "Negotiate"), target(target) {}
 
 /**
  * Description of the negotiate order
@@ -409,7 +409,7 @@ std::string NegotiateOrder::description() {
  * @param o The to-be-copied object
  */
 NegotiateOrder::NegotiateOrder(const NegotiateOrder &o)
-	: Order(o.issuer, o.name), target(o.target) {}
+    : Order(o.issuer, o.name), target(o.target) {}
 
 /**
  * Negotiate order destructor
@@ -433,7 +433,7 @@ void OrderList::push(Order *order) {
  */
 Order *OrderList::pop() {
   if (this->orders.empty())
-	return nullptr;
+    return nullptr;
   auto order = this->orders.front();
   this->orders.erase(this->orders.begin());
   return order;
@@ -463,10 +463,10 @@ void OrderList::remove(int index) {
  */
 void OrderList::move(int a, int b) {
   if ((0 <= a && a < this->orders.size()) &&
-	  (0 <= b && b < this->orders.size())) {
-	std::swap(this->orders[a], this->orders[b]);
+      (0 <= b && b < this->orders.size())) {
+    std::swap(this->orders[a], this->orders[b]);
   } else {
-	throw runtime_error("Index out of bounds!");
+    throw runtime_error("Index out of bounds!");
   }
 }
 
@@ -475,9 +475,9 @@ void OrderList::move(int a, int b) {
  */
 void OrderList::executeOrders() {
   while (!this->orders.empty()) {
-	auto order = pop();
-	order->execute();
-	delete order;
+    auto order = pop();
+    order->execute();
+    delete order;
   }
 }
 
@@ -496,20 +496,20 @@ int OrderList::getOrdersSize() { return orders.size(); }
 std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {
   auto i = 1;
   auto divider = "-------------------------------------------------------------"
-				 "-------------------";
+                 "-------------------";
 
   std::cout << divider << "\n"
-			<< std::left << std::setw(3) << "Id | " << std::left
-			<< std::setw(10) << "Name"
-			<< "| Description"
-			<< "\n"
-			<< divider << std::endl;
+            << std::left << std::setw(3) << "Id | " << std::left
+            << std::setw(10) << "Name"
+            << "| Description"
+            << "\n"
+            << divider << std::endl;
 
   for (auto order : orderList.orders) {
-	std::cout << std::left << std::setw(3) << std::to_string(i) << "| "
-			  << std::left << std::setw(10) << order->name
-			  << "| " + order->description() << std::endl;
-	++i;
+    std::cout << std::left << std::setw(3) << std::to_string(i) << "| "
+              << std::left << std::setw(10) << order->name
+              << "| " + order->description() << std::endl;
+    ++i;
   }
 
   std::cout << divider << std::endl;
@@ -541,4 +541,4 @@ OrderList::~OrderList() { this->Detach(LogObserver::instance()); }
  * @param arg The text that will be printed on error
  */
 InvalidOrderException::InvalidOrderException(const std::string &arg)
-	: runtime_error(arg) {}
+    : runtime_error(arg) {}

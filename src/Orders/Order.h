@@ -61,7 +61,7 @@ private:
 class AdvanceOrder : public Order {
 public:
   AdvanceOrder(Player *issuer, int armies, Territory *source,
-			   Territory *target);
+               Territory *target);
 
   void validate() override;
 
@@ -118,7 +118,7 @@ private:
 class AirliftOrder : public Order {
 public:
   AirliftOrder(Player *issuer, int armies, Territory *source,
-			   Territory *target);
+               Territory *target);
 
   void validate() override;
 
@@ -140,9 +140,9 @@ class NegotiateOrder : public Order {
 public:
   explicit NegotiateOrder(Player *issuer, const Player *target);
 
-  void validate() override {};
+  void validate() override{};
 
-  void execute() override {};
+  void execute() override{};
 
   std::string description() override;
 

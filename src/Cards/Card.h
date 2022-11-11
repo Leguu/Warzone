@@ -5,12 +5,12 @@ class Hand;
 
 class Card;
 
+#include "../Map/Map.h"
+#include "../Player/Player.h"
+#include <ostream>
+#include <string>
 #include <utility>
 #include <vector>
-#include <string>
-#include <ostream>
-#include "../Player/Player.h"
-#include "../Map/Map.h"
 
 using std::string;
 
@@ -52,7 +52,6 @@ private:
 
 class Deck {
 public:
-
   explicit Deck(std::vector<Card *> cards) : cards(std::move(cards)) {}
 
   Deck() = default;
@@ -83,10 +82,10 @@ public:
 
   virtual bool play(Player *issuer) const = 0;
 
-  Card(std::string name, std::string description, std::vector<std::string> aliases) : name(std::move(name)),
-																					  description(
-																						  std::move(description)),
-																					  aliases(std::move(aliases)) {}
+  Card(std::string name, std::string description,
+       std::vector<std::string> aliases)
+      : name(std::move(name)), description(std::move(description)),
+        aliases(std::move(aliases)) {}
 
   std::vector<std::string> getAliases();
 
@@ -98,9 +97,9 @@ private:
 
 class BombCard : public Card {
 public:
-
-  inline BombCard() : Card("Bomb", "Use to destroy half of an enemy territory's army",
-						   {"bomb", "bombcard", "bomb card"}) {}
+  inline BombCard()
+      : Card("Bomb", "Use to destroy half of an enemy territory's army",
+             {"bomb", "bombcard", "bomb card"}) {}
 
   bool play(Player *issuer) const override;
 
@@ -111,9 +110,10 @@ public:
 
 class BlockadeCard : public Card {
 public:
-
-  inline BlockadeCard() : Card("Blockade", "Use to lose control of a territory but triple its army size",
-							   {"blockade", "blockadecard", "blockade card", "block"}) {}
+  inline BlockadeCard()
+      : Card("Blockade",
+             "Use to lose control of a territory but triple its army size",
+             {"blockade", "blockadecard", "blockade card", "block"}) {}
 
   bool play(Player *issuer) const override;
 
@@ -124,23 +124,25 @@ public:
 
 class AirliftCard : public Card {
 public:
-
-  inline AirliftCard() : Card("Airlift", "Use to move armies from any territory to any other",
-							  {"airlift", "airliftcard", "air", "lift", "airlift card", "air lift card",
-							   "air lift"}) {}
+  inline AirliftCard()
+      : Card("Airlift", "Use to move armies from any territory to any other",
+             {"airlift", "airliftcard", "air", "lift", "airlift card",
+              "air lift card", "air lift"}) {}
 
   bool play(Player *issuer) const override;
 
-  static void execute(Player *issuer, int armiesSize, Territory *territoryPlayer, Territory *territoryTarget);
+  static void execute(Player *issuer, int armiesSize,
+                      Territory *territoryPlayer, Territory *territoryTarget);
 
   ~AirliftCard() override;
 };
 
 class NegotiateCard : public Card {
 public:
-
-  inline NegotiateCard() : Card("NegotiateCard", "Use to prevent attacks between you and another player",
-								{"negotiate", "negotiatecard", "negotiate card"}) {}
+  inline NegotiateCard()
+      : Card("NegotiateCard",
+             "Use to prevent attacks between you and another player",
+             {"negotiate", "negotiatecard", "negotiate card"}) {}
 
   bool play(Player *issuer) const override;
 
@@ -149,4 +151,4 @@ public:
   ~NegotiateCard() override;
 };
 
-#endif //WARZONE_CARD_H
+#endif // WARZONE_CARD_H

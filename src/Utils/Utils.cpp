@@ -8,16 +8,16 @@
 const string Utils::inputPrompt = ">";
 
 string Utils::getInputString(const string &prompt) {
-  cout << prompt << endl;
+  std::cout << prompt << std::endl;
   return Utils::getInputString();
 }
 
 int Utils::getInputInt(const string &prompt, bool cancelable) {
-  cout << prompt;
+  std::cout << prompt;
   if (cancelable) {
-	cout << " Type in \"cancel\" to cancel this input.";
+	std::cout << " Type in \"cancel\" to cancel this input.";
   }
-  cout << endl;
+  std::cout << std::endl;
   int value;
 
   while (true) {
@@ -31,7 +31,7 @@ int Utils::getInputInt(const string &prompt, bool cancelable) {
 	  value = stoi(input);
 	  break;
 	} catch (std::invalid_argument &e) {
-	  cout << "Your input has to be a number!" << endl;
+	  std::cout << "Your input has to be a number!" << std::endl;
 	  continue;
 	}
   }
@@ -43,8 +43,8 @@ int Utils::getInputInt(const string &prompt) {
   return getInputInt(prompt, false);
 }
 
-vector<string> Utils::tokenizer(const string &s, char del) {
-  auto vec = vector<string>();
+std::vector<string> Utils::tokenizer(const string &s, char del) {
+  auto vec = std::vector<string>();
   auto ss = std::stringstream(Utils::trim(s));
   string word;
   while (!ss.eof()) {
@@ -73,9 +73,9 @@ bool Utils::isEqualLowercase(const string &a, const string &b) {
 }
 
 string Utils::getInputString() {
-  cout << inputPrompt << std::flush;
+  std::cout << inputPrompt << std::flush;
   string input;
-  getline(cin, input);
+  getline(std::cin, input);
   return input;
 }
 
@@ -94,9 +94,9 @@ void Utils::assertCondition(bool condition, const std::string &message) {
 int Utils::randomNumberInRange(int a, int b) {
   std::default_random_engine generator;
   std::uniform_int_distribution<int> distribution(a, b);
-  auto res = distribution(generator);
-  return res;
+  return distribution(generator);
 }
+
 bool Utils::weightedBoolean(int percentage) {
   return randomNumberInRange(1, 100) <= percentage;
 }

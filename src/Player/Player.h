@@ -9,10 +9,6 @@ class Player;
 #include <memory>
 #include <utility>
 #include <vector>
-using std::cout;
-using std::endl;
-using std::string;
-using std::vector;
 
 class InvalidCardException : public std::runtime_error {
 public:

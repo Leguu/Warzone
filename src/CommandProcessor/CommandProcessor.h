@@ -1,147 +1,140 @@
 #ifndef WARZONE_SRC_COMMANDPROCESSOR_COMMANDPROCESSOR_H
 #define WARZONE_SRC_COMMANDPROCESSOR_COMMANDPROCESSOR_H
 
-#include <string>
-#include <vector>
-#include <memory>
-#include <iostream>
 #include "../Logging/LoggingObserver.h"
 #include <fstream>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
 
-using std::string;
-using std::vector;
 using std::cout;
 using std::endl;
 using std::ifstream;
-using std::streampos;
 using std::ostream;
+using std::streampos;
+using std::string;
+using std::vector;
 
 // Command class
 class Command : public ILoggable, public Subject {
 public:
+  Command();
 
-    Command();
+  Command(const Command &);
 
-    Command(const Command &);
+  virtual ~Command();
 
-    virtual ~Command();
+  Command &operator=(const Command &);
 
-    Command &operator=(const Command &);
+  friend ostream &operator<<(ostream &, const Command &);
 
-    friend ostream &operator<<(ostream &, const Command &);
+  [[nodiscard]] const string &getCommand() const;
 
-    [[nodiscard]] const string &getCommand() const;
+  [[nodiscard]] const string &getArg() const;
 
-    [[nodiscard]] const string &getArg() const;
+  [[nodiscard]] const string &getEffect() const;
 
-    [[nodiscard]] const string &getEffect() const;
+  bool operator!=(const string &rhs) const;
 
-    bool operator!=(const string &rhs) const;
+  bool operator==(const string &rhs) const;
 
-    bool operator==(const string &rhs) const;
+  void saveEffect(const string &Effect);
 
-    void saveEffect(const string &Effect);
-
-    std::string stringToLog() override;
+  std::string stringToLog() override;
 
 private:
-    string command;
-    string arg;
-    string effect;
+  string command;
+  string arg;
+  string effect;
 
-    friend class CommandProcessor;
-    friend void testLoggingObserver();
-    friend class FileCommandProcessorAdapter;
+  friend class CommandProcessor;
+  friend void testLoggingObserver();
+  friend class FileCommandProcessorAdapter;
 };
 
 // Command processor class
 
 class CommandProcessor : public ILoggable, public Subject {
 public:
+  CommandProcessor();
 
-    CommandProcessor();
+  CommandProcessor(const CommandProcessor &);
 
-    CommandProcessor(const CommandProcessor &);
+  virtual ~CommandProcessor();
 
-    virtual ~CommandProcessor();
+  CommandProcessor &operator=(const CommandProcessor &);
 
-    CommandProcessor &operator=(const CommandProcessor &);
+  friend ostream &operator<<(ostream &, const CommandProcessor &);
 
-    friend ostream &operator<<(ostream &, const CommandProcessor &);
+  bool validate(Command *);
 
-    bool validate(Command *);
+  Command *getCommand();
 
-    Command *getCommand();
+  [[nodiscard]] Command *getCommand(const string &prompt);
 
-    [[nodiscard]] Command *getCommand(const string &prompt);
+  vector<Command *> getCommandList();
 
-    vector<Command *> getCommandList();
+  std::string stringToLog() override;
 
-    std::string stringToLog() override;
-
-    void saveCommand(Command *command);
+  void saveCommand(Command *command);
 
 private:
+  virtual Command *readCommand();
 
-    virtual Command *readCommand();
-
-    vector<Command *> commands;
-    friend void testLoggingObserver();
-    friend class FileCommandProcessorAdapter;
+  vector<Command *> commands;
+  friend void testLoggingObserver();
+  friend class FileCommandProcessorAdapter;
 };
 
 // File line reader
 
 class FileLineReader {
 public:
+  FileLineReader();
 
-    FileLineReader();
+  explicit FileLineReader(string);
 
-    explicit FileLineReader(string);
+  FileLineReader(const FileLineReader &);
 
-    FileLineReader(const FileLineReader &);
+  ~FileLineReader();
 
-    ~FileLineReader();
+  FileLineReader &operator=(const FileLineReader &);
 
-    FileLineReader &operator=(const FileLineReader &);
+  friend ostream &operator<<(ostream &os, const FileLineReader &);
 
-    friend ostream &operator<<(ostream &os, const FileLineReader &);
+  string getPath();
 
-    string getPath();
+  void setPath(string);
 
-    void setPath(string);
+  string readLineFromFile();
 
-    string readLineFromFile();
+  ifstream ifile;
 
-    ifstream ifile;
 private:
-
-    string path;
+  string path;
 };
-
 
 // File command processor class
 
 class FileCommandProcessorAdapter : public CommandProcessor {
 public:
+  FileCommandProcessorAdapter();
 
-    FileCommandProcessorAdapter();
+  explicit FileCommandProcessorAdapter(string path);
 
-    explicit FileCommandProcessorAdapter(string path);
+  FileCommandProcessorAdapter(const FileCommandProcessorAdapter &);
 
-    FileCommandProcessorAdapter(const FileCommandProcessorAdapter &);
+  ~FileCommandProcessorAdapter() override;
 
-    ~FileCommandProcessorAdapter() override;
+  FileCommandProcessorAdapter &operator=(const FileCommandProcessorAdapter &);
 
-    FileCommandProcessorAdapter &operator=(const FileCommandProcessorAdapter &);
+  friend ostream &operator<<(ostream &, const FileCommandProcessorAdapter &);
 
-    friend ostream &operator<<(ostream &, const FileCommandProcessorAdapter &);
-
-    FileLineReader *flr = nullptr;
+  FileLineReader *flr = nullptr;
 
 private:
-    Command *readCommand() override;
-
+  Command *readCommand() override;
 };
 
-#endif //WARZONE_SRC_COMMANDPROCESSOR_COMMANDPROCESSOR_H
+#endif // WARZONE_SRC_COMMANDPROCESSOR_COMMANDPROCESSOR_H

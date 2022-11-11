@@ -1,19 +1,19 @@
 #ifndef WARZONE_MAP_H
 #define WARZONE_MAP_H
 
-#include <string>
+#include "../Utils/Utils.h"
+#include <filesystem>
 #include <iostream>
+#include <memory>
+#include <random>
+#include <set>
+#include <string>
 #include <utility>
 #include <vector>
-#include <set>
-#include <memory>
-#include <filesystem>
-#include "../Utils/Utils.h"
-#include <random>
 
-using std::filesystem::directory_iterator;
 using std::string;
 using std::vector;
+using std::filesystem::directory_iterator;
 
 class Player;
 
@@ -73,8 +73,10 @@ public:
 
 protected:
   /// Global variable for assigning territory ids.
-  /// The ids for allTerritories need to be globally unique, so this can be static.
+  /// The ids for allTerritories need to be globally unique, so this can be
+  /// static.
   static int idIncrement;
+
 private:
   vector<Territory *> adjacentTerritories;
   // Variables
@@ -153,7 +155,8 @@ public:
 
   Territory *getInputTerritory(const std::string &inputRequest);
 
-  Territory *getInputTerritory(const std::string &inputRequest, bool cancelable);
+  Territory *getInputTerritory(const std::string &inputRequest,
+                               bool cancelable);
 
   // A method to add a continent
   void addContinent(Continent *continent);
@@ -195,7 +198,6 @@ private:
 
 class MapLoader {
 public:
-
   static Map *importMap(const string &path) noexcept(false);
 
 private:
@@ -204,4 +206,4 @@ private:
 
 void testLoadMaps();
 
-#endif //WARZONE_MAP_H
+#endif // WARZONE_MAP_H

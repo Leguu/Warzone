@@ -2,8 +2,8 @@
 // Created by danie on 2022-10-08.
 //
 
-#include "Player.h"
 #include "../GameEngine/GameEngine.h"
+#include "Player.h"
 #include <iostream>
 
 void testPlayers() {

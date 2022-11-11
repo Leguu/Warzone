@@ -4,9 +4,6 @@
 #include <string>
 #include <vector>
 
-using std::cin;
-using std::cout;
-using std::endl;
 using std::getline;
 using std::string;
 using std::vector;
@@ -46,8 +43,10 @@ public:
 	~CancelledInputException() override;
   };
 
-private:
-  inline Utils() = default;
+  template<class T> static T *accessRandomElement(vector<T *> elements) {
+	int randomIndex = rand() % elements.size();
+	return elements[randomIndex];
+  }
 };
 
 #endif // WARZONE_UTILS_H
