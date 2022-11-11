@@ -61,9 +61,9 @@ class AdvanceOrder : public Order {
 public:
   AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target);
 
-  void validate() override {};
+  void validate() override;
 
-  void execute() override {};
+  void execute() override;
 
   std::string description() override;
 

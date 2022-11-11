@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <chrono>
 #include <ctime>
+#include <random>
 #include "../Logging/LogObserver.h"
 
 // ------------------ Order -------------------------
@@ -92,9 +93,9 @@ std::string DeployOrder::description() {
  * Validate a deploy order
  */
 void DeployOrder::validate() {
-    if (target->getOwner() && (target->getOwner() != issuer)) {
-        throw InvalidOrderException(issuer->name + " tried to deploy in someone else's territory.");
-    } else if (reinforcements > issuer->reinforcements) {
+  if (target->getOwner() && (target->getOwner() != issuer)) {
+    throw InvalidOrderException(issuer->name + " tried to deploy in someone else's territory.");
+  } else if (reinforcements > issuer->reinforcements) {
         throw InvalidOrderException(issuer->name + " does not have the specified number of reinforcements. Player has "
                                     + std::to_string(issuer->reinforcements) + " reinforcements, but requested "
                                     + std::to_string(reinforcements) + " reinforcements.");
@@ -146,6 +147,105 @@ std::string AdvanceOrder::description() {
            target->toString();
 }
 
+/**
+ * Validate an advance order
+ */
+void AdvanceOrder::validate() {
+  if (target->getOwner() && (target->getOwner() != issuer)) {
+    throw InvalidOrderException(issuer->name + " tried to move someone else's territory.");
+  } else if (std::find(source->getAdjTerritories().begin(), source->getAdjTerritories().end(), target) != source->getAdjTerritories().end()) {
+    throw InvalidOrderException(issuer->name + "The territory is not adjacent to the source territory");
+  }else if (source->getArmies() - armies < 0) {
+    throw InvalidOrderException(
+        issuer->name + "'s source territory (" + source->getName() + ") does not have " + std::to_string(armies)
+            + " number of army members to advance.");
+  }
+}
+
+/**
+ * Execute a deploy order #1
+ */
+void AdvanceOrder::execute() {
+  validate();
+
+  // If territory is enemy territory
+  if ((target->getOwner() && (target->getOwner() != issuer))){
+    while ((this->source->getArmies() !=0) || (target->getArmies() !=0) ) {
+      //srand (time(NULL));
+      float attackkill = ((float) rand()/RAND_MAX);
+      float defendkill = ((float) rand()/RAND_MAX);
+      // Idea for giving us rounded up values 0 or 1
+      //int attackkill = round(((double) rand() / ((double)RAND_MAX)) * 0.6 + 0.0);
+      //int defendkill = round(((double) rand() / RAND_MAX) * 0.7 + 0.0);
+
+      if ((attackkill >0.3) && (defendkill < 0.4)) {
+        target->setArmies(target->getArmies() - 1);
+      }else if ((attackkill <0.3) && (defendkill > 0.4)) {
+        this->source->setArmies((source->getId())-1);
+      }else{
+        continue;
+      }
+    }
+    if (target->getArmies() ==0){
+      this->target->setArmies(this->source->getArmies());
+      this->issuer->hand->draw();
+    }else if(this->source->getArmies() ==0){
+      target->setArmies((target->getArmies()));
+    }
+  } else {
+    // This is if player is just moving to their orn territory
+    this->source->setArmies(this->source->getArmies() - armies);
+    this->target->setArmies(this->target->getArmies() + armies);
+  }
+
+  this->Notify(this);
+}
+
+
+/**
+ * Execute a deploy order #2
+ */
+ /*
+void AdvanceOrder::execute()
+{
+  // 1. deduct source armies
+  this->source->setArmies(this->source->getArmies() - armies);
+
+  // 2. fight until at least one is completely
+  //    swept off
+  while (armies > 0 && target->getArmies() > 0)
+  {
+    target->getArmies();
+
+    int i = 0;
+    while (i > armies)
+    {
+      // <= 60
+      target->setArmies(target->getArmies() - 1);
+      i++;
+    }
+
+    int y = 0;
+    while (y > target->getArmies())
+    {
+      // <= 70
+      target->setArmies(target->getArmies() - 1);
+      y++;
+    }
+  }
+
+  // release territory if both armies swept off
+  if (armies == target->getArmies())
+  {
+   // target->getArmies() = 0;
+  }
+  else if (armies > 0)
+  {
+    // attacker won
+    issuer->hand->draw();
+  }
+}
+*/
 /**
  * Advance order copy constructor
  * @param other The to-be-copied object
