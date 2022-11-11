@@ -1,15 +1,15 @@
 #ifndef WARZONE_UTILS_H
 #define WARZONE_UTILS_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
+using std::cin;
+using std::cout;
+using std::endl;
+using std::getline;
 using std::string;
 using std::vector;
-using std::cout;
-using std::cin;
-using std::getline;
-using std::endl;
 
 class Utils {
 public:
@@ -33,17 +33,21 @@ public:
 
   static bool isEqualLowercase(const string &a, const string &b);
 
-  static void assertCondition(bool condition, const std::string& message);
+  static int randomNumberInRange(int a, int b);
+
+  static bool weightedBoolean(int percentage);
+
+  static void assertCondition(bool condition, const std::string &message);
 
   class CancelledInputException : public std::runtime_error {
   public:
-    explicit CancelledInputException();
+	explicit CancelledInputException();
 
-    ~CancelledInputException() override;
+	~CancelledInputException() override;
   };
 
 private:
   inline Utils() = default;
 };
 
-#endif //WARZONE_UTILS_H
+#endif // WARZONE_UTILS_H

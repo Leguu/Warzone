@@ -1,9 +1,15 @@
 #include <iostream>
+
 #include <fstream>
+
 #include <random>
+
 #include <chrono>
+
 #include <ctime>
+
 #include "GameEngine.h"
+
 #include "../Logging/LogObserver.h"
 
 GameEngine *GameEngine::_instance = nullptr;
@@ -23,7 +29,8 @@ const string GameEngine::helpText =
 const string GameEngine::wrongStateTransitionMessage = "Wrong state";
 
 /**
- * GameEngine constructor used to create a singleton game engine used to manage the game
+ * GameEngine constructor used to create a singleton game engine used to manage
+ * the game
  * @param mp the map
  */
 GameEngine::GameEngine(const std::string &mp) {
@@ -47,8 +54,8 @@ bool GameEngine::executeOrdersPhase() {
 		  return true;
 		}
 	  } catch (InvalidOrderException &e) {
-		cout << order->name << " order issued by " + order->issuer->name << " was invalid: " << e.what()
-			 << endl;
+		cout << order->name << " order issued by " + order->issuer->name
+			 << " was invalid: " << e.what() << endl;
 	  }
 	}
   }
@@ -62,7 +69,9 @@ bool GameEngine::executeOrdersPhase() {
  */
 
 void GameEngine::mainGameLoop() {
-  cout << "Welcome to Warzone! Type in \"help\" at any time to have a list of commands" << endl;
+  cout << "Welcome to Warzone! Type in \"help\" at any time to have a list of "
+		  "commands"
+	   << endl;
   while (true) {
 	reinforcementPhase();
 
@@ -104,17 +113,25 @@ GameEngine::GameEngine() {
  * Issue the orders
  */
 void GameEngine::issueOrdersPhase() {
-  auto playersList(players);
-  int stillIssuing = playersList.size();
+  int stillIssuing = players.size();
+  vector<Player *> playersDoneIssuing = {};
   while (stillIssuing > 0) {
-	for (auto player : playersList) {
+	for (auto player : players) {
+	  if (std::find(playersDoneIssuing.begin(), playersDoneIssuing.end(),
+					player) != playersDoneIssuing.end())
+		continue;
 	  cout << player->name << " is issuing an order" << endl;
 	  auto doneIssuing = player->issueOrder();
 	  if (doneIssuing) {
-		std::remove(playersList.begin(), playersList.end(), player);
+		playersDoneIssuing.push_back(player);
 		stillIssuing--;
 	  }
 	}
+  }
+
+  // reset so card can be awarded next round
+  for (auto player : players) {
+	player->cardAwarded = false;
   }
 }
 
@@ -124,7 +141,8 @@ void GameEngine::issueOrdersPhase() {
  */
 GameEngine *GameEngine::instance() {
   if (!_instance)
-	throw runtime_error("GameEngine instance not yet initialised. Did you forget to create a GameEngine first?");
+	throw runtime_error("GameEngine instance not yet initialised. Did you "
+						"forget to create a GameEngine first?");
   return _instance;
 }
 
@@ -165,19 +183,22 @@ void GameEngine::startupPhase() {
   transition(GameState::START);
 
   while (true) {
-	input = commandProcessor->getCommand("Input your command, write \"help\" for help");
+	input = commandProcessor->getCommand(
+		"Input your command, write \"help\" for help");
 
 	if (input == nullptr) {
 	  continue;
 	}
 	std::string inputText = input->getCommand();
-	if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')), "loadmap")) {
+	if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')),
+								"loadmap")) {
 	  loadMap("../assets/" + input->getArg() + ".map");
 	} else if (*input == "help") {
 	  cout << commands << endl;
 	} else if (Utils::isEqualLowercase(inputText, "validatemap")) {
 	  validateMap();
-	} else if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')), "addplayer")) {
+	} else if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')),
+									   "addplayer")) {
 	  addPlayer(input->getArg());
 	} else if (Utils::isEqualLowercase(inputText, "gamestart")) {
 	  if (state != GameState::PLAYERS_ADDED) {
@@ -186,7 +207,9 @@ void GameEngine::startupPhase() {
 	  }
 
 	  if (players.size() < 2) {
-		cout << "You can't have a game of less than 2 players, unless you're schizophrenic" << endl;
+		cout << "You can't have a game of less than 2 players, unless you're "
+				"schizophrenic"
+			 << endl;
 		continue;
 	  }
 
@@ -294,7 +317,8 @@ void GameEngine::addPlayer(const string &playerName) {
  */
 void GameEngine::assignCountries() {
   auto i = 0;
-  // Territories are randomly shuffled by the Map class, so this operation is valid
+  // Territories are randomly shuffled by the Map class, so this operation is
+  // valid
   for (auto t : map->getAllTerritories()) {
 	t->setOwner(players[i]);
 	i = (i + 1) % players.size();
@@ -320,13 +344,12 @@ std::string GameEngine::stringToLog() {
   auto time = std::chrono::system_clock::now();
   std::time_t time_t = std::chrono::system_clock::to_time_t(time);
   file << std::ctime(&time_t);
-  file << "Game State Modified: " << this->gameStates[this->state] << std::endl << std::endl;
+  file << "Game State Modified: " << this->gameStates[this->state] << std::endl
+	   << std::endl;
   return "Game State Modified: " + this->gameStates[this->state];
 }
 
-GameEngine::GameState GameEngine::getState() {
-  return state;
-}
+GameEngine::GameState GameEngine::getState() { return state; }
 
 void GameEngine::transition(GameEngine::GameState newState) {
   this->state = newState;

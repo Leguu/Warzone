@@ -3,16 +3,16 @@
 
 class Player;
 
-#include <utility>
-#include <vector>
-#include <memory>
+#include "../Cards/Card.h"
 #include "../Map/Map.h"
 #include "../Orders/Order.h"
-#include "../Cards/Card.h"
-using std::vector;
+#include <memory>
+#include <utility>
+#include <vector>
 using std::cout;
 using std::endl;
 using std::string;
+using std::vector;
 
 class InvalidCardException : public std::runtime_error {
 public:
@@ -28,6 +28,8 @@ public:
   int reinforcements = 50;
 
   int reinforcementsAfterDeploy = reinforcements;
+
+  int cardAwarded = false;
 
   explicit Player(string name);
 
@@ -54,4 +56,4 @@ public:
 
 void testPlayers();
 
-#endif //WARZONE_PLAYER_H
+#endif // WARZONE_PLAYER_H

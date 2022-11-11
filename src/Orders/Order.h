@@ -4,13 +4,13 @@
 class OrderList;
 class Order;
 
-#include <vector>
-#include <string>
+#include "../Logging/LoggingObserver.h"
+#include "../Player/Player.h"
+#include <list>
 #include <ostream>
 #include <queue>
-#include <list>
-#include "../Player/Player.h"
-#include "../Logging/LoggingObserver.h"
+#include <string>
+#include <vector>
 using std::runtime_error;
 
 /// Thrown when an order can not be executed due to invalid state
@@ -26,7 +26,8 @@ public:
   Order(Player *issuer, std::string name);
   std::string stringToLog() override;
 
-  /// Throws InvalidOrderException if the order no longer makes sense (due to previous orders)
+  /// Throws InvalidOrderException if the order no longer makes sense (due to
+  /// previous orders)
   virtual void validate() noexcept(false) = 0;
 
   virtual std::string description() = 0;
@@ -59,7 +60,8 @@ private:
 
 class AdvanceOrder : public Order {
 public:
-  AdvanceOrder(Player *issuer, int armies, Territory *source, Territory *target);
+  AdvanceOrder(Player *issuer, int armies, Territory *source,
+			   Territory *target);
 
   void validate() override;
 
@@ -72,7 +74,7 @@ public:
   AdvanceOrder(const AdvanceOrder &other);
 
 private:
-  const int armies;
+  int armies;
   Territory *source;
   Territory *target;
 };
@@ -115,7 +117,8 @@ private:
 
 class AirliftOrder : public Order {
 public:
-  AirliftOrder(Player *issuer, int armies, Territory *source, Territory *target);
+  AirliftOrder(Player *issuer, int armies, Territory *source,
+			   Territory *target);
 
   void validate() override;
 
@@ -182,4 +185,4 @@ private:
 
 void testOrdersLists();
 
-#endif //WARZONE_ORDER_H
+#endif // WARZONE_ORDER_H

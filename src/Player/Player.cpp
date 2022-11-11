@@ -1,8 +1,8 @@
-#include "Player.h"
-#include "../GameEngine/GameEngine.h"
 #include <iostream>
-#include <random>
 #include <map>
+
+#include "../GameEngine/GameEngine.h"
+#include "Player.h"
 
 /**
  * Find all adjacent enemy territories
@@ -46,9 +46,10 @@ vector<Territory *> Player::getAdjacentEnemyTerritories() {
   vector<Territory *> enemyTerritoriesAdjacent;
   for (auto friendlyTerritory : this->ownedTerritories) {
 	for (auto adjacentTerritory : friendlyTerritory->getAdjTerritories()) {
-	  if (adjacentTerritory->getOwner() != this && adjacentTerritory->getOwner() &&
-		  find(enemyTerritoriesAdjacent.begin(), enemyTerritoriesAdjacent.end(), adjacentTerritory) ==
-			  enemyTerritoriesAdjacent.end()) {
+	  if (adjacentTerritory->getOwner() != this &&
+		  adjacentTerritory->getOwner() &&
+		  find(enemyTerritoriesAdjacent.begin(), enemyTerritoriesAdjacent.end(),
+			   adjacentTerritory) == enemyTerritoriesAdjacent.end()) {
 		enemyTerritoriesAdjacent.push_back(adjacentTerritory);
 	  }
 	}
@@ -84,7 +85,7 @@ bool Player::issueOrder() {
   // Current Mechanism:
   // ------------------
   // 	1. Keep deploying until zero reinforcements are left. Random number each
-  // turn.
+  // 	turn.
   //    2. If user has a card in their hand, 30% chance they use it (first one
   //    available to them), otherwise they advance order.
   //    3. If OrdersList reaches at least 5-10 moves (decided randomly), the
@@ -106,10 +107,7 @@ bool Player::issueOrder() {
   }
 
   // (3)
-  std::default_random_engine generator;
-  std::uniform_int_distribution<int> distribution(5, 7);
-
-  return this->orders->getOrdersSize() >= distribution(generator);
+  return this->orders->getOrdersSize() >= Utils::randomNumberInRange(5, 10);
 }
 
 void Player::issueDeployOrder() {
@@ -158,9 +156,7 @@ void Player::issueCardOrder() {
 	Territory *source = this->ownedTerritories[randomSourceIndex];
 
 	auto armies = source->getArmies();
-	std::default_random_engine generator;
-	std::uniform_int_distribution<int> distribution(0, armies + 1);
-	armies = distribution(generator);
+	armies = Utils::randomNumberInRange(0, armies + 1);
 
 	orders->push(new AirliftOrder(this, armies, source, target));
 	break;
@@ -180,7 +176,6 @@ void Player::issueCardOrder() {
   }
 
   default: throw InvalidCardException(randomCardName + " is not a legal card.");
-	break;
   }
 }
 
@@ -215,4 +210,5 @@ Player::~Player() = default;
  * Exception for invalid card
  * @param arg The text that will be printed on error
  */
-InvalidCardException::InvalidCardException(const std::string &arg) : runtime_error(arg) {}
+InvalidCardException::InvalidCardException(const std::string &arg)
+	: runtime_error(arg) {}
