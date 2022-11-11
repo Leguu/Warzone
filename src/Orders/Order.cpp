@@ -444,7 +444,9 @@ Order *OrderList::pop() {
  * @param index The location
  * @return The order at that index
  */
-Order *OrderList::get(int index) { return this->orders[index]; }
+Order *OrderList::get(int index) {
+  return this->orders[index];
+}
 
 /**
  * Remove an order from the order list at a specific index
@@ -485,7 +487,9 @@ void OrderList::executeOrders() {
  * Get the size of the list of orders to be executed
  * @return The size of the list of orders to be executed
  */
-int OrderList::getOrdersSize() { return orders.size(); }
+int OrderList::getOrdersSize() {
+  return orders.size();
+}
 
 /**
  * Function to print to console the content's of the order list

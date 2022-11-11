@@ -47,6 +47,10 @@ public:
 	int randomIndex = rand() % elements.size();
 	return elements[randomIndex];
   }
+
+private:
+  inline Utils() = default;
+
 };
 
 #endif // WARZONE_UTILS_H

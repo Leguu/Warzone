@@ -37,7 +37,9 @@ std::ostream &operator<<(std::ostream &os, const Deck &deck) {
 /**
  * List the contents of the hand
  */
-void Hand::listHand() const { cout << *this << endl; }
+void Hand::listHand() const {
+  cout << *this << endl;
+}
 
 /**
  * Remove a card from the hand
@@ -58,7 +60,9 @@ void Hand::remove(Card *card) {
  * Add a card to the hand
  * @param card The card that is added
  */
-void Hand::add(Card *card) { this->cards.push_back(card); }
+void Hand::add(Card *card) {
+  this->cards.push_back(card);
+}
 
 /**
  * Function to print to console the content's of the card
@@ -75,7 +79,9 @@ std::ostream &operator<<(std::ostream &os, const Card &card) {
  * Return the aliases of a card
  * @return the aliases of a card
  */
-std::vector<std::string> Card::getAliases() { return this->aliases; }
+std::vector<std::string> Card::getAliases() {
+  return this->aliases;
+}
 
 /**
  * Destructor for the card
@@ -343,7 +349,9 @@ Card *Deck::draw() {
  * Get the number of cards in the deck
  * @return the number of cards in the deck
  */
-unsigned long long Deck::getCardsSize() { return cards.size(); }
+unsigned long long Deck::getCardsSize() {
+  return cards.size();
+}
 
 /**
  * Deck copy constructor

@@ -349,7 +349,9 @@ std::string GameEngine::stringToLog() {
   return "Game State Modified: " + this->gameStates[this->state];
 }
 
-GameEngine::GameState GameEngine::getState() { return state; }
+GameEngine::GameState GameEngine::getState() {
+  return state;
+}
 
 void GameEngine::transition(GameEngine::GameState newState) {
   this->state = newState;
