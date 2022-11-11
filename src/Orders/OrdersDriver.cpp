@@ -29,26 +29,26 @@ void testOrdersLists() {
   list.push(airlift);
   list.push(negotiate);
   Utils::assertCondition(list.getOrdersSize() == 6,
-                         "Push operation failed: list size is not 6.");
+						 "Push operation failed: list size is not 6.");
 
   list.remove(2);
   Utils::assertCondition(list.getOrdersSize() == 5,
-                         "Remove operation failed: list size is not 5.");
+						 "Remove operation failed: list size is not 5.");
   Utils::assertCondition(
-      list.get(2) == blockade,
-      "Remove operation failed: index 2 is not blockade order.");
+	  list.get(2) == blockade,
+	  "Remove operation failed: index 2 is not blockade order.");
 
   list.move(1, 2);
   Utils::assertCondition(
-      list.get(1) == blockade,
-      "Move operation failed: index 1 is not blockade order.");
+	  list.get(1) == blockade,
+	  "Move operation failed: index 1 is not blockade order.");
   Utils::assertCondition(
-      list.get(2) == advance,
-      "Move operation failed: index 2 is not advance order.");
+	  list.get(2) == advance,
+	  "Move operation failed: index 2 is not advance order.");
 
   list.executeOrders();
   Utils::assertCondition(list.getOrdersSize() == 0,
-                         "Execute orders operation failed: list is not empty.");
+						 "Execute orders operation failed: list is not empty.");
 
   cout << "All tests passed successfully!" << endl;
   delete ge;

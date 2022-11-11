@@ -11,11 +11,11 @@
 vector<Territory *> Player::toAttack() const {
   auto adjacentEnemies = vector<Territory *>();
   for (auto t : ownedTerritories) {
-    for (auto adj : t->getAdjTerritories()) {
-      if (adj->getOwner() && adj->getOwner() != this) {
-        adjacentEnemies.push_back(adj);
-      }
-    }
+	for (auto adj : t->getAdjTerritories()) {
+	  if (adj->getOwner() && adj->getOwner() != this) {
+		adjacentEnemies.push_back(adj);
+	  }
+	}
   }
   return adjacentEnemies;
 }
@@ -28,12 +28,12 @@ vector<Territory *> Player::toAttack() const {
 vector<Territory *> Player::toDefend() const {
   auto sensitiveTerritories = vector<Territory *>();
   for (auto t : ownedTerritories) {
-    for (auto adj : t->getAdjTerritories()) {
-      if (adj->getOwner() && adj->getOwner() != this) {
-        sensitiveTerritories.push_back(t);
-        break;
-      }
-    }
+	for (auto adj : t->getAdjTerritories()) {
+	  if (adj->getOwner() && adj->getOwner() != this) {
+		sensitiveTerritories.push_back(t);
+		break;
+	  }
+	}
   }
   return sensitiveTerritories;
 }
@@ -45,14 +45,14 @@ vector<Territory *> Player::toDefend() const {
 vector<Territory *> Player::getAdjacentEnemyTerritories() {
   vector<Territory *> enemyTerritoriesAdjacent;
   for (auto friendlyTerritory : this->ownedTerritories) {
-    for (auto adjacentTerritory : friendlyTerritory->getAdjTerritories()) {
-      if (adjacentTerritory->getOwner() != this &&
-          adjacentTerritory->getOwner() &&
-          find(enemyTerritoriesAdjacent.begin(), enemyTerritoriesAdjacent.end(),
-               adjacentTerritory) == enemyTerritoriesAdjacent.end()) {
-        enemyTerritoriesAdjacent.push_back(adjacentTerritory);
-      }
-    }
+	for (auto adjacentTerritory : friendlyTerritory->getAdjTerritories()) {
+	  if (adjacentTerritory->getOwner() != this &&
+		  adjacentTerritory->getOwner() &&
+		  find(enemyTerritoriesAdjacent.begin(), enemyTerritoriesAdjacent.end(),
+			   adjacentTerritory) == enemyTerritoriesAdjacent.end()) {
+		enemyTerritoriesAdjacent.push_back(adjacentTerritory);
+	  }
+	}
   }
   return enemyTerritoriesAdjacent;
 }
@@ -94,15 +94,15 @@ bool Player::issueOrder() {
 
   // (1)
   if (this->reinforcementsAfterDeploy > 0) {
-    issueDeployOrder();
-    return false;
+	issueDeployOrder();
+	return false;
   }
 
   // (2)
   if (!this->hand->cards.empty() && Utils::weightedBoolean(30)) {
-    issueCardOrder();
+	issueCardOrder();
   } else {
-    issueAdvanceOrder();
+	issueAdvanceOrder();
   }
 
   // (3)
@@ -110,9 +110,7 @@ bool Player::issueOrder() {
 }
 
 void Player::issueDeployOrder() {
-  auto territories = toDefend();
-
-  Territory *target = Utils::accessRandomElement(territories);
+  Territory *target = Utils::accessRandomElement(toDefend());
   int armies = rand() % reinforcementsAfterDeploy;
   orders->push(new DeployOrder(this, armies, target));
   this->reinforcementsAfterDeploy -= armies;
@@ -121,49 +119,47 @@ void Player::issueDeployOrder() {
 void Player::issueCardOrder() {
   auto randomCardName = this->hand->cards[0]->name;
   this->hand->play(randomCardName);
-  Territory *target = Utils::accessRandomElement(this->ownedTerritories);
 
+  Territory *target = Utils::accessRandomElement(this->ownedTerritories);
   std::map<std::string, int> cardNameMap = {
-      {"Bomb", 0}, {"Blockade", 1}, {"Airlift", 2}, {"Negotiate", 3}};
+	  {"Bomb", 0}, {"Blockade", 1}, {"Airlift", 2}, {"Negotiate", 3}};
 
   int cardIndex = (cardNameMap.count(randomCardName) > 0)
-                      ? (*cardNameMap.find(name)).second
-                      : -1;
-
+				  ? (*cardNameMap.find(name)).second
+				  : -1;
   switch (cardIndex) {
   case 0: {
-    Territory *attack = Utils::accessRandomElement(toAttack());
-    orders->push(new BombOrder(this, attack));
-    break;
+	Territory *attack = Utils::accessRandomElement(toAttack());
+	orders->push(new BombOrder(this, attack));
+	break;
   }
 
   case 1: {
-    orders->push(new BlockadeOrder(this, target));
-    break;
+	orders->push(new BlockadeOrder(this, target));
+	break;
   }
 
   case 2: {
-    Territory *source = Utils::accessRandomElement(this->ownedTerritories);
-    auto armies = source->getArmies();
-    armies = Utils::randomNumberInRange(0, armies + 1);
-    orders->push(new AirliftOrder(this, armies, source, target));
-    break;
+	Territory *source = Utils::accessRandomElement(this->ownedTerritories);
+	auto armies = source->getArmies();
+	armies = Utils::randomNumberInRange(0, armies + 1);
+	orders->push(new AirliftOrder(this, armies, source, target));
+	break;
   }
 
   case 3: {
-    auto ge = GameEngine::instance();
+	auto ge = GameEngine::instance();
 
-    Player *randomPlayer;
-    do {
-      randomPlayer = Utils::accessRandomElement(ge->players);
-    } while (randomPlayer != this);
+	Player *randomPlayer;
+	do {
+	  randomPlayer = Utils::accessRandomElement(ge->players);
+	} while (randomPlayer != this);
 
-    orders->push(new NegotiateOrder(this, randomPlayer));
-    break;
+	orders->push(new NegotiateOrder(this, randomPlayer));
+	break;
   }
 
-  default:
-    throw InvalidCardException(randomCardName + " is not a legal card.");
+  default:throw InvalidCardException(randomCardName + " is not a legal card.");
   }
 }
 
@@ -171,7 +167,7 @@ void Player::issueAdvanceOrder() {
   Territory *source = Utils::accessRandomElement(this->ownedTerritories);
 
   vector<Territory *> territories =
-      Utils::weightedBoolean(50) ? toDefend() : toAttack();
+	  Utils::weightedBoolean(50) ? toDefend() : toAttack();
   Territory *target = Utils::accessRandomElement(territories);
 
   int armies = rand() % source->getArmies();
@@ -195,4 +191,4 @@ Player::~Player() = default;
  * @param arg The text that will be printed on error
  */
 InvalidCardException::InvalidCardException(const std::string &arg)
-    : runtime_error(arg) {}
+	: runtime_error(arg) {}

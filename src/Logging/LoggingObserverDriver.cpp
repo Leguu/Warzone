@@ -16,8 +16,8 @@ void testLoggingObserver() {
   auto *log = new LogObserver();
 
   cout << "Part 1: Calling Notify and StringToLog on all classes to prove they "
-          "are children of Subject and Iloggable"
-       << endl;
+		  "are children of Subject and Iloggable"
+	   << endl;
   auto player1 = Player("Bob");
   auto ge = new GameEngine("../assets/Moon.map");
   const auto territoryS = ge->map->findTerritory("Byrgius");

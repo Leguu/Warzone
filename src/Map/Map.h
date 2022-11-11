@@ -156,7 +156,7 @@ public:
   Territory *getInputTerritory(const std::string &inputRequest);
 
   Territory *getInputTerritory(const std::string &inputRequest,
-                               bool cancelable);
+							   bool cancelable);
 
   // A method to add a continent
   void addContinent(Continent *continent);
