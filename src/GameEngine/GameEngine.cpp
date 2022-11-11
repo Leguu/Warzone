@@ -114,17 +114,15 @@ GameEngine::GameEngine() {
  */
 void GameEngine::issueOrdersPhase() {
   int stillIssuing = players.size();
-  vector<Player *> playersDoneIssuing = {};
   while (stillIssuing > 0) {
 	for (auto player : players) {
-	  if (std::find(playersDoneIssuing.begin(), playersDoneIssuing.end(),
-					player) != playersDoneIssuing.end())
-		continue;
-	  cout << player->name << " is issuing an order" << endl;
-	  auto doneIssuing = player->issueOrder();
-	  if (doneIssuing) {
-		playersDoneIssuing.push_back(player);
-		stillIssuing--;
+	  if (!player->isDoneIssuing) {
+		cout << player->name << " is issuing an order" << endl;
+		auto doneIssuing = player->issueOrder();
+		if (doneIssuing) {
+		  player->isDoneIssuing = true;
+		  stillIssuing--;
+		}
 	  }
 	}
   }
@@ -132,6 +130,7 @@ void GameEngine::issueOrdersPhase() {
   // reset so card can be awarded next round
   for (auto player : players) {
 	player->cardAwarded = false;
+	player->isDoneIssuing = false;
   }
 }
 

@@ -27,6 +27,8 @@ public:
 
   int cardAwarded = false;
 
+  bool isDoneIssuing = false;
+
   explicit Player(string name);
 
   vector<Territory *> getAdjacentEnemyTerritories();
