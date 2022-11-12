@@ -73,6 +73,8 @@ public:
 
   AdvanceOrder(const AdvanceOrder &other);
 
+  Territory *getTarget();
+
 private:
   int armies;
   Territory *source;

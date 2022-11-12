@@ -221,6 +221,10 @@ AdvanceOrder::AdvanceOrder(const AdvanceOrder &other)
 	: Order(other.issuer, other.name), armies(other.armies),
 	  source(other.source), target(other.target) {}
 
+Territory *AdvanceOrder::getTarget() {
+  return target;
+}
+
 /**
  * Destructor for advance order
  */

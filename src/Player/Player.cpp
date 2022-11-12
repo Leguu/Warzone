@@ -26,16 +26,7 @@ vector<Territory *> Player::toAttack() const {
  */
 
 vector<Territory *> Player::toDefend() const {
-  auto sensitiveTerritories = vector<Territory *>();
-  for (auto t : ownedTerritories) {
-	for (auto adj : t->getAdjTerritories()) {
-	  if (adj->getOwner() && adj->getOwner() != this) {
-		sensitiveTerritories.push_back(t);
-		break;
-	  }
-	}
-  }
-  return sensitiveTerritories;
+  return ownedTerritories;
 }
 
 /**
@@ -110,6 +101,7 @@ bool Player::issueOrder() {
 }
 
 void Player::issueDeployOrder() {
+  std::cout << ownedTerritories.size() << std::endl;
   Territory *target = Utils::accessRandomElement(toDefend());
   int armies = rand() % reinforcementsAfterDeploy;
   orders->push(new DeployOrder(this, armies, target));

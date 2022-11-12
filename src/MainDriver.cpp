@@ -30,8 +30,8 @@ int main() {
 	} else if (input == "command") {
 	  testCommandProcessor();
 	} else if (Utils::isEqualLowercase(input, "game")) {
-	  auto ge = new GameEngine();
-	  ge->startupPhase();
+	  testStartupPhase();
+//	  testMainGameLoop();
 	} else if (Utils::isEqualLowercase(input, "quit")) {
 	  break;
 	} else {

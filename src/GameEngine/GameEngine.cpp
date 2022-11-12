@@ -119,6 +119,7 @@ void GameEngine::issueOrdersPhase() {
 	  if (!player->isDoneIssuing) {
 		cout << player->name << " is issuing an order" << endl;
 		auto doneIssuing = player->issueOrder();
+		cout << "he is " << std::boolalpha << doneIssuing << endl;
 		if (doneIssuing) {
 		  player->isDoneIssuing = true;
 		  stillIssuing--;
