@@ -73,48 +73,37 @@ vector<Territory *> Territory::getAdjTerritories() const {
  * Get the name of the territory
  * @return
  */
-string Territory::getName() {
-  return name;
-}
+string Territory::getName() { return name; }
 
 /**
  * Get the id of the territory
  * @return id of the territory
  */
-int Territory::getId() const {
-  return id;
-}
+int Territory::getId() const { return id; }
 
 /**
  * Get the continent the territory belongs to
  * @return the continent the territory belongs to
  */
-Continent *Territory::getContinent() {
-  return continent; }
+Continent *Territory::getContinent() { return continent; }
 
 /**
  * Get the armies on the territory
  * @return the armies on the territory
  */
-int Territory::getArmies() const {
-  return armies;
-}
+int Territory::getArmies() const { return armies; }
 
 /**
  * Set the armies on the territories
  * @param num the new armies on the territories
  */
-void Territory::setArmies(int num) {
-  armies = num;
-}
+void Territory::setArmies(int num) { armies = num; }
 
 /**
  * Get the owner of the territory
  * @return the owner (Player object) of the territory
  */
-Player *Territory::getOwner() {
-  return owner;
-}
+Player *Territory::getOwner() { return owner; }
 
 /**
  * Set the owner of a territory
@@ -151,9 +140,7 @@ string Territory::toString() const {
  * Set the continent of a territory
  * @param pContinent the new continent it belongs to
  */
-void Territory::setContinent(Continent *pContinent) {
-  continent = pContinent;
-}
+void Territory::setContinent(Continent *pContinent) { continent = pContinent; }
 
 /**
  * List the name of adjacent territories
@@ -243,25 +230,19 @@ std::ostream &operator<<(ostream &os, const Continent &continent) {
  * Get all territories a continent owns
  * @return
  */
-vector<Territory *> Continent::getTerritories() {
-  return territories;
-}
+vector<Territory *> Continent::getTerritories() { return territories; }
 
 /**
  * Get the name of a continent
  * @return  the name of the continent
  */
-string Continent::getName() {
-  return name;
-}
+string Continent::getName() { return name; }
 
 /**
  * Get the bonus a continent has
  * @return the bonus a continent has
  */
-int Continent::getBonus() const {
-  return bonus;
-}
+int Continent::getBonus() const { return bonus; }
 
 /**
  * Add a territory to a continent
@@ -368,25 +349,19 @@ std::ostream &operator<<(ostream &os, const Map &map) {
  * Get all territories within a map
  * @return all territories within a map
  */
-vector<Territory *> Map::getAllTerritories() {
-  return territories;
-}
+vector<Territory *> Map::getAllTerritories() { return territories; }
 
 /**
  * Get all continents within a map
  * @return all continents within a map
  */
-vector<Continent *> Map::getContinents() {
-  return continents;
-}
+vector<Continent *> Map::getContinents() { return continents; }
 
 /**
  * Add a territory to a map
  * @param terr The territory that will be added to the map
  */
-void Map::addTerritoryToMap(Territory *terr) {
-  territories.push_back(terr);
-}
+void Map::addTerritoryToMap(Territory *terr) { territories.push_back(terr); }
 
 /**
  * Add a continent to a map

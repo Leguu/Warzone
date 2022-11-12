@@ -19,11 +19,20 @@ using std::vector;
 class GameEngine : public ILoggable, public Subject {
 public:
   enum GameState {
-	START, MAP_LOADED, MAP_VALIDATED, PLAYERS_ADDED, ASSIGN_REINFORCEMENTS, WIN
+	START,
+	MAP_LOADED,
+	MAP_VALIDATED,
+	PLAYERS_ADDED,
+	ASSIGN_REINFORCEMENTS,
+	WIN
   };
 
-  static inline string
-	  gameStates[6] = {"START", "MAP_LOADED", "MAP_VALIDATED", "PLAYERS_ADDED", "ASSIGN_REINFORCEMENTS", "WIN"};
+  static inline string gameStates[6] = {"START",
+										"MAP_LOADED",
+										"MAP_VALIDATED",
+										"PLAYERS_ADDED",
+										"ASSIGN_REINFORCEMENTS",
+										"WIN"};
 
   bool debugMode = false;
 

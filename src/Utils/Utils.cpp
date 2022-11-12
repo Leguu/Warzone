@@ -66,9 +66,7 @@ string rtrim(const string &s) {
   return (end == string::npos) ? "" : s.substr(0, end + 1);
 }
 
-string Utils::trim(const string &s) {
-  return rtrim(ltrim(s));
-}
+string Utils::trim(const string &s) { return rtrim(ltrim(s)); }
 
 bool Utils::isEqualLowercase(const string &a, const string &b) {
   return toLowercase(a) == toLowercase(b);

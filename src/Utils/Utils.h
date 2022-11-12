@@ -50,7 +50,6 @@ public:
 
 private:
   inline Utils() = default;
-
 };
 
 #endif // WARZONE_UTILS_H

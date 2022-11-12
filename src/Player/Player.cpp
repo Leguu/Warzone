@@ -25,9 +25,7 @@ vector<Territory *> Player::toAttack() const {
  * @return all territories the player owns
  */
 
-vector<Territory *> Player::toDefend() const {
-  return ownedTerritories;
-}
+vector<Territory *> Player::toDefend() const { return ownedTerritories; }
 
 /**
  * Get all the enemy territories adjacent to your own
@@ -102,17 +100,22 @@ bool Player::issueOrder(bool debugMode) {
 
 void Player::issueDeployOrder(bool debugMode) {
   Territory *target = Utils::accessRandomElement(toDefend());
-  int armies = (reinforcementsAfterDeploy == 1 ? 0 : rand() % reinforcementsAfterDeploy) + 1;
+  int armies =
+	  (reinforcementsAfterDeploy == 1 ? 0
+									  : rand() % reinforcementsAfterDeploy) +
+		  1;
   target->reinforcementsAdded += armies;
   if (debugMode)
-	cout << "Issued Deploy Order: " << armies << " units to " + target->getName() << endl;
+	cout << "Issued Deploy Order: " << armies
+		 << " units to " + target->getName() << endl;
   orders->push(new DeployOrder(this, armies, target));
   this->reinforcementsAfterDeploy -= armies;
 }
 
 void Player::issueCardOrder(bool debugMode) {
   auto randomCardName = this->hand->cards[0]->name;
-  debugMode ? this->hand->debugPlay(randomCardName) : this->hand->play(randomCardName);
+  debugMode ? this->hand->debugPlay(randomCardName)
+			: this->hand->play(randomCardName);
 
   Territory *target = Utils::accessRandomElement(this->ownedTerritories);
   std::map<std::string, int> cardNameMap = {
@@ -149,8 +152,9 @@ void Player::issueCardOrder(bool debugMode) {
 	source->reinforcementsAdded -= armies;
 	target->reinforcementsAdded += armies;
 	if (debugMode)
-	  cout << "Issued AirliftOrder " << armies << " units from: " << source->getName() << " to " << target->getName()
-		   << endl;
+	  cout << "Issued AirliftOrder " << armies
+		   << " units from: " << source->getName() << " to "
+		   << target->getName() << endl;
 	break;
   }
 
@@ -164,13 +168,13 @@ void Player::issueCardOrder(bool debugMode) {
 
 	orders->push(new NegotiateOrder(this, randomPlayer));
 	if (debugMode)
-	  cout << "Issued NegotiateOrder by " << this->name << "against: " << randomPlayer->name << endl;
+	  cout << "Issued NegotiateOrder by " << this->name
+		   << "against: " << randomPlayer->name << endl;
 	break;
   }
 
   default:throw InvalidCardException(randomCardName + " is not a legal card.");
   }
-
 }
 
 void Player::issueAdvanceOrder(bool debugMode) {
@@ -191,8 +195,8 @@ void Player::issueAdvanceOrder(bool debugMode) {
   target->reinforcementsAdded += armies;
 
   if (debugMode)
-	cout << "Issued Advance Order: " << armies << " units from " << source->getName() << " to " << target->getName()
-		 << endl;
+	cout << "Issued Advance Order: " << armies << " units from "
+		 << source->getName() << " to " << target->getName() << endl;
 }
 
 /**

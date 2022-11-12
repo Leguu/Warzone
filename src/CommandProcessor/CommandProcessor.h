@@ -71,7 +71,9 @@ public:
 
   Command *getCommand();
 
-  [[nodiscard]] Command *getCommand(const string &prompt, string command = string(), string arg = string());
+  [[nodiscard]] Command *getCommand(const string &prompt,
+									string command = string(),
+									string arg = string());
 
   vector<Command *> getCommandList();
 

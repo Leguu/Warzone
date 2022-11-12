@@ -172,7 +172,8 @@ void GameEngine::reinforcementPhase() const {
   }
 }
 
-bool GameEngine::startupPhase(std::vector<std::pair<std::string, std::string>> testCommands) {
+bool GameEngine::startupPhase(
+	std::vector<std::pair<std::string, std::string>> testCommands) {
   const string commands =
 	  "Available commands:\n"
 	  "LoadMap <Map Name> - Load a map\n"
@@ -189,9 +190,12 @@ bool GameEngine::startupPhase(std::vector<std::pair<std::string, std::string>> t
 	this->debugMode = true;
   }
   while (testCommands.empty() || commandsCounter < testCommands.size()) {
-	input = testCommands.empty() ? commandProcessor->getCommand(
-		"Input your command, write \"help\" for help") : commandProcessor
-				->getCommand("testPrompt", testCommands[commandsCounter].first, testCommands[commandsCounter].second);
+	input = testCommands.empty()
+			? commandProcessor->getCommand(
+			"Input your command, write \"help\" for help")
+			: commandProcessor->getCommand(
+			"testPrompt", testCommands[commandsCounter].first,
+			testCommands[commandsCounter].second);
 
 	if (input == nullptr) {
 	  continue;
@@ -363,9 +367,7 @@ std::string GameEngine::stringToLog() {
   return "Game State Modified: " + this->gameStates[this->state];
 }
 
-GameEngine::GameState GameEngine::getState() {
-  return state;
-}
+GameEngine::GameState GameEngine::getState() { return state; }
 
 void GameEngine::transition(GameEngine::GameState newState) {
   this->state = newState;

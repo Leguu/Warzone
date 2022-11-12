@@ -164,17 +164,11 @@ void CommandProcessor::saveCommand(Command *command) {
   this->Notify(this);
 }
 
-const string &Command::getCommand() const {
-  return command;
-}
+const string &Command::getCommand() const { return command; }
 
-const string &Command::getArg() const {
-  return arg;
-}
+const string &Command::getArg() const { return arg; }
 
-const string &Command::getEffect() const {
-  return effect;
-}
+const string &Command::getEffect() const { return effect; }
 
 void Command::saveEffect(const string &Effect) {
   effect = Effect;
@@ -189,7 +183,8 @@ bool Command::operator!=(const string &rhs) const {
   return !Utils::isEqualLowercase(command, rhs);
 }
 
-Command *CommandProcessor::getCommand(const string &prompt, string command, string arg) {
+Command *CommandProcessor::getCommand(const string &prompt, string command,
+									  string arg) {
   if (command == string()) {
 	cout << prompt << endl;
 	return getCommand();
@@ -228,9 +223,7 @@ std::string Command::stringToLog() {
   return "Effect Modified: " + this->effect;
 }
 
-vector<Command *> CommandProcessor::getCommandList() {
-  return commands;
-}
+vector<Command *> CommandProcessor::getCommandList() { return commands; }
 
 FileCommandProcessorAdapter::FileCommandProcessorAdapter()
 	: CommandProcessor() {
@@ -287,9 +280,7 @@ ostream &operator<<(ostream &os, const FileLineReader &flr) {
   return os;
 }
 
-string FileLineReader::getPath() {
-  return path;
-}
+string FileLineReader::getPath() { return path; }
 
 void FileLineReader::setPath(string newPath) { path = std::move(newPath); }
 
