@@ -7,13 +7,50 @@
 void testStartupPhase() {
   auto ge = new GameEngine();
 
-  auto playerOne = new Player("Bob");
-  auto playerTwo = new Player("Alice");
+  auto playerOneName = "Bob";
+  auto playerTwoName = "Alice";
 
   std::vector<std::pair<std::string, std::string>>
-	  testCommands = {{"loadmap", "Moon"}};
+	  testCommands =
+	  {{"loadmap", "Moon"}, {"validatemap", string()}, {"addplayer", playerOneName}, {"addplayer", playerTwoName},
+	   {"gamestart", string()}};
 
-  ge->startupPhase(testCommands);
+  auto gameStarted = !ge->startupPhase(testCommands);
+
+  //  1) use the loadmap <filename> command to select a map from a list of map files as stored in a directory,
+  //  which results in the map being loaded in the game.
+  Utils::assertCondition(ge->map != nullptr, "loadmap command failed: did not load map");
+
+  //  2) use the validatemap command to validate the map (i.e. it is a connected graph, etc – see assignment 1).
+  Utils::assertCondition(ge->map->validate(), "validatemap command failed: could not validate map");
+
+  auto v = ge->players;
+  auto itPlayerOne = find_if(v.begin(), v.end(), [&playerOneName](Player *p) { return p->name == playerOneName; });
+  auto itPlayerTwo = find_if(v.begin(), v.end(), [&playerTwoName](Player *p) { return p->name == playerTwoName; });
+
+  //  3) use the addplayer <playername> command to enter players in the game (2-6 players)
+  Utils::assertCondition(itPlayerOne != v.end() && itPlayerTwo != v.end(),
+						 "addplayer command failed: could not add all players");
+
+  //  4) use the gamestart command to
+  //  	a) fairly distribute all the territories to the players
+  Utils::assertCondition(ge->players[0]->ownedTerritories.size() == ge->players[1]->ownedTerritories.size(),
+						 "gamestart command failed: unable to fairly distribute all the territories to the players");
+
+  //  	b) determine randomly the order of play of the players in the game
+  Utils::assertCondition(ge->players[0]->name == playerOneName || ge->players[1]->name == playerOneName,
+						 "gamestart command failed: unable to randomly determine the order of play of the players in the game");
+
+  //  	c) give 50 initial army units to the players, which are placed in their respective reinforcement pool
+  Utils::assertCondition(ge->players[0]->reinforcements == 50 && ge->players[1]->reinforcements == 50,
+						 "gamestart command failed: unable to give 50 initial army units to the players, which are placed in their respective reinforcement pool");
+
+  //  	d) let each player draw 2 initial cards from the deck using the deck’s draw() method
+  Utils::assertCondition(ge->players[0]->hand->cards.size() == 2 && ge->players[1]->hand->cards.size() == 2,
+						 "gamestart command failed: each player should have drawn 2 initial cards from the deck");
+
+  //  	e) switch the game to the play phase
+  Utils::assertCondition(gameStarted, "gamestart command failed: game not in play phase");
 
   delete ge;
 }

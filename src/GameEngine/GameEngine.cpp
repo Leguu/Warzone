@@ -169,7 +169,7 @@ void GameEngine::reinforcementPhase() const {
   }
 }
 
-void GameEngine::startupPhase(std::vector<std::pair<std::string, std::string>> testCommands) {
+bool GameEngine::startupPhase(std::vector<std::pair<std::string, std::string>> testCommands) {
   const string commands =
 	  "Available commands:\n"
 	  "LoadMap <Map Name> - Load a map\n"
@@ -225,6 +225,9 @@ void GameEngine::startupPhase(std::vector<std::pair<std::string, std::string>> t
 		p->hand->draw();
 	  }
 
+	  if (testCommands.size() > 0)
+		return false;
+
 	  mainGameLoop();
 
 	  transition(GameState::WIN);
@@ -233,21 +236,23 @@ void GameEngine::startupPhase(std::vector<std::pair<std::string, std::string>> t
 		cout << wrongStateTransitionMessage << endl;
 		continue;
 	  }
-
-	  return;
+	  return true;
 	} else if (Utils::isEqualLowercase(input->getCommand(), "replay")) {
 	  if (state != GameState::WIN) {
 		cout << wrongStateTransitionMessage << endl;
 		continue;
 	  }
-	  return;
+	  return true;
 	} else {
 	  cout << "Type the right command" << endl;
 	}
-	if (testCommands.size() == 0)
+	if (testCommands.size() == 0) {
 	  cout << "-----------------------------" << endl;
+	}
 	commandsCounter++;
   }
+
+  return true;
 }
 
 /**
