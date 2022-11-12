@@ -82,6 +82,10 @@ void GameEngine::mainGameLoop() {
 	if (gameOver) {
 	  break;
 	}
+
+	for (auto t : map->getAllTerritories()) {
+	  t->reinforcementsAdded = 0;
+	}
   }
 
   cout << "Game is over!" << endl;
@@ -118,8 +122,7 @@ void GameEngine::issueOrdersPhase() {
 	for (auto player : players) {
 	  if (!player->isDoneIssuing) {
 		cout << player->name << " is issuing an order" << endl;
-		auto doneIssuing = player->issueOrder();
-		cout << "he is " << std::boolalpha << doneIssuing << endl;
+		auto doneIssuing = player->issueOrder(this->debugMode);
 		if (doneIssuing) {
 		  player->isDoneIssuing = true;
 		  stillIssuing--;
@@ -182,8 +185,11 @@ bool GameEngine::startupPhase(std::vector<std::pair<std::string, std::string>> t
   Command *input;
   transition(GameState::START);
   int commandsCounter = 0;
-  while (testCommands.size() > 0 ? commandsCounter < testCommands.size() : true) {
-	input = testCommands.size() == 0 ? commandProcessor->getCommand(
+  if (!testCommands.empty()) {
+	this->debugMode = true;
+  }
+  while (testCommands.empty() || commandsCounter < testCommands.size()) {
+	input = testCommands.empty() ? commandProcessor->getCommand(
 		"Input your command, write \"help\" for help") : commandProcessor
 				->getCommand("testPrompt", testCommands[commandsCounter].first, testCommands[commandsCounter].second);
 

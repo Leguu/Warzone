@@ -31,7 +31,7 @@ int main() {
 	  testCommandProcessor();
 	} else if (Utils::isEqualLowercase(input, "game")) {
 	  testStartupPhase();
-//	  testMainGameLoop();
+	  testMainGameLoop();
 	} else if (Utils::isEqualLowercase(input, "quit")) {
 	  break;
 	} else {

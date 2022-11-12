@@ -25,6 +25,8 @@ public:
   static inline string
 	  gameStates[6] = {"START", "MAP_LOADED", "MAP_VALIDATED", "PLAYERS_ADDED", "ASSIGN_REINFORCEMENTS", "WIN"};
 
+  bool debugMode = false;
+
   vector<Player *> players = vector<Player *>();
   Deck *deck =
 	  new Deck({new BombCard, new BombCard, new AirliftCard, new AirliftCard,

@@ -38,7 +38,7 @@ public:
 
   /**
    * Play a card from the deck and add it to the deck
-   * @param cardName The name of the card
+   * @param cardName	The name of the card
    */
   void play(string const &cardName);
 

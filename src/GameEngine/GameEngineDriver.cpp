@@ -92,9 +92,10 @@ void testMainGameLoop() {
 						 "Wrong number of reinforcements were added for player two in the reinforcement phase");
 
   //  (2) a player will only issue deploy orders and no other kind of orders if they still have army units in their reinforcement pool;
+  ge->debugMode = true;
   ge->issueOrdersPhase();
-  Utils::assertCondition(playerOne->reinforcements == 0, "Player one did not deploy all reinforcements");
-  Utils::assertCondition(playerTwo->reinforcements == 0, "Player two did not deploy all reinforcements");
+  Utils::assertCondition(playerOne->reinforcementsAfterDeploy == 0, "Player one did not deploy all reinforcements");
+  Utils::assertCondition(playerTwo->reinforcementsAfterDeploy == 0, "Player two did not deploy all reinforcements");
 
   // Since we don't have a way to track of past reinforcements after issuing an order,
   // we just make sure the first 'n' orders are "Deploy".
@@ -191,6 +192,8 @@ void testMainGameLoop() {
 						   "Player one can not play their card");
   }
 
+//  playerTwo->ownedTerritories = {};
+//  ge->executeOrdersPhase();
   //  (5) TODO: a player that does not control any territory is removed from the game;
   //  (6) TODO: the game ends when a single player controls all the territories.
 

@@ -37,13 +37,13 @@ public:
 
   [[nodiscard]] vector<Territory *> toDefend() const;
 
-  void issueDeployOrder();
+  void issueDeployOrder(bool debugMode = false);
 
-  void issueAdvanceOrder();
+  void issueAdvanceOrder(bool debugMode = false);
 
-  void issueCardOrder();
+  void issueCardOrder(bool debugMode = false);
 
-  bool issueOrder();
+  bool issueOrder(bool debugMode = false);
 
   void drawFromDeck() const;
 
