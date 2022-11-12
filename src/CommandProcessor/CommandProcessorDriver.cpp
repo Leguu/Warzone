@@ -22,10 +22,16 @@ void testCommandProcessor() {
             }
         } else if (input1 == "file") {
             cout << "You are in file read mode." << endl;
-            string fileName = Utils::getInputString("Enter the name of the text file you want to read");
+            string fileName = Utils::getInputString("Enter the name of the text file (with the extension) you want to read");
             string path = "../src/CommandProcessor/" + fileName;
             auto fcpa = new FileCommandProcessorAdapter(path);
+
             fcpa->flr->ifile.open(path);
+
+            if (!fcpa->flr->ifile.is_open()) {
+                cout << ("File " + fileName + " could not be opened! Try again") << endl;
+                continue;
+            }
             cout << "You are taking commands from a file now." << endl;
             while (!fcpa->flr->ifile.eof()) {
 
