@@ -27,13 +27,15 @@ public:
 
   int cardAwarded = false;
 
+  vector<Player *> cannotAttack = vector<Player *>();
+
   bool isDoneIssuing = false;
 
   explicit Player(string name);
 
   vector<Territory *> getAdjacentEnemyTerritories();
 
-  [[nodiscard]] vector<Territory *> toAttack() const;
+  [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const;
 
   [[nodiscard]] vector<Territory *> toDefend() const;
 

@@ -142,9 +142,9 @@ class NegotiateOrder : public Order {
 public:
   explicit NegotiateOrder(Player *issuer, const Player *target);
 
-  void validate() override {};
+  void validate() override;
 
-  void execute() override {};
+  void execute() override;
 
   std::string description() override;
 

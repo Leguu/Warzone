@@ -50,6 +50,16 @@ public:
 	return elements[randomIndex];
   }
 
+  template<class T> static std::pair<T *, T *> accessRandomPair(vector<std::pair<T *, T *>> elements) {
+	int randomIndex = rand() % elements.size();
+	return elements[randomIndex];
+  }
+
+//  template<class T> static std::pair<T *, T *> *accessRandomElement(vector<std::pair<T *, T *>> elements) {
+//	int randomIndex = rand() % elements.size();
+//	return elements[randomIndex];
+//  }
+
 private:
   inline Utils() = default;
 };

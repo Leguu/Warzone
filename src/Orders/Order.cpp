@@ -158,7 +158,7 @@ std::string AdvanceOrder::description() {
  * Validate an advance order
  */
 void AdvanceOrder::validate() {
-  if (target->getOwner() && (target->getOwner() != issuer)) {
+  if (source->getOwner() && (source->getOwner() != issuer)) {
 	throw InvalidOrderException(issuer->name +
 		" tried to move someone else's territory.");
   } else if (std::find(source->getAdjTerritories().begin(),
@@ -179,6 +179,22 @@ void AdvanceOrder::validate() {
  */
 void AdvanceOrder::execute() {
   validate();
+
+  auto sourceOwner = source->getOwner();
+  auto targetOwner = target->getOwner();
+  if (sourceOwner != targetOwner) {
+	auto sourceOwnerCannotAttack = sourceOwner->cannotAttack;
+	auto targetOwnerCannotAttack = targetOwner->cannotAttack;
+
+	if (std::find(sourceOwnerCannotAttack.begin(), sourceOwnerCannotAttack.end(), targetOwner)
+		!= sourceOwnerCannotAttack.end()
+		|| std::find(targetOwnerCannotAttack.begin(), targetOwnerCannotAttack.end(), sourceOwner)
+			!= targetOwnerCannotAttack.end()
+		) {
+	  std::cout << "Attack was blocked due to Diplomacy Card" << std::endl;
+	  return;
+	}
+  }
 
   // 1. deduct source armies
   source->setArmies(source->getArmies() - armies);
@@ -412,6 +428,19 @@ std::string NegotiateOrder::description() {
  */
 NegotiateOrder::NegotiateOrder(const NegotiateOrder &o)
 	: Order(o.issuer, o.name), target(o.target) {}
+
+void NegotiateOrder::execute() {
+  validate();
+  this->issuer->cannotAttack.push_back(const_cast<Player *&&>(this->target));
+  const_cast<Player *&&>(this->target)->cannotAttack.push_back(this->issuer);
+}
+
+void NegotiateOrder::validate() {
+  if (this->target == this->issuer) {
+	throw InvalidOrderException(
+		issuer->name + " tried to negotiate with themselves. Are you okay? :(");
+  }
+}
 
 /**
  * Negotiate order destructor

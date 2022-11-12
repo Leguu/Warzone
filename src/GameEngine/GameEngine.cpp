@@ -44,21 +44,28 @@ GameEngine::GameEngine(const std::string &mp) {
 
 bool GameEngine::executeOrdersPhase() {
   cout << endl << "Executing orders..." << endl;
-  for (auto &player : this->players) {
-	while (auto order = player->orders->pop()) {
-	  try {
-		order->execute();
-		cout << *order << endl;
-		if (map->allContinentsOwned()) {
-		  cout << "Game is over!" << endl;
-		  return true;
+  int stillExecuting = players.size();
+  while (stillExecuting > 0) {
+	for (auto player : players) {
+	  if (player->orders->getOrdersSize() > 0) {
+		auto order = player->orders->pop();
+		try {
+		  order->execute();
+		  cout << *order << endl;
+		  if (map->allContinentsOwned()) {
+			cout << "	Game is over!" << endl;
+			return true;
+		  }
+		} catch (InvalidOrderException &e) {
+		  cout << order->name << " order issued by " + order->issuer->name
+			   << " was invalid: " << e.what() << endl;
 		}
-	  } catch (InvalidOrderException &e) {
-		cout << order->name << " order issued by " + order->issuer->name
-			 << " was invalid: " << e.what() << endl;
+	  } else {
+		stillExecuting--;
 	  }
 	}
   }
+
   cout << "... All orders have been executed" << endl << endl;
   cout << "Next round has started" << endl << endl;
   return false;
@@ -84,7 +91,7 @@ void GameEngine::mainGameLoop() {
 	}
 
 	for (auto t : map->getAllTerritories()) {
-	  t->reinforcementsAdded = 0;
+	  t->reinforcementsAdded = t->getArmies();
 	}
   }
 
@@ -135,6 +142,7 @@ void GameEngine::issueOrdersPhase() {
   for (auto player : players) {
 	player->cardAwarded = false;
 	player->isDoneIssuing = false;
+	player->cannotAttack.clear();
   }
 }
 
