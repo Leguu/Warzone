@@ -204,7 +204,8 @@ bool GameEngine::startupPhase(
 	if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')),
 								"loadmap")) {
 	  loadMap("../assets/" + input->getArg() + ".map");
-	} else if (*input == "help") {
+	}
+	if (*input == "help") {
 	  cout << commands << endl;
 	} else if (Utils::isEqualLowercase(inputText, "validatemap")) {
 	  validateMap();
@@ -218,7 +219,8 @@ bool GameEngine::startupPhase(
 	  }
 
 	  if (players.size() < 2) {
-		cout << "You can't have a game of less than 2 players, unless you're "
+		cout << "You can't have"
+				" a game of less than 2 players, unless you're "
 				"schizophrenic"
 			 << endl;
 		continue;

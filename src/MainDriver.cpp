@@ -14,7 +14,7 @@ int main() {
   auto log = new LogObserver();
   while (true) {
 	auto input = Utils::getInputString(
-		"What do you want to test? cards, map, orders, players, game, logging, "
+		"What do you want to test? cards, map, orders, players, logging, startup, mainloop, game "
 		"command. Type quit to quit");
 
 	if (Utils::isEqualLowercase(input, "cards")) {
@@ -29,9 +29,16 @@ int main() {
 	  testLoggingObserver();
 	} else if (input == "command") {
 	  testCommandProcessor();
-	} else if (Utils::isEqualLowercase(input, "game")) {
+	} else if (Utils::isEqualLowercase(input, "startup")) {
 	  testStartupPhase();
+	} else if (Utils::isEqualLowercase(input, "mainloop")) {
 	  testMainGameLoop();
+	} else if (Utils::isEqualLowercase(input, "game")) {
+	  auto ge = new GameEngine();
+	  ge->debugMode = true;
+	  ge->startupPhase();
+
+	  delete ge;
 	} else if (Utils::isEqualLowercase(input, "quit")) {
 	  break;
 	} else {

@@ -95,7 +95,7 @@ bool Player::issueOrder(bool debugMode) {
   }
 
   // (3)
-  return this->orders->getOrdersSize() >= Utils::randomNumberInRange(5, 10);
+  return this->orders->getOrdersSize() >= Utils::randomNumberInRange(15, 40);
 }
 
 void Player::issueDeployOrder(bool debugMode) {
@@ -119,7 +119,7 @@ void Player::issueCardOrder(bool debugMode) {
 
   Territory *target = Utils::accessRandomElement(this->ownedTerritories);
   std::map<std::string, int> cardNameMap = {
-	  {"Bomb", 0}, {"Blockade", 1}, {"Airlift", 2}, {"Negotiate", 3}};
+	  {"Bomb", 0}, {"Blockade", 1}, {"Airlift", 2}, {"NegotiateCard", 3}};
 
   int cardIndex = (cardNameMap.count(randomCardName) > 0)
 				  ? (*cardNameMap.find(randomCardName)).second
