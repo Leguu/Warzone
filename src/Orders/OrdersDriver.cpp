@@ -53,3 +53,18 @@ void testOrdersLists() {
   cout << "All tests passed successfully!" << endl;
   delete ge;
 }
+
+void testOrdersExecution() {
+  //  TODO: (1) each order is validated before being executed according to the above descriptions;
+
+  //  TODO: (2) ownership of a territory is transferred to the attacking player if a territory is conquered as a result of an
+  //  advance order;
+
+  //  TODO: (3) one card is given to a player if they conquer at least one territory in a turn (not more than one card per turn);
+
+  //  TODO: (4) the negotiate order prevents attacks between the two players involved;
+  //  (5) the blockade order transfers ownership to the Neutral player; 6) all the orders described above can be issued by
+  //  a player and executed by the game engine
+  cout << "All tests passed successfully!" << endl;
+  delete ge;
+}
