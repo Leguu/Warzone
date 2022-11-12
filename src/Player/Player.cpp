@@ -25,7 +25,9 @@ vector<Territory *> Player::toAttack() const {
  * @return all territories the player owns
  */
 
-vector<Territory *> Player::toDefend() const { return ownedTerritories; }
+vector<Territory *> Player::toDefend() const {
+  return ownedTerritories;
+}
 
 /**
  * Get all the enemy territories adjacent to your own
@@ -95,7 +97,7 @@ bool Player::issueOrder(bool debugMode) {
   }
 
   // (3)
-  return this->orders->getOrdersSize() >= Utils::randomNumberInRange(15, 40);
+  return this->orders->getOrdersSize() >= Utils::randomNumberInRange(5, 10);
 }
 
 void Player::issueDeployOrder(bool debugMode) {
@@ -169,7 +171,7 @@ void Player::issueCardOrder(bool debugMode) {
 	orders->push(new NegotiateOrder(this, randomPlayer));
 	if (debugMode)
 	  cout << "Issued NegotiateOrder by " << this->name
-		   << "against: " << randomPlayer->name << endl;
+		   << " against: " << randomPlayer->name << endl;
 	break;
   }
 
@@ -184,12 +186,13 @@ void Player::issueAdvanceOrder(bool debugMode) {
 	  Utils::weightedBoolean(50) ? toDefend() : toAttack();
   Territory *target = Utils::accessRandomElement(territories);
 
-  int armies;
-  while (source->reinforcementsAdded == 0) {
-	source = Utils::accessRandomElement(this->ownedTerritories);
+  for (auto t : target->getAdjTerritories()) {
+	if (t->getOwner() == this && t->reinforcementsAdded > 0) {
+	  source = t;
+	}
   }
-  armies = rand() % source->reinforcementsAdded + 1;
 
+  int armies = rand() % source->reinforcementsAdded + 1;
   orders->push(new AdvanceOrder(this, armies, source, target));
   source->reinforcementsAdded -= armies;
   target->reinforcementsAdded += armies;

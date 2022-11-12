@@ -165,7 +165,7 @@ void AdvanceOrder::validate() {
 					   source->getAdjTerritories().end(),
 					   target) != source->getAdjTerritories().end()) {
 	throw InvalidOrderException(
-		issuer->name + "The territory is not adjacent to the source territory");
+		"The territory is not adjacent to the source territory");
   } else if (source->getArmies() - armies < 0) {
 	throw InvalidOrderException(issuer->name + "'s source territory (" +
 		source->getName() + ") does not have " +

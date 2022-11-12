@@ -90,7 +90,7 @@ bool BombCard::play(Player *issuer) const {
   auto ge = GameEngine::instance();
   auto adjacentEnemyTerritories = issuer->getAdjacentEnemyTerritories();
   while (true) {
-	cout << "Adjacent enemy territories you can bomb: ";
+	cout << "BombCard Adjacent enemy territories you can bomb: ";
 	for (auto adjacentEnemyTerritory : adjacentEnemyTerritories) {
 	  cout << "* " << *adjacentEnemyTerritory << " ";
 	}
@@ -152,7 +152,7 @@ NegotiateCard::~NegotiateCard() = default;
 bool BlockadeCard::play(Player *issuer) const {
   auto ge = GameEngine::instance();
   while (true) {
-	cout << "Territories you own: " << endl;
+	cout << "BlockadeCard Territories you own: " << endl;
 	for (Territory *playerTerritory : issuer->ownedTerritories) {
 	  cout << "Name: " << playerTerritory->getName()
 		   << ", ID : " << playerTerritory->getId() << endl;
@@ -192,13 +192,13 @@ void Deck::put(Card *card) { this->cards.push_back(card); }
 bool AirliftCard::play(Player *issuer) const {
   auto ge = GameEngine::instance();
   while (true) {
-	cout << "Territories you own: " << endl;
+	cout << "AirliftCard Territories you own: " << endl;
 	for (Territory *territory : issuer->ownedTerritories) {
 	  cout << "Name: " << territory->getName()
 		   << ", ID : " << territory->getId() << endl;
 	}
-	auto territoryOrigin = ge->map->getInputTerritory(
-		"Please input the ID of the territory you will airlift.");
+	cout << "Please input the ID of the territory you will airlift." << endl;
+	auto territoryOrigin = ge->map->getInputTerritory(false);
 	if (territoryOrigin->getOwner() != issuer) {
 	  cout << "Error: Cannot airlift from a territory you don't own!" << endl
 		   << endl;
@@ -288,7 +288,7 @@ bool NegotiateCard::play(Player *issuer) const {
   std::string playerName;
   Player *target;
   while (true) {
-	cout << "List of all players in the game:" << endl;
+	cout << "NegotiateCard List of all players in the game:" << endl;
 	for (auto player : ge->players) {
 	  cout << "- " << player->name << endl;
 	}
@@ -430,7 +430,7 @@ void Hand::debugPlay(const string &name) {
   auto ge = GameEngine::instance();
   auto card = removeByName(name);
   if (card != nullptr) {
-	//    card->play(player);
+	card->play(player);
 	ge->deck->put(card);
   } else {
 	cout << "Could not find that card. Are you sure you have it in your hand?"
