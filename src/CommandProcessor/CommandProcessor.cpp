@@ -320,7 +320,6 @@ FileCommandProcessorAdapter::~FileCommandProcessorAdapter() {
  */
 FileCommandProcessorAdapter::FileCommandProcessorAdapter(string path) : CommandProcessor() {
     flr = new FileLineReader(std::move(path));
-    this->Attach(LogObserver::instance());
 }
 
 /**
@@ -330,7 +329,6 @@ FileCommandProcessorAdapter::FileCommandProcessorAdapter(string path) : CommandP
 FileCommandProcessorAdapter::FileCommandProcessorAdapter(const FileCommandProcessorAdapter &fcpa) : CommandProcessor(
         fcpa) {
     this->flr = fcpa.flr;
-    this->Attach(LogObserver::instance());
 }
 
 /**
