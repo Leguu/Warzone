@@ -189,9 +189,20 @@ bool Command::operator!=(const string &rhs) const {
   return !Utils::isEqualLowercase(command, rhs);
 }
 
-Command *CommandProcessor::getCommand(const string &prompt) {
-  cout << prompt << endl;
-  return getCommand();
+Command *CommandProcessor::getCommand(const string &prompt, string command, string arg) {
+  if (command == string()) {
+	cout << prompt << endl;
+	return getCommand();
+  } else {
+	auto tesCommand = new Command();
+	tesCommand->command = command;
+	if (arg != string()) {
+	  tesCommand->arg = arg;
+	}
+	validate(tesCommand);
+	saveCommand(tesCommand);
+	return tesCommand;
+  }
 }
 
 std::string CommandProcessor::stringToLog() {

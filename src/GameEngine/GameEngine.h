@@ -47,7 +47,7 @@ public:
 
   const static string helpText;
 
-  void startupPhase();
+  void startupPhase(std::vector<std::pair<std::string, std::string>> = {});
 
   void mainGameLoop();
 

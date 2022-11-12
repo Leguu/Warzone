@@ -169,7 +169,7 @@ void GameEngine::reinforcementPhase() const {
   }
 }
 
-void GameEngine::startupPhase() {
+void GameEngine::startupPhase(std::vector<std::pair<std::string, std::string>> testCommands) {
   const string commands =
 	  "Available commands:\n"
 	  "LoadMap <Map Name> - Load a map\n"
@@ -181,10 +181,11 @@ void GameEngine::startupPhase() {
 
   Command *input;
   transition(GameState::START);
-
-  while (true) {
-	input = commandProcessor->getCommand(
-		"Input your command, write \"help\" for help");
+  int commandsCounter = 0;
+  while (testCommands.size() > 0 ? commandsCounter < testCommands.size() : true) {
+	input = testCommands.size() == 0 ? commandProcessor->getCommand(
+		"Input your command, write \"help\" for help") : commandProcessor
+				->getCommand("testPrompt", testCommands[commandsCounter].first, testCommands[commandsCounter].second);
 
 	if (input == nullptr) {
 	  continue;
@@ -243,7 +244,9 @@ void GameEngine::startupPhase() {
 	} else {
 	  cout << "Type the right command" << endl;
 	}
-	cout << "-----------------------------" << endl;
+	if (testCommands.size() == 0)
+	  cout << "-----------------------------" << endl;
+	commandsCounter++;
   }
 }
 

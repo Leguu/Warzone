@@ -10,8 +10,10 @@ void testStartupPhase() {
   auto playerOne = new Player("Bob");
   auto playerTwo = new Player("Alice");
 
-  ge->startupPhase();
-  cout << "loadmap Moon";
+  std::vector<std::pair<std::string, std::string>>
+	  testCommands = {{"loadmap", "Moon"}};
+
+  ge->startupPhase(testCommands);
 
   delete ge;
 }
