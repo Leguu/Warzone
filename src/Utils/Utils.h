@@ -3,10 +3,12 @@
 
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 using std::getline;
 using std::string;
 using std::vector;
+using std::runtime_error;
 
 class Utils {
 public:
@@ -36,7 +38,7 @@ public:
 
   static void assertCondition(bool condition, const std::string &message);
 
-  class CancelledInputException : public std::runtime_error {
+  class CancelledInputException : public runtime_error {
   public:
 	explicit CancelledInputException();
 

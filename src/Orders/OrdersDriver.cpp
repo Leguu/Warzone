@@ -66,5 +66,4 @@ void testOrdersExecution() {
   //  (5) the blockade order transfers ownership to the Neutral player; 6) all the orders described above can be issued by
   //  a player and executed by the game engine
   cout << "All tests passed successfully!" << endl;
-  delete ge;
 }
