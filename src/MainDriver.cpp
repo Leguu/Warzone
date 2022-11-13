@@ -36,6 +36,18 @@ int main() {
 	} else if (Utils::isEqualLowercase(input, "game")) {
 	  auto ge = new GameEngine();
 	  ge->debugMode = true;
+
+//	  std::vector<std::pair<std::string, std::string>>
+//		  testCommands =
+//		  {{"loadmap", "Moon"}, {"validatemap", string()}, {"addplayer", "A"}, {"addplayer", "B"}, {"addplayer", "C"},
+//		   {"Gamestara", string()}};
+
+//	    loadmap Moon
+//	    validatemap
+//	    addplayer A
+//	    addplayer B
+//	    addplayer C},
+//		Gamestart
 	  ge->startupPhase();
 
 	  delete ge;

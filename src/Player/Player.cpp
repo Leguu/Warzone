@@ -91,36 +91,34 @@ bool Player::issueOrder(bool debugMode) {
   }
 
   // (2)
-  if (!this->hand->cards.empty() && Utils::weightedBoolean(20)) {
+  if (!this->cardOrderIssued) {
 	issueCardOrder(debugMode);
-  } else {
+	this->cardOrderIssued = true;
+  } else if (!this->advanceOrderIssued) {
 	issueAdvanceOrder(debugMode);
+	this->advanceOrderIssued = true;
   }
 
   // (3)
-  return this->orders->getOrdersSize() >= Utils::randomNumberInRange(5, 10);
+  this->isDoneIssuing = this->advanceOrderIssued && this->cardOrderIssued;
+  return this->isDoneIssuing;
 }
 
 void Player::issueDeployOrder(bool debugMode) {
   Territory *target = Utils::accessRandomElement(toDefend());
-
-  int armies = 1;
-  if (this->reinforcementsAfterDeploy > 1) {
-//	armies = (rand() % this->reinforcementsAfterDeploy) + 1;
-//	armies = (rand() % this->reinforcementsAfterDeploy) + 1;
-	armies = Utils::randomNumberInRange(1, this->reinforcementsAfterDeploy);
-  }
+  int armies = reinforcementsAfterDeploy == 1 ? 1 : Utils::randomNumberInRange(1, reinforcementsAfterDeploy);
 
   if (debugMode)
 	cout << "Issued Deploy Order: " << armies
 		 << " units to " + target->getName() << endl;
+
   orders->push(new DeployOrder(this, armies, target));
-  this->reinforcementsAfterDeploy -= armies;
-  target->reinforcementsAdded += armies;
+  reinforcementsAfterDeploy -= armies;
 }
 
 void Player::issueCardOrder(bool debugMode) {
   auto randomCardName = this->hand->cards[0]->name;
+
   debugMode ? this->hand->debugPlay(randomCardName)
 			: this->hand->play(randomCardName);
 
@@ -135,36 +133,42 @@ void Player::issueCardOrder(bool debugMode) {
   case 0: {
 	std::pair<Territory *, Territory *> attack = Utils::accessRandomPair(toAttack());
 	orders->push(new BombOrder(this, attack.first));
+
 	if (debugMode)
 	  cout << "Issued BombOrder on: " << attack.first->getName() << endl;
+
 	break;
   }
 
   case 1: {
 	Territory *target = Utils::accessRandomElement(this->ownedTerritories);
 	orders->push(new BlockadeOrder(this, target));
+
 	if (debugMode)
 	  cout << "Issued BlockadeOrder on: " << target->getName() << endl;
+
 	break;
   }
 
   case 2: {
 	Territory *source = Utils::accessRandomElement(this->ownedTerritories);
 	Territory *target = Utils::accessRandomElement(this->ownedTerritories);
-	while (source->reinforcementsAdded == 0 && source != target) {
+
+	auto armies = source->getArmies();
+
+	while (source->getArmies() == 0) {
 	  source = Utils::accessRandomElement(this->ownedTerritories);
+	  armies = source->getArmies();
 	}
 
-	auto armies = source->reinforcementsAdded;
 	armies = Utils::randomNumberInRange(1, armies);
 	orders->push(new AirliftOrder(this, armies, source, target));
-	source->reinforcementsAdded -= armies;
-	target->reinforcementsAdded += armies;
 
 	if (debugMode)
 	  cout << "Issued AirliftOrder " << armies
 		   << " units from: " << source->getName() << " to "
 		   << target->getName() << endl;
+
 	break;
   }
 
@@ -174,12 +178,14 @@ void Player::issueCardOrder(bool debugMode) {
 	Player *randomPlayer;
 	do {
 	  randomPlayer = Utils::accessRandomElement(ge->players);
-	} while (randomPlayer != this);
+	} while (randomPlayer == this);
 
 	orders->push(new NegotiateOrder(this, randomPlayer));
+
 	if (debugMode)
 	  cout << "Issued NegotiateOrder by " << this->name
 		   << " against: " << randomPlayer->name << endl;
+
 	break;
   }
 
@@ -188,23 +194,21 @@ void Player::issueCardOrder(bool debugMode) {
 }
 
 void Player::issueAdvanceOrder(bool debugMode) {
-  auto territories = toAttack();
-  // should be 50-50
-  // Utils::weightedBoolean(50) ? toDefend() : toAttack();
-  std::pair<Territory *, Territory *> attack = Utils::accessRandomPair(toAttack());
-  auto target = attack.first;
-  auto source = attack.second;
+  Territory *source, *target;
+  if (Utils::weightedBoolean(50)) {
+	auto targetTerritories = toAttack();
+	auto randomPair = Utils::accessRandomPair(targetTerritories);
+	target = randomPair.first;
+	source = randomPair.second;
+  } else {
+	target = Utils::accessRandomElement(toDefend());
+	do {
+	  source = Utils::accessRandomElement(toDefend());
+	} while (source == target);
+  }
 
-//  for (auto t : target->getAdjTerritories()) {
-//	if (t->getOwner() == this && t->reinforcementsAdded > 0) {
-//	  source = t;
-//	}
-//  }
-
-  int armies = rand() % (source->reinforcementsAdded == 0 ? 1 : source->reinforcementsAdded) + 1;
+  int armies = Utils::randomNumberInRange(1, this->reinforcementsAfterDeploy);
   orders->push(new AdvanceOrder(this, armies, source, target));
-  source->reinforcementsAdded -= armies;
-  target->reinforcementsAdded += armies;
 
   if (debugMode)
 	cout << "Issued Advance Order: " << armies << " units from "

@@ -220,10 +220,12 @@ void AdvanceOrder::execute() {
   // release territory if both armies swept off
   if (armies == target->getArmies()) {
 	target->setArmies(0);
+	target->setOwner(nullptr);
   } // draw a card if the attacker captures the territory
   else if (armies > 0 && !issuer->cardAwarded) {
 	issuer->hand->draw();
 	issuer->cardAwarded = true;
+	target->setOwner(this->issuer);
   }
 
   this->Notify(this);
@@ -324,7 +326,7 @@ void BlockadeOrder::validate() {
  */
 void BlockadeOrder::execute() {
   validate();
-  this->target->setArmies(this->target->getArmies() * 3);
+  this->target->setArmies(this->target->getArmies() * 2);
   this->Notify(this);
 }
 

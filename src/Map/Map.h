@@ -49,8 +49,6 @@ public:
 
   void addAdjacent(Territory *);
 
-  int reinforcementsAdded = 0;
-
   bool visited = false;
 
   // Getters and setters

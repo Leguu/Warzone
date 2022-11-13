@@ -92,9 +92,12 @@ void Utils::assertCondition(bool condition, const std::string &message) {
 }
 
 int Utils::randomNumberInRange(int a, int b) {
-  std::default_random_engine generator;
-  std::uniform_int_distribution<int> distribution(a, b);
-  return distribution(generator);
+//  std::default_random_engine generator;
+//  std::uniform_int_distribution<int> distribution(a,  b));
+//  return distribution(generator);
+  int range = (b - a + 1);
+  range += (range == 0) ? 1 : 0;
+  return rand() % range + a;
 }
 
 bool Utils::weightedBoolean(int percentage) {

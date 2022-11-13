@@ -90,9 +90,6 @@ void GameEngine::mainGameLoop() {
 	  break;
 	}
 
-	for (auto t : map->getAllTerritories()) {
-	  t->reinforcementsAdded = t->getArmies();
-	}
   }
 
   cout << "Game is over!" << endl;
@@ -131,7 +128,6 @@ void GameEngine::issueOrdersPhase() {
 		cout << player->name << " is issuing an order" << endl;
 		auto doneIssuing = player->issueOrder(this->debugMode);
 		if (doneIssuing) {
-		  player->isDoneIssuing = true;
 		  stillIssuing--;
 		}
 	  }
@@ -142,6 +138,9 @@ void GameEngine::issueOrdersPhase() {
   for (auto player : players) {
 	player->cardAwarded = false;
 	player->isDoneIssuing = false;
+	player->cardOrderIssued = false;
+	player->advanceOrderIssued = false;
+	player->reinforcementsAfterDeploy = 0;
 	player->cannotAttack.clear();
   }
 }
@@ -160,7 +159,6 @@ GameEngine *GameEngine::instance() {
 /**
  * Assign the reinforcements to all territories
  */
-
 void GameEngine::reinforcementPhase() const {
   for (auto p : players) {
 	auto reinforcementsToAssign = 0;

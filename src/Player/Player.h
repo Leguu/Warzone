@@ -23,7 +23,11 @@ public:
   vector<Territory *> ownedTerritories = {};
   int reinforcements = 50;
 
-  int reinforcementsAfterDeploy = reinforcements;
+  int reinforcementsAfterDeploy = 50;
+
+  bool advanceOrderIssued = false;
+
+  bool cardOrderIssued = false;
 
   int cardAwarded = false;
 
