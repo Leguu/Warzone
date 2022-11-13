@@ -124,27 +124,27 @@ bool CommandProcessor::validate(Command *command) {
         GameEngine::GameState currState = engine->getState();
         string okString = "Valid command. Moving from state " + GameEngine::gameStates[currState];
 
-        if (command->getCommand() == "loadmap" && !command->getArg().empty()) {
+        if (Utils::isEqualLowercase(command->getCommand(), "loadmap") && !command->getArg().empty()) {
             if (currState == GameEngine::START || currState == GameEngine::MAP_LOADED) {
                 command->saveEffect(okString);
                 return true;
             }
-        } else if (command->getCommand() == "validatemap") {
+        } else if (Utils::isEqualLowercase(command->getCommand(), "validatemap")) {
             if (currState == GameEngine::MAP_LOADED) {
                 command->saveEffect(okString);
                 return true;
             }
-        } else if (command->getCommand() == "addplayer" && !command->getArg().empty()) {
+        } else if (Utils::isEqualLowercase(command->getCommand(), "addplayer") && !command->getArg().empty()) {
             if (currState == GameEngine::MAP_VALIDATED || currState == GameEngine::PLAYERS_ADDED) {
                 command->saveEffect(okString);
                 return true;
             }
-        } else if (command->getCommand() == "gamestart") {
+        } else if (Utils::isEqualLowercase(command->getCommand(), "gamestart")) {
             if (currState == GameEngine::PLAYERS_ADDED) {
                 command->saveEffect(okString);
                 return true;
             }
-        } else if (command->getCommand() == "replay" || command->getCommand() == "quit") {
+        } else if (Utils::isEqualLowercase(command->getCommand(), "replay") || Utils::isEqualLowercase(command->getCommand(), "quit") ) {
             if (currState == GameEngine::WIN) {
                 command->saveEffect(okString);
                 return true;
