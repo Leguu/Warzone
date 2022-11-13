@@ -124,12 +124,11 @@ void GameEngine::issueOrdersPhase() {
   int stillIssuing = players.size();
   while (stillIssuing > 0) {
 	for (auto player : players) {
-	  if (!player->isDoneIssuing) {
+	  if (player->advanceOrderIssued && player->cardOrderIssued) {
+		stillIssuing--;
+	  } else {
 		cout << player->name << " is issuing an order" << endl;
-		auto doneIssuing = player->issueOrder(this->debugMode);
-		if (doneIssuing) {
-		  stillIssuing--;
-		}
+		player->issueOrder(this->debugMode);
 	  }
 	}
   }

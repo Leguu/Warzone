@@ -23,6 +23,7 @@ extern bool debug;
 
 class Territory {
 public:
+
   // Constructor with necessary parameters
   Territory(const string &territory, Continent *continent);
 
@@ -43,6 +44,8 @@ public:
 
   // Insertion operator
   friend std::ostream &operator<<(std::ostream &os, const Territory &territory);
+
+  bool operator==(const Territory &b) { return this->getId() == b.getId(); }
 
   // Method to get neighbors
   [[nodiscard]] vector<Territory *> getAdjTerritories() const;

@@ -100,8 +100,7 @@ bool Player::issueOrder(bool debugMode) {
   }
 
   // (3)
-  this->isDoneIssuing = this->advanceOrderIssued && this->cardOrderIssued;
-  return this->isDoneIssuing;
+//  this->isDoneIssuing = /zthis->advanceOrderIssued && this->cardOrderIssued;
 }
 
 void Player::issueDeployOrder(bool debugMode) {
@@ -110,7 +109,7 @@ void Player::issueDeployOrder(bool debugMode) {
 
   if (debugMode)
 	cout << "Issued Deploy Order: " << armies
-		 << " units to " + target->getName() << endl;
+		 << " units to " + target->getContinent()->getName() << endl;
 
   orders->push(new DeployOrder(this, armies, target));
   reinforcementsAfterDeploy -= armies;

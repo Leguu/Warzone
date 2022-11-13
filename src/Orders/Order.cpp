@@ -158,12 +158,31 @@ std::string AdvanceOrder::description() {
  * Validate an advance order
  */
 void AdvanceOrder::validate() {
+
+//  auto b = std::find_if(source->getAdjTerritories().begin(),
+//						source->getAdjTerritories().end(),
+//						[&target](const Territory *t) { return *t == target; })
+
+
+  auto result1 = std::find_if(source->getAdjTerritories().begin(), source->getAdjTerritories().end(),
+							  [this](Territory *item) {
+								if (item == nullptr)
+								  return false;
+								return item == target;
+							  });
+
+  auto result2 = std::find_if(target->getAdjTerritories().begin(), target->getAdjTerritories().end(),
+							  [this](Territory *item) {
+								if (item == nullptr)
+								  return false;
+								return item == source;
+							  });
+
   if (source->getOwner() && (source->getOwner() != issuer)) {
 	throw InvalidOrderException(issuer->name +
-		" tried to move someone else's territory.");
-  } else if (std::find(source->getAdjTerritories().begin(),
-					   source->getAdjTerritories().end(),
-					   target) != source->getAdjTerritories().end()) {
+		" tried to move from someone else's territory.");
+  } else if (source->getOwner() != target->getOwner() && (result1 == source->getAdjTerritories().end())
+	  && (result2 == target->getAdjTerritories().end())) {
 	throw InvalidOrderException(
 		"The territory is not adjacent to the source territory");
   } else if (source->getArmies() - armies < 0) {
