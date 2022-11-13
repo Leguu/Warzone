@@ -96,7 +96,7 @@ Command *CommandProcessor::readCommand() {
 
         } else if (Utils::isEqualLowercase(tokens[0], "validatemap") ||
                    Utils::isEqualLowercase(tokens[0], "gamestart") || Utils::isEqualLowercase(tokens[0], "replay") ||
-                   Utils::isEqualLowercase(tokens[0], "quit")) {
+                   Utils::isEqualLowercase(tokens[0], "quit") || Utils::isEqualLowercase(tokens[0], "help")) {
             auto command = new Command();
             command->command = Utils::trim(line);
             return command;
@@ -302,8 +302,6 @@ vector<Command *> CommandProcessor::getCommandList() {
  */
 FileCommandProcessorAdapter::FileCommandProcessorAdapter() : CommandProcessor() {
     flr = new FileLineReader();
-    this->Attach(LogObserver::instance());
-
 }
 
 /**
@@ -311,7 +309,6 @@ FileCommandProcessorAdapter::FileCommandProcessorAdapter() : CommandProcessor() 
  */
 FileCommandProcessorAdapter::~FileCommandProcessorAdapter() {
     delete flr;
-    this->Detach(LogObserver::instance());
 }
 
 /**
@@ -439,15 +436,15 @@ Command *FileCommandProcessorAdapter::readCommand() {
 
     auto tokens = Utils::tokenizer(currentLine, ' ');
     auto command = new Command();
-    if (tokens[0] == "loadmap" || tokens[0] == "addplayer") {
+    if (Utils::isEqualLowercase(tokens[0], "loadmap") || Utils::isEqualLowercase(tokens[0], "addplayer")) {
         if (tokens.size() == 1) {
             cout << "This command is missing an argument. Moving on..." << endl;
         }
         command->command = Utils::trim(tokens[0]);
         command->arg = Utils::trim(currentLine.substr(tokens[0].length()));
         return command;
-    } else if (tokens[0] == "validatemap" || tokens[0] == "gamestart" || tokens[0] == "replay" ||
-               tokens[0] == "quit") {
+    } else if (Utils::isEqualLowercase(tokens[0], "validatemap") || Utils::isEqualLowercase(tokens[0], "gamestart") || Utils::isEqualLowercase(tokens[0], "replay") ||
+            Utils::isEqualLowercase(tokens[0], "quit")) {
         command->command = Utils::trim(currentLine);
         return command;
     } else {
