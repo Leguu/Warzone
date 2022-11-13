@@ -50,8 +50,8 @@ bool GameEngine::executeOrdersPhase() {
 	  if (player->orders->getOrdersSize() > 0) {
 		auto order = player->orders->pop();
 		try {
-		  order->execute();
 		  cout << *order << endl;
+		  order->execute();
 		  if (map->allContinentsOwned()) {
 			cout << "	Game is over!" << endl;
 			return true;
@@ -208,8 +208,7 @@ bool GameEngine::startupPhase(
 	if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')),
 								"loadmap")) {
 	  loadMap("../assets/" + input->getArg() + ".map");
-	}
-	if (*input == "help") {
+	} else if (*input == "help") {
 	  cout << commands << endl;
 	} else if (Utils::isEqualLowercase(inputText, "validatemap")) {
 	  validateMap();

@@ -28,7 +28,7 @@ int main() {
 	  testPlayers();
 	} else if (Utils::isEqualLowercase(input, "logging")) {
 	  testLoggingObserver();
-	} else if (input == "command") {
+	} else if (Utils::isEqualLowercase(input, "command")) {
 	  testCommandProcessor();
 	} else if (Utils::isEqualLowercase(input, "startup")) {
 	  testStartupPhase();

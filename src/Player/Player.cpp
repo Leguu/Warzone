@@ -74,12 +74,9 @@ void Player::drawFromDeck() const {
 void Player::issueOrder(bool debugMode) {
   // Current Mechanism:
   // ------------------
-  // 	1. Keep deploying until zero reinforcements are left. Random number each
-  // 	turn.
-  //    2. If user has a card in their hand, 20% chance they use it (first one
-  //    available to them), otherwise they advance order.
-  //    3. If OrdersList reaches at least 5-10 moves (decided randomly), the
-  //    player is done issuing orders.
+  // 	1. Keep deploying until zero reinforcements are left. Random number each turn.
+  //    2. If user has a card in their hand, they play it.
+  //    3. If player has not advanced an order this round, they advance order.
   // NOTE: All orders that are issued follow random moves for now.
 
   if (this->reinforcementsAfterDeploy > 0) {
@@ -161,7 +158,8 @@ void Player::issueCardOrder(bool debugMode) {
 	if (armies != 1) {
 	  std::random_device rd;
 	  std::mt19937 rng(rd());
-	  std::uniform_int_distribution<int> uni(1, armies);
+	  std::uniform_int_distribution<int> dis(1, armies);
+	  armies = dis(rng);
 	}
 
 	orders->push(new AirliftOrder(this, armies, source, target));
@@ -228,8 +226,8 @@ void Player::issueAdvanceOrder(bool debugMode) {
   if (armies > 1) {
 	std::random_device rd;
 	std::mt19937 rng(rd());
-	std::uniform_int_distribution<int> uni(1, armies);
-	armies = uni(rng);
+	std::uniform_int_distribution<int> dis(1, armies);
+	armies = dis(rng);
   }
 
   orders->push(new AdvanceOrder(this, armies, source, target));

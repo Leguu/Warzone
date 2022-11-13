@@ -251,7 +251,7 @@ void AdvanceOrder::execute() {
 	  issuer->cardAwarded = true;
 	}
 	target->setOwner(this->issuer);
-	std::cout << this->issuer->name + " wins territory " + this->name
+	std::cout << this->issuer->name + " wins territory " + target->getName()
 			  << std::endl;
   }
 

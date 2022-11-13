@@ -76,6 +76,8 @@ void testStartupPhase() {
   Utils::assertCondition(gameStarted,
 						 "gamestart command failed: game not in play phase");
 
+  cout << "All tests passed successfully since no exceptions were thrown." << endl;
+
   delete ge;
 }
 
@@ -88,9 +90,17 @@ void testMainGameLoop() {
   const auto territoriesPlayerTwo = {ge->map->findTerritory("Sea of Nectar"),
 									 ge->map->findTerritory("Byrgius")};
 
-  auto card = new AirliftCard();
-  playerOne->hand->cards.push_back(card);
+  auto card1 = new AirliftCard();
+  auto card2 = new NegotiateCard();
+  playerOne->hand->cards.push_back(card1);
+  playerOne->hand->cards.push_back(card2);
   playerOne->ownedTerritories.push_back(territoryPlayerOne);
+
+  auto card3 = new AirliftCard();
+  auto card4 = new NegotiateCard();
+  playerTwo->hand->cards.push_back(card3);
+  playerTwo->hand->cards.push_back(card4);
+  playerTwo->ownedTerritories.push_back(territoryPlayerOne);
 
   for (auto territory : territoryPlayerOne->getAdjTerritories()) {
 	if (std::find(territoriesPlayerTwo.begin(), territoriesPlayerTwo.end(),
@@ -117,7 +127,7 @@ void testMainGameLoop() {
   Utils::assertCondition((playerOne->reinforcements == 50 + 3),
 						 "Wrong number of reinforcements were added for player "
 						 "one in the reinforcement phase");
-  Utils::assertCondition((playerTwo->reinforcements == 50 + 2),
+  Utils::assertCondition((playerTwo->reinforcements == 50 + 3),
 						 "Wrong number of reinforcements were added for player "
 						 "two in the reinforcement phase");
 
@@ -171,77 +181,97 @@ void testMainGameLoop() {
 
   //  (3) a player can issue advance orders to either defend or attack, based on
   //  the toAttack() and toDefend() lists
-  //  i = 0;
-  //  int advanceOrderCount = 0;
-  //  bool advanceOrderPossibleP1 = false;
-  //  for (; i < playerOne->orders->getOrdersSize(); i++) {
-  //	if (playerOne->orders->get(i)->name == "Advance") {
-  //	  auto target = dynamic_cast<AdvanceOrder
-  //*>((playerOne->orders->get(i))); 	  auto attack =
-  //(playerOne->toAttack()).first; 	  auto defend = playerOne->toDefend(); 	  if
-  //(std::find(attack.begin(), attack.end(), target->getTarget()) !=
-  //		  attack.end() ||
-  //		  std::find(defend.begin(), defend.end(), target->getTarget())
-  //!= 			  defend.end()) { 		advanceOrderPossibleP1 = true;
-  //	  }
-  //	  advanceOrderCount++;
-  //	}
-  //  }
-  //
-  //  i = 0;
-  //  bool advanceOrderPossibleP2 = false;
-  //  for (; i < playerTwo->orders->getOrdersSize(); i++) {
-  //	if (playerTwo->orders->get(i)->name == "Advance") {
-  //	  auto target = dynamic_cast<AdvanceOrder
-  //*>((playerTwo->orders->get(i))); 	  auto attack = playerTwo->toAttack(); 	  auto
-  //defend = playerTwo->toDefend(); 	  if (std::find(attack.begin(), attack.end(),
-  //target->getTarget()) != 		  attack.end() || 		  std::find(defend.begin(),
-  //defend.end(), target->getTarget()) != 			  defend.end()) { 		advanceOrderPossibleP2
-  //= true;
-  //	  }
-  //	  advanceOrderCount++;
-  //	}
-  //  }
-  //
-  //  if (advanceOrderCount == 0) {
-  //	std::cout << "No advance orders were issued by any player this time.
-  //This " 				 "is because player actions are random. Test result cannot be "
-  //				 "determined."
-  //			  << std::endl;
-  //  } else {
-  //	Utils::assertCondition(
-  //		advanceOrderPossibleP1 || advanceOrderPossibleP2,
-  //		"Players did not issue advance orders from attack or defend
-  //list");
-  //  }
-  //
-  //  //  (4) a player can play cards to issue orders;
-  //  i = 0;
-  //  int cardOrderCount = 0;
-  //  for (; i < playerOne->orders->getOrdersSize(); i++) {
-  //	auto orderName = playerOne->orders->get(i)->name;
-  //	if (orderName != "Bomb" || orderName != "Blockade" ||
-  //		orderName != "Airlift" || orderName != "Negotiate") {
-  //	  cardOrderCount++;
-  //	}
-  //  }
-  //
-  //  if (cardOrderCount == 0) {
-  //	std::cout
-  //		<< "No card order was issued by player one this time. This is
-  //because " 		   "player actions are random. Test result cannot be determined."
-  //		<< std::endl;
-  //  } else {
-  //	Utils::assertCondition(playerOne->hand->cards.empty(),
-  //						   "Player one can not play their
-  //card");
-  //  }
+  i = 0;
+  int advanceOrderCount = 0;
+  bool advanceOrderPossibleP1 = false;
+  for (; i < playerOne->orders->getOrdersSize(); i++) {
+	if (playerOne->orders->get(i)->name == "Advance") {
+	  auto target = dynamic_cast<AdvanceOrder
+	  *>((playerOne->orders->get(i)));
+	  auto attackPairs = playerTwo->toAttack();
+	  vector<Territory *> attack = {};
+	  for (auto t : attackPairs) {
+		attack.push_back(t.first);
+	  }
+	  auto defend = playerOne->toDefend();
+	  if
+		  (std::find(attack.begin(), attack.end(), target->getTarget()) !=
+		  attack.end() ||
+		  std::find(defend.begin(), defend.end(), target->getTarget())
+			  != defend.end()) {
+		advanceOrderPossibleP1 = true;
+	  }
+	  advanceOrderCount++;
+	}
+  }
 
-  //  playerTwo->ownedTerritories = {};
-  //  ge->executeOrdersPhase();
-  //  (5) TODO: a player that does not control any territory is removed from the
-  //  game; (6) TODO: the game ends when a single player controls all the
-  //  territories.
+  i = 0;
+  bool advanceOrderPossibleP2 = false;
+  for (; i < playerTwo->orders->getOrdersSize(); i++) {
+	if (playerTwo->orders->get(i)->name == "Advance") {
+	  auto target = dynamic_cast<AdvanceOrder *>((playerTwo->orders->get(i)));
+	  auto attackPairs = playerTwo->toAttack();
+	  vector<Territory *> attack = {};
+	  for (auto t : attackPairs) {
+		attack.push_back(t.first);
+	  }
+
+	  auto defend = playerTwo->toDefend();
+	  if (std::find(attack.begin(), attack.end(),
+					target->getTarget()) != attack.end() || std::find(defend.begin(),
+																	  defend.end(), target->getTarget())
+		  != defend.end()) {
+		advanceOrderPossibleP2
+			= true;
+	  }
+	  advanceOrderCount++;
+	}
+  }
+
+  if (advanceOrderCount == 0) {
+	std::cout
+		<< "No advance orders were issued by any player this time. This is because player actions are random. Test result cannot be determined."
+		<< std::endl;
+  } else {
+	Utils::assertCondition(advanceOrderPossibleP1 || advanceOrderPossibleP2,
+						   "Players did not issue advance orders from attack or defend list");
+  }
+
+  //  (4) a player can play cards to issue orders;
+  i = 0;
+  int cardOrderCount = 0;
+  for (; i < playerOne->orders->getOrdersSize(); i++) {
+	auto orderName = playerOne->orders->get(i)->name;
+	if (orderName != "Bomb" || orderName != "Blockade" ||
+		orderName != "Airlift" || orderName != "Negotiate") {
+	  cardOrderCount++;
+	}
+  }
+
+  i = 0;
+  for (; i < playerTwo->orders->getOrdersSize(); i++) {
+	auto orderName = playerOne->orders->get(i)->name;
+	if (orderName != "Bomb" || orderName != "Blockade" ||
+		orderName != "Airlift" || orderName != "Negotiate") {
+	  cardOrderCount++;
+	}
+  }
+
+  if (cardOrderCount == 0) {
+	std::cout
+		<< "No card order was issued by the two players this time. This is because player actions are random. Test result cannot be determined."
+		<< std::endl;
+  } else {
+	Utils::assertCondition(!playerOne->hand->cards.empty() && !playerTwo->hand->cards.empty(),
+						   "Player one can not play their card");
+  }
+
+  //  (5) a player that does not control any territory is removed from the game.
+  //  -- Play game to show this
+
+  //  (6) the game ends when a single player controls all the territories.
+  Utils::assertCondition(!playerOne->ownedTerritories.empty() && !playerTwo->ownedTerritories.empty(),
+						 "Players were kicked out despite controlling some territories");
 
   cout << "All tests passed successfully!" << endl;
   delete ge;
