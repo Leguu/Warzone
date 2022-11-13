@@ -58,6 +58,11 @@ ostream &operator<<(ostream &os, const Command &c) {
 
 }
 
+/**
+ *
+ * @return returns the commands whether it is valid or
+ * not after it is read, processed, logged and saved
+ */
 Command *CommandProcessor::getCommand() {
     auto command = readCommand();
     validate(command);
@@ -66,6 +71,11 @@ Command *CommandProcessor::getCommand() {
 
 }
 
+/**
+ *
+ * @return Checks the command whether it is
+ * valid at the current state of the game engine
+ */
 Command *CommandProcessor::readCommand() {
     string line;
     while (true) {
@@ -97,6 +107,12 @@ Command *CommandProcessor::readCommand() {
     }
 }
 
+/**
+ *
+ * @param command Just an average command object
+ * @return checks whether this command is valid according
+ * to its argument and returns a bool
+ */
 bool CommandProcessor::validate(Command *command) {
 
     auto engine = GameEngine::instance();
@@ -139,24 +155,34 @@ bool CommandProcessor::validate(Command *command) {
     return false;
 }
 
-
+/**
+ * Default constructor for Command processor
+ */
 CommandProcessor::CommandProcessor() {
     this->Attach(LogObserver::instance());
 }
-
+/**
+ * Copy constructor for Command processor
+ */
 CommandProcessor::CommandProcessor(const CommandProcessor &commandProcessor) {
     this->commands = commandProcessor.commands;
     this->Attach(LogObserver::instance());
 }
 
+/**
+ * Destructor for Command processor
+ */
 CommandProcessor::~CommandProcessor() {
     this->Detach(LogObserver::instance());
 }
-
+/**
+ * Assignment operator for Command processor
+ * @param commandProcessor The command processor that we want to assign its values to another
+ * @return Assigns the same values and pointers from one command processor to another
+ */
 CommandProcessor &CommandProcessor::operator=(const CommandProcessor &commandProcessor) = default;
 
 ostream &operator<<(ostream &os, const CommandProcessor &commandProcessor) {
-    // TODO format this
     os << "list of commands: \n";
 
     for (auto i: commandProcessor.commands) {
@@ -165,42 +191,80 @@ ostream &operator<<(ostream &os, const CommandProcessor &commandProcessor) {
     return os;
 }
 
+/**
+ * Command that gets pushed to a vector
+ * @param command A command object whether valid or not
+ */
 void CommandProcessor::saveCommand(Command *command) {
     commands.push_back(command);
     this->Notify(this);
 
 }
 
+/**
+ * Get method for command
+ * @return A command is returned
+ */
 const string &Command::getCommand() const {
     return command;
 }
 
+/**
+ * Get method for argument
+ * @return
+ */
 const string &Command::getArg() const {
     return arg;
 }
 
+/**
+ * Get method for effect
+ * @return
+ */
 const string &Command::getEffect() const {
     return effect;
 }
 
+/**
+ * Saves the effect into the command object
+ * @param Effect A string that describes the command
+ */
 void Command::saveEffect(const string &Effect) {
     effect = Effect;
     this->Notify(this);
 }
 
+/**
+ *
+ * @param rhs
+ * @return Checks if commands are the same
+ */
 bool Command::operator==(const string &rhs) const {
     return Utils::isEqualLowercase(command, rhs);
 }
-
+/**
+ *
+ * @param rhs
+ * @return Checks if commands are the NOT the same
+ */
 bool Command::operator!=(const string &rhs) const {
     return !Utils::isEqualLowercase(command, rhs);
 }
 
+/**
+ * Get command method
+ * @param prompt the actual command from either a console or file
+ * @return
+ */
 Command *CommandProcessor::getCommand(const string &prompt) {
     cout << prompt << endl;
     return getCommand();
 }
 
+/**
+ * Logs commands from the command processor
+ * @return
+ */
 std::string CommandProcessor::stringToLog() {
     std::ofstream file;
     file.open("../logs/gamelog.txt", std::ios_base::app);
@@ -211,6 +275,10 @@ std::string CommandProcessor::stringToLog() {
     return "New Command Added: " + this->commands[this->commands.size() - 1]->command;
 }
 
+/**
+ * Logs commands from the command object
+ * @return
+ */
 std::string Command::stringToLog() {
     std::ofstream file;
     file.open("../logs/gamelog.txt", std::ios_base::app);
@@ -221,75 +289,133 @@ std::string Command::stringToLog() {
     return "Effect Modified: " + this->effect;
 }
 
+/**
+ * Get method for the command list vector
+ * @return
+ */
 vector<Command *> CommandProcessor::getCommandList() {
     return commands;
 }
 
-
+/**
+ * Default constructor for the adapter
+ */
 FileCommandProcessorAdapter::FileCommandProcessorAdapter() : CommandProcessor() {
     flr = new FileLineReader();
     this->Attach(LogObserver::instance());
 
 }
 
+/**
+ * Destructor for the adapter
+ */
 FileCommandProcessorAdapter::~FileCommandProcessorAdapter() {
     delete flr;
     this->Detach(LogObserver::instance());
 }
 
+/**
+ * Another constructor for the adapter
+ * @param path A path to where the file is located to read commands
+ */
 FileCommandProcessorAdapter::FileCommandProcessorAdapter(string path) : CommandProcessor() {
     flr = new FileLineReader(std::move(path));
-    this->Attach(LogObserver::instance());
 }
 
+/**
+ * Copy constructor for the adapter
+ * @param fcpa Another adapter to copy from
+ */
 FileCommandProcessorAdapter::FileCommandProcessorAdapter(const FileCommandProcessorAdapter &fcpa) : CommandProcessor(
         fcpa) {
     this->flr = fcpa.flr;
-    this->Attach(LogObserver::instance());
 }
 
+/**
+ * Assignemnt operator for the adapter
+ * @param fcpa
+ * @return
+ */
 FileCommandProcessorAdapter &FileCommandProcessorAdapter::operator=(const FileCommandProcessorAdapter &fcpa) {
     CommandProcessor::operator=(fcpa);
     this->flr = fcpa.flr;
     return *this;
 }
 
+/**
+ * Insertion operator for the adapter
+ * @param os
+ * @param fcpa
+ * @return
+ */
 ostream &operator<<(ostream &os, const FileCommandProcessorAdapter &fcpa) {
     os << "The path of the file command processor adaptor is: " << fcpa.flr->getPath() << endl;;
     return os;
 }
 
-
+/**
+ * Line reader default constructor
+ */
 FileLineReader::FileLineReader() = default;
 
+/**
+ * Line reader default destructor
+ */
 FileLineReader::~FileLineReader() = default;
 
+/**
+ * Another Line reader constructor
+ */
 FileLineReader::FileLineReader(string newPath) {
     path = std::move(newPath);
 }
 
+/**
+ * Line reader copy constructor
+ * @param flr
+ */
 FileLineReader::FileLineReader(const FileLineReader &flr) {
     path = flr.path;
 }
-
+/**
+ * Line reader Assignment operator
+ * @param flr
+ */
 FileLineReader &FileLineReader::operator=(const FileLineReader &flr) {
     this->path = flr.path;
     return *this;
 }
 
+/**
+ * Insertion operator for line reader
+ * @param os
+ * @param flr
+ * @return
+ */
 ostream &operator<<(ostream &os, const FileLineReader &flr) {
     os << "The path of the file line reader is: " << flr.path << endl;
     return os;
 }
-
+/**
+ * Get method for path
+ * @return
+ */
 string FileLineReader::getPath() {
     return path;
 }
 
+/**
+ * Set method for path
+ * @param newPath
+ */
 void FileLineReader::setPath(string newPath) {
     path = std::move(newPath);
 }
 
+/**
+ * Method to read get one line from a text file
+ * @return
+ */
 string FileLineReader::readLineFromFile() {
     string line;
     if (!ifile) {
@@ -303,7 +429,10 @@ string FileLineReader::readLineFromFile() {
 
 
 }
-
+/**
+ * Read commands from the file line by line and returns a command
+ * @return
+ */
 Command *FileCommandProcessorAdapter::readCommand() {
 
     string currentLine = flr->readLineFromFile();
