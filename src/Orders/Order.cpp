@@ -159,30 +159,33 @@ std::string AdvanceOrder::description() {
  */
 void AdvanceOrder::validate() {
 
-//  auto b = std::find_if(source->getAdjTerritories().begin(),
-//						source->getAdjTerritories().end(),
-//						[&target](const Territory *t) { return *t == target; })
+  //  auto b = std::find_if(source->getAdjTerritories().begin(),
+  //						source->getAdjTerritories().end(),
+  //						[&target](const Territory *t) { return *t == target;
+  //})
 
+  auto result1 =
+	  std::find_if(source->getAdjTerritories().begin(),
+				   source->getAdjTerritories().end(), [this](Territory *item) {
+			if (item == nullptr)
+			  return false;
+			return item == target;
+		  });
 
-  auto result1 = std::find_if(source->getAdjTerritories().begin(), source->getAdjTerritories().end(),
-							  [this](Territory *item) {
-								if (item == nullptr)
-								  return false;
-								return item == target;
-							  });
-
-  auto result2 = std::find_if(target->getAdjTerritories().begin(), target->getAdjTerritories().end(),
-							  [this](Territory *item) {
-								if (item == nullptr)
-								  return false;
-								return item == source;
-							  });
+  auto result2 =
+	  std::find_if(target->getAdjTerritories().begin(),
+				   target->getAdjTerritories().end(), [this](Territory *item) {
+			if (item == nullptr)
+			  return false;
+			return item == source;
+		  });
 
   if (source->getOwner() && (source->getOwner() != issuer)) {
-	throw InvalidOrderException(issuer->name +
-		" tried to move from someone else's territory.");
-  } else if (source->getOwner() != target->getOwner() && (result1 == source->getAdjTerritories().end())
-	  && (result2 == target->getAdjTerritories().end())) {
+	throw InvalidOrderException(
+		issuer->name + " tried to move from someone else's territory.");
+  } else if (source->getOwner() != target->getOwner() &&
+	  (result1 == source->getAdjTerritories().end()) &&
+	  (result2 == target->getAdjTerritories().end())) {
 	throw InvalidOrderException(
 		"The territory is not adjacent to the source territory");
   } else if (source->getArmies() - armies < 0) {
@@ -205,11 +208,12 @@ void AdvanceOrder::execute() {
 	auto sourceOwnerCannotAttack = sourceOwner->cannotAttack;
 	auto targetOwnerCannotAttack = targetOwner->cannotAttack;
 
-	if (std::find(sourceOwnerCannotAttack.begin(), sourceOwnerCannotAttack.end(), targetOwner)
-		!= sourceOwnerCannotAttack.end()
-		|| std::find(targetOwnerCannotAttack.begin(), targetOwnerCannotAttack.end(), sourceOwner)
-			!= targetOwnerCannotAttack.end()
-		) {
+	if (std::find(sourceOwnerCannotAttack.begin(),
+				  sourceOwnerCannotAttack.end(),
+				  targetOwner) != sourceOwnerCannotAttack.end() ||
+		std::find(targetOwnerCannotAttack.begin(),
+				  targetOwnerCannotAttack.end(),
+				  sourceOwner) != targetOwnerCannotAttack.end()) {
 	  std::cout << "Attack was blocked due to Diplomacy Card" << std::endl;
 	  return;
 	}
@@ -247,7 +251,8 @@ void AdvanceOrder::execute() {
 	  issuer->cardAwarded = true;
 	}
 	target->setOwner(this->issuer);
-	std::cout << this->issuer->name + " wins territory " + this->name << std::endl;
+	std::cout << this->issuer->name + " wins territory " + this->name
+			  << std::endl;
   }
 
   this->Notify(this);

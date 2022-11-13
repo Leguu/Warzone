@@ -26,9 +26,7 @@ std::vector<std::pair<Territory *, Territory *>> Player::toAttack() const {
  * @return all territories the player owns
  */
 
-vector<Territory *> Player::toDefend() const {
-  return ownedTerritories;
-}
+vector<Territory *> Player::toDefend() const { return ownedTerritories; }
 
 /**
  * Get all the enemy territories adjacent to your own
@@ -97,7 +95,9 @@ void Player::issueOrder(bool debugMode) {
 
 void Player::issueDeployOrder(bool debugMode) {
   Territory *target = Utils::accessRandomElement(toDefend());
-  int armies = reinforcementsAfterDeploy == 1 ? 1 : Utils::randomNumberInRange(1, reinforcementsAfterDeploy);
+  int armies = reinforcementsAfterDeploy == 1
+			   ? 1
+			   : Utils::randomNumberInRange(1, reinforcementsAfterDeploy);
 
   if (debugMode)
 	cout << "Issued Deploy Order: " << armies
@@ -122,7 +122,8 @@ void Player::issueCardOrder(bool debugMode) {
 
   switch (cardIndex) {
   case 0: {
-	std::pair<Territory *, Territory *> attack = Utils::accessRandomPair(toAttack());
+	std::pair<Territory *, Territory *> attack =
+		Utils::accessRandomPair(toAttack());
 	orders->push(new BombOrder(this, attack.first));
 
 	if (debugMode)
@@ -235,8 +236,9 @@ void Player::issueAdvanceOrder(bool debugMode) {
 
   if (debugMode)
 	cout << "Issued Advance Order: " << armies << " units from "
-		 << source->getName() << " [armies = " << source->getArmies() << "] to " << target->getName() << " [armies = "
-		 << target->getArmies() << "]" << endl;
+		 << source->getName() << " [armies = " << source->getArmies() << "] to "
+		 << target->getName() << " [armies = " << target->getArmies() << "]"
+		 << endl;
 }
 
 /**

@@ -1,14 +1,14 @@
 #ifndef WARZONE_UTILS_H
 #define WARZONE_UTILS_H
 
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <stdexcept>
 
 using std::getline;
+using std::runtime_error;
 using std::string;
 using std::vector;
-using std::runtime_error;
 
 class Utils {
 public:
@@ -50,15 +50,12 @@ public:
 	return elements[randomIndex];
   }
 
-  template<class T> static std::pair<T *, T *> accessRandomPair(vector<std::pair<T *, T *>> elements) {
+  template<class T>
+  static std::pair<T *, T *>
+  accessRandomPair(vector<std::pair<T *, T *>> elements) {
 	int randomIndex = rand() % elements.size();
 	return elements[randomIndex];
   }
-
-//  template<class T> static std::pair<T *, T *> *accessRandomElement(vector<std::pair<T *, T *>> elements) {
-//	int randomIndex = rand() % elements.size();
-//	return elements[randomIndex];
-//  }
 
 private:
   inline Utils() = default;

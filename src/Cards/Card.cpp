@@ -432,7 +432,7 @@ void Hand::debugPlay(const string &name) {
   auto cardName = name == "NegotiateCard" ? name : "Negotiate";
   auto card = removeByName(cardName);
   if (card != nullptr) {
-//	card->play(player);
+	//	card->play(player);
 	ge->deck->put(card);
   } else {
 	cout << "Could not find that card. Are you sure you have it in your hand?"

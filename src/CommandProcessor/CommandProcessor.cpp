@@ -69,34 +69,36 @@ Command *CommandProcessor::getCommand() {
  * valid at the current state of the game engine
  */
 Command *CommandProcessor::readCommand() {
-    string line;
-    while (true) {
-        line = Utils::getInputString();
+  string line;
+  while (true) {
+	line = Utils::getInputString();
 
-        auto tokens = Utils::tokenizer(line, ' ');
+	auto tokens = Utils::tokenizer(line, ' ');
 
+	if (Utils::isEqualLowercase(tokens[0], "loadmap") ||
+		Utils::isEqualLowercase(tokens[0], "addplayer")) {
+	  if (tokens.size() == 1) {
+		cout << "This command is missing an argument." << endl;
+		continue;
+	  }
+	  auto command = new Command();
+	  command->command = Utils::trim(tokens[0]);
+	  command->arg = Utils::trim(line.substr(tokens[0].length()));
+	  return command;
 
-        if (Utils::isEqualLowercase(tokens[0], "loadmap") || Utils::isEqualLowercase(tokens[0], "addplayer")) {
-            if (tokens.size() == 1) {
-                cout << "This command is missing an argument." << endl;
-                continue;
-            }
-            auto command = new Command();
-            command->command = Utils::trim(tokens[0]);
-            command->arg = Utils::trim(line.substr(tokens[0].length()));
-            return command;
-
-        } else if (Utils::isEqualLowercase(tokens[0], "validatemap") ||
-                   Utils::isEqualLowercase(tokens[0], "gamestart") || Utils::isEqualLowercase(tokens[0], "replay") ||
-                   Utils::isEqualLowercase(tokens[0], "quit") || Utils::isEqualLowercase(tokens[0], "help")) {
-            auto command = new Command();
-            command->command = Utils::trim(line);
-            return command;
-        } else {
-            cout << "You need to input something" << endl;
-            continue;
-        }
-    }
+	} else if (Utils::isEqualLowercase(tokens[0], "validatemap") ||
+		Utils::isEqualLowercase(tokens[0], "gamestart") ||
+		Utils::isEqualLowercase(tokens[0], "replay") ||
+		Utils::isEqualLowercase(tokens[0], "quit") ||
+		Utils::isEqualLowercase(tokens[0], "help")) {
+	  auto command = new Command();
+	  command->command = Utils::trim(line);
+	  return command;
+	} else {
+	  cout << "You need to input something" << endl;
+	  continue;
+	}
+  }
 }
 
 /**
@@ -107,52 +109,56 @@ Command *CommandProcessor::readCommand() {
  */
 bool CommandProcessor::validate(Command *command) {
 
-    auto engine = GameEngine::instance();
+  auto engine = GameEngine::instance();
 
-    string badString = "Invalid command!";
+  string badString = "Invalid command!";
 
-    if (engine != nullptr && command != nullptr) {
+  if (engine != nullptr && command != nullptr) {
 
-        GameEngine::GameState currState = engine->getState();
-        string okString = "Valid command. Moving from state " + GameEngine::gameStates[currState];
+	GameEngine::GameState currState = engine->getState();
+	string okString =
+		"Valid command. Moving from state " + GameEngine::gameStates[currState];
 
-        if (Utils::isEqualLowercase(command->getCommand(), "loadmap") && !command->getArg().empty()) {
-            if (currState == GameEngine::START || currState == GameEngine::MAP_LOADED) {
-                command->saveEffect(okString);
-                return true;
-            }
-        } else if (Utils::isEqualLowercase(command->getCommand(), "validatemap")) {
-            if (currState == GameEngine::MAP_LOADED) {
-                command->saveEffect(okString);
-                return true;
-            }
-        } else if (Utils::isEqualLowercase(command->getCommand(), "addplayer") && !command->getArg().empty()) {
-            if (currState == GameEngine::MAP_VALIDATED || currState == GameEngine::PLAYERS_ADDED) {
-                command->saveEffect(okString);
-                return true;
-            }
-        } else if (Utils::isEqualLowercase(command->getCommand(), "gamestart")) {
-            if (currState == GameEngine::PLAYERS_ADDED) {
-                command->saveEffect(okString);
-                return true;
-            }
-        } else if (Utils::isEqualLowercase(command->getCommand(), "replay") || Utils::isEqualLowercase(command->getCommand(), "quit") ) {
-            if (currState == GameEngine::WIN) {
-                command->saveEffect(okString);
-                return true;
-            }
-        }
-    }
-    command->saveEffect(badString);
-    return false;
+	if (Utils::isEqualLowercase(command->getCommand(), "loadmap") &&
+		!command->getArg().empty()) {
+	  if (currState == GameEngine::START ||
+		  currState == GameEngine::MAP_LOADED) {
+		command->saveEffect(okString);
+		return true;
+	  }
+	} else if (Utils::isEqualLowercase(command->getCommand(), "validatemap")) {
+	  if (currState == GameEngine::MAP_LOADED) {
+		command->saveEffect(okString);
+		return true;
+	  }
+	} else if (Utils::isEqualLowercase(command->getCommand(), "addplayer") &&
+		!command->getArg().empty()) {
+	  if (currState == GameEngine::MAP_VALIDATED ||
+		  currState == GameEngine::PLAYERS_ADDED) {
+		command->saveEffect(okString);
+		return true;
+	  }
+	} else if (Utils::isEqualLowercase(command->getCommand(), "gamestart")) {
+	  if (currState == GameEngine::PLAYERS_ADDED) {
+		command->saveEffect(okString);
+		return true;
+	  }
+	} else if (Utils::isEqualLowercase(command->getCommand(), "replay") ||
+		Utils::isEqualLowercase(command->getCommand(), "quit")) {
+	  if (currState == GameEngine::WIN) {
+		command->saveEffect(okString);
+		return true;
+	  }
+	}
+  }
+  command->saveEffect(badString);
+  return false;
 }
 
 /**
  * Default constructor for Command processor
  */
-CommandProcessor::CommandProcessor() {
-    this->Attach(LogObserver::instance());
-}
+CommandProcessor::CommandProcessor() { this->Attach(LogObserver::instance()); }
 /**
  * Copy constructor for Command processor
  */
@@ -164,18 +170,19 @@ CommandProcessor::CommandProcessor(const CommandProcessor &commandProcessor) {
 /**
  * Destructor for Command processor
  */
-CommandProcessor::~CommandProcessor() {
-    this->Detach(LogObserver::instance());
-}
+CommandProcessor::~CommandProcessor() { this->Detach(LogObserver::instance()); }
 /**
  * Assignment operator for Command processor
- * @param commandProcessor The command processor that we want to assign its values to another
- * @return Assigns the same values and pointers from one command processor to another
+ * @param commandProcessor The command processor that we want to assign its
+ * values to another
+ * @return Assigns the same values and pointers from one command processor to
+ * another
  */
-CommandProcessor &CommandProcessor::operator=(const CommandProcessor &commandProcessor) = default;
+CommandProcessor &
+CommandProcessor::operator=(const CommandProcessor &commandProcessor) = default;
 
 ostream &operator<<(ostream &os, const CommandProcessor &commandProcessor) {
-    os << "list of commands: \n";
+  os << "list of commands: \n";
 
   for (auto i : commandProcessor.commands) {
 	os << i->getCommand() << endl;
@@ -196,25 +203,19 @@ void CommandProcessor::saveCommand(Command *command) {
  * Get method for command
  * @return A command is returned
  */
-const string &Command::getCommand() const {
-    return command;
-}
+const string &Command::getCommand() const { return command; }
 
 /**
  * Get method for argument
  * @return
  */
-const string &Command::getArg() const {
-    return arg;
-}
+const string &Command::getArg() const { return arg; }
 
 /**
  * Get method for effect
  * @return
  */
-const string &Command::getEffect() const {
-    return effect;
-}
+const string &Command::getEffect() const { return effect; }
 
 /**
  * Saves the effect into the command object
@@ -281,52 +282,51 @@ std::string CommandProcessor::stringToLog() {
  * @return
  */
 std::string Command::stringToLog() {
-    std::ofstream file;
-    file.open("../logs/gamelog.txt", std::ios_base::app);
-    auto time = std::chrono::system_clock::now();
-    std::time_t time_t = std::chrono::system_clock::to_time_t(time);
-    file << std::ctime(&time_t);
-    file << "Effect Modified: " << this->effect << std::endl << std::endl;
-    return "Effect Modified: " + this->effect;
+  std::ofstream file;
+  file.open("../logs/gamelog.txt", std::ios_base::app);
+  auto time = std::chrono::system_clock::now();
+  std::time_t time_t = std::chrono::system_clock::to_time_t(time);
+  file << std::ctime(&time_t);
+  file << "Effect Modified: " << this->effect << std::endl << std::endl;
+  return "Effect Modified: " + this->effect;
 }
 
 /**
  * Get method for the command list vector
  * @return
  */
-vector<Command *> CommandProcessor::getCommandList() {
-    return commands;
-}
+vector<Command *> CommandProcessor::getCommandList() { return commands; }
 
 /**
  * Default constructor for the adapter
  */
-FileCommandProcessorAdapter::FileCommandProcessorAdapter() : CommandProcessor() {
-    flr = new FileLineReader();
+FileCommandProcessorAdapter::FileCommandProcessorAdapter()
+	: CommandProcessor() {
+  flr = new FileLineReader();
 }
 
 /**
  * Destructor for the adapter
  */
-FileCommandProcessorAdapter::~FileCommandProcessorAdapter() {
-    delete flr;
-}
+FileCommandProcessorAdapter::~FileCommandProcessorAdapter() { delete flr; }
 
 /**
  * Another constructor for the adapter
  * @param path A path to where the file is located to read commands
  */
-FileCommandProcessorAdapter::FileCommandProcessorAdapter(string path) : CommandProcessor() {
-    flr = new FileLineReader(std::move(path));
+FileCommandProcessorAdapter::FileCommandProcessorAdapter(string path)
+	: CommandProcessor() {
+  flr = new FileLineReader(std::move(path));
 }
 
 /**
  * Copy constructor for the adapter
  * @param fcpa Another adapter to copy from
  */
-FileCommandProcessorAdapter::FileCommandProcessorAdapter(const FileCommandProcessorAdapter &fcpa) : CommandProcessor(
-        fcpa) {
-    this->flr = fcpa.flr;
+FileCommandProcessorAdapter::FileCommandProcessorAdapter(
+	const FileCommandProcessorAdapter &fcpa)
+	: CommandProcessor(fcpa) {
+  this->flr = fcpa.flr;
 }
 
 /**
@@ -334,10 +334,11 @@ FileCommandProcessorAdapter::FileCommandProcessorAdapter(const FileCommandProces
  * @param fcpa
  * @return
  */
-FileCommandProcessorAdapter &FileCommandProcessorAdapter::operator=(const FileCommandProcessorAdapter &fcpa) {
-    CommandProcessor::operator=(fcpa);
-    this->flr = fcpa.flr;
-    return *this;
+FileCommandProcessorAdapter &FileCommandProcessorAdapter::operator=(
+	const FileCommandProcessorAdapter &fcpa) {
+  CommandProcessor::operator=(fcpa);
+  this->flr = fcpa.flr;
+  return *this;
 }
 
 /**
@@ -365,17 +366,13 @@ FileLineReader::~FileLineReader() = default;
 /**
  * Another Line reader constructor
  */
-FileLineReader::FileLineReader(string newPath) {
-    path = std::move(newPath);
-}
+FileLineReader::FileLineReader(string newPath) { path = std::move(newPath); }
 
 /**
  * Line reader copy constructor
  * @param flr
  */
-FileLineReader::FileLineReader(const FileLineReader &flr) {
-    path = flr.path;
-}
+FileLineReader::FileLineReader(const FileLineReader &flr) { path = flr.path; }
 /**
  * Line reader Assignment operator
  * @param flr
@@ -399,17 +396,13 @@ ostream &operator<<(ostream &os, const FileLineReader &flr) {
  * Get method for path
  * @return
  */
-string FileLineReader::getPath() {
-    return path;
-}
+string FileLineReader::getPath() { return path; }
 
 /**
  * Set method for path
  * @param newPath
  */
-void FileLineReader::setPath(string newPath) {
-    path = std::move(newPath);
-}
+void FileLineReader::setPath(string newPath) { path = std::move(newPath); }
 
 /**
  * Method to read get one line from a text file
@@ -432,25 +425,28 @@ string FileLineReader::readLineFromFile() {
  */
 Command *FileCommandProcessorAdapter::readCommand() {
 
-    string currentLine = flr->readLineFromFile();
+  string currentLine = flr->readLineFromFile();
 
-    auto tokens = Utils::tokenizer(currentLine, ' ');
-    auto command = new Command();
-    if (Utils::isEqualLowercase(tokens[0], "loadmap") || Utils::isEqualLowercase(tokens[0], "addplayer")) {
-        if (tokens.size() == 1) {
-            cout << "This command is missing an argument. Moving on..." << endl;
-        }
-        command->command = Utils::trim(tokens[0]);
-        command->arg = Utils::trim(currentLine.substr(tokens[0].length()));
-        return command;
-    } else if (Utils::isEqualLowercase(tokens[0], "validatemap") || Utils::isEqualLowercase(tokens[0], "gamestart") || Utils::isEqualLowercase(tokens[0], "replay") ||
-            Utils::isEqualLowercase(tokens[0], "quit")) {
-        command->command = Utils::trim(currentLine);
-        return command;
-    } else {
-        cout << "Some input must be here. Moving on." << endl;
-        command->command = Utils::trim(tokens[0]);
-        command->arg = Utils::trim(currentLine.substr(tokens[0].length()));
-        return command;
-    }
+  auto tokens = Utils::tokenizer(currentLine, ' ');
+  auto command = new Command();
+  if (Utils::isEqualLowercase(tokens[0], "loadmap") ||
+	  Utils::isEqualLowercase(tokens[0], "addplayer")) {
+	if (tokens.size() == 1) {
+	  cout << "This command is missing an argument. Moving on..." << endl;
+	}
+	command->command = Utils::trim(tokens[0]);
+	command->arg = Utils::trim(currentLine.substr(tokens[0].length()));
+	return command;
+  } else if (Utils::isEqualLowercase(tokens[0], "validatemap") ||
+	  Utils::isEqualLowercase(tokens[0], "gamestart") ||
+	  Utils::isEqualLowercase(tokens[0], "replay") ||
+	  Utils::isEqualLowercase(tokens[0], "quit")) {
+	command->command = Utils::trim(currentLine);
+	return command;
+  } else {
+	cout << "Some input must be here. Moving on." << endl;
+	command->command = Utils::trim(tokens[0]);
+	command->arg = Utils::trim(currentLine.substr(tokens[0].length()));
+	return command;
+  }
 }

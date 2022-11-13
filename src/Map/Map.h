@@ -23,7 +23,6 @@ extern bool debug;
 
 class Territory {
 public:
-
   // Constructor with necessary parameters
   Territory(const string &territory, Continent *continent);
 

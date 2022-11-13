@@ -13,9 +13,10 @@
 int main() {
   auto log = new LogObserver();
   while (true) {
-	auto input = Utils::getInputString(
-		"What do you want to test? cards, map, orders, players, logging, startup, mainloop, game "
-		"command. Type quit to quit");
+	auto input =
+		Utils::getInputString("What do you want to test? cards, map, orders, "
+							  "players, logging, startup, mainloop, game "
+							  "command. Type quit to quit");
 
 	if (Utils::isEqualLowercase(input, "cards")) {
 	  testCards();
@@ -35,19 +36,8 @@ int main() {
 	  testMainGameLoop();
 	} else if (Utils::isEqualLowercase(input, "game")) {
 	  auto ge = new GameEngine();
+
 	  ge->debugMode = true;
-
-//	  std::vector<std::pair<std::string, std::string>>
-//		  testCommands =
-//		  {{"loadmap", "Moon"}, {"validatemap", string()}, {"addplayer", "A"}, {"addplayer", "B"}, {"addplayer", "C"},
-//		   {"Gamestara", string()}};
-
-//	    loadmap Moon
-//	    validatemap
-//	    addplayer A
-//	    addplayer B
-//	    addplayer C},
-//		Gamestart
 	  ge->startupPhase();
 
 	  delete ge;

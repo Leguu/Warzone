@@ -39,7 +39,8 @@ public:
 
   vector<Territory *> getAdjacentEnemyTerritories();
 
-  [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const;
+  [[nodiscard]] std::vector<std::pair<Territory *, Territory *>>
+  toAttack() const;
 
   [[nodiscard]] vector<Territory *> toDefend() const;
 

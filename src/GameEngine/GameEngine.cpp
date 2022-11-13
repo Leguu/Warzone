@@ -89,7 +89,6 @@ void GameEngine::mainGameLoop() {
 	if (gameOver) {
 	  break;
 	}
-
   }
 
   cout << "Game is over!" << endl;
