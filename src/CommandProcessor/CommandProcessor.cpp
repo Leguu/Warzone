@@ -96,7 +96,7 @@ Command *CommandProcessor::readCommand() {
 
         } else if (Utils::isEqualLowercase(tokens[0], "validatemap") ||
                    Utils::isEqualLowercase(tokens[0], "gamestart") || Utils::isEqualLowercase(tokens[0], "replay") ||
-                   Utils::isEqualLowercase(tokens[0], "quit")) {
+                   Utils::isEqualLowercase(tokens[0], "quit") || Utils::isEqualLowercase(tokens[0], "help")) {
             auto command = new Command();
             command->command = Utils::trim(line);
             return command;
