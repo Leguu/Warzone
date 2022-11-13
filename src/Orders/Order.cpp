@@ -241,10 +241,13 @@ void AdvanceOrder::execute() {
 	target->setArmies(0);
 	target->setOwner(nullptr);
   } // draw a card if the attacker captures the territory
-  else if (armies > 0 && !issuer->cardAwarded) {
-	issuer->hand->draw();
-	issuer->cardAwarded = true;
+  else if (armies > 0) {
+	if (!issuer->cardAwarded) {
+	  issuer->hand->draw();
+	  issuer->cardAwarded = true;
+	}
 	target->setOwner(this->issuer);
+	std::cout << this->issuer->name + " wins territory " + this->name << std::endl;
   }
 
   this->Notify(this);

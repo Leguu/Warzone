@@ -428,7 +428,9 @@ Hand::Hand(Player *player) : player(player) {}
 /// Identical to Hand::play. \param name name of card to play
 void Hand::debugPlay(const string &name) {
   auto ge = GameEngine::instance();
-  auto card = removeByName(name);
+
+  auto cardName = name == "NegotiateCard" ? name : "Negotiate";
+  auto card = removeByName(cardName);
   if (card != nullptr) {
 //	card->play(player);
 	ge->deck->put(card);

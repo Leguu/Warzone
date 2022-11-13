@@ -21,7 +21,7 @@ void testPlayers() {
 
   Utils::assertCondition(!bob->toDefend().empty(), "to defend not empty");
 
-  auto _ = bob->issueOrder();
+  bob->issueOrder();
 
   delete ge;
 }

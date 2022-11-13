@@ -49,7 +49,7 @@ public:
 
   void issueCardOrder(bool debugMode = false);
 
-  bool issueOrder(bool debugMode = false);
+  void issueOrder(bool debugMode = false);
 
   void drawFromDeck() const;
 
