@@ -176,6 +176,7 @@ bool BlockadeCard::play(Player *issuer) const {
  */
 void BlockadeCard::execute(Player *issuer, Territory *territory) {
   auto order = new BlockadeOrder(issuer, territory);
+    territory->setOwner(nullptr);
   issuer->orders->push(order);
 }
 
