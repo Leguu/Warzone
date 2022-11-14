@@ -3,87 +3,90 @@
 
 class GameEngine;
 
-#include <queue>
-#include <memory>
-#include "../Player/Player.h"
-#include "../Orders/Order.h"
-#include "../Logging/LoggingObserver.h"
 #include "../CommandProcessor/CommandProcessor.h"
+#include "../Logging/LoggingObserver.h"
+#include "../Orders/Order.h"
+#include "../Player/Player.h"
+#include <memory>
+#include <queue>
 
+using std::cout;
+using std::endl;
 using std::runtime_error;
 using std::string;
 using std::vector;
-using std::cout;
-using std::endl;
-
 
 class GameEngine : public ILoggable, public Subject {
 public:
-    enum GameState {
-        START,
-        MAP_LOADED,
-        MAP_VALIDATED,
-        PLAYERS_ADDED,
-        ASSIGN_REINFORCEMENTS,
-        WIN
-    };
+  enum GameState {
+	START,
+	MAP_LOADED,
+	MAP_VALIDATED,
+	PLAYERS_ADDED,
+	ASSIGN_REINFORCEMENTS,
+	WIN
+  };
 
-    static inline string gameStates[6] = {"START", "MAP_LOADED", "MAP_VALIDATED",
-                                          "PLAYERS_ADDED", "ASSIGN_REINFORCEMENTS", "WIN"};
+  static inline string gameStates[6] = {"START",
+										"MAP_LOADED",
+										"MAP_VALIDATED",
+										"PLAYERS_ADDED",
+										"ASSIGN_REINFORCEMENTS",
+										"WIN"};
 
-    vector<Player *> players = vector<Player *>();
-    Deck *deck = new Deck({new BombCard, new BombCard, new AirliftCard, new AirliftCard, new BlockadeCard,
-                           new BlockadeCard, new NegotiateCard});
-    CommandProcessor *commandProcessor = new CommandProcessor();
+  bool debugMode = false;
 
-    Map *map = nullptr;
+  vector<Player *> players = vector<Player *>();
+  Deck *deck =
+	  new Deck({new BombCard, new BombCard, new AirliftCard, new AirliftCard,
+				new BlockadeCard, new BlockadeCard, new NegotiateCard});
+  CommandProcessor *commandProcessor = new CommandProcessor();
 
-    static GameEngine *instance();
+  Map *map = nullptr;
 
-    Player *findPlayerByName(const std::string &name);
+  static GameEngine *instance();
 
-    explicit GameEngine(const std::string &mapPath);
+  Player *findPlayerByName(const std::string &name);
 
-    void reinforcementPhase() const;
+  explicit GameEngine(const std::string &mapPath);
 
-    void issueOrdersPhase();
+  void reinforcementPhase() const;
 
-    bool executeOrdersPhase();
+  void issueOrdersPhase();
 
-    const static string helpText;
+  bool executeOrdersPhase();
 
-    void startupPhase();
+  const static string helpText;
 
-    void mainGameLoop();
+  bool startupPhase(std::vector<std::pair<std::string, std::string>> = {});
 
-    GameEngine();
+  void mainGameLoop();
 
-    virtual ~GameEngine();
+  GameEngine();
 
-    GameState getState();
+  virtual ~GameEngine();
 
-    std::string stringToLog() override;
+  GameState getState();
 
-    void transition(GameEngine::GameState newState);
+  std::string stringToLog() override;
 
+  void transition(GameEngine::GameState newState);
 
 private:
+  const static string wrongStateTransitionMessage;
 
-    const static string wrongStateTransitionMessage;
+  static GameEngine *_instance;
+  GameState state = START;
 
-    static GameEngine *_instance;
-    GameState state = START;
+  void loadMap(const string &input);
 
-    void loadMap(const string &input);
+  void validateMap();
 
-    void validateMap();
+  void addPlayer(const string &playerName);
 
-    void addPlayer(const string &playerName);
+  void assignCountries();
 
-    void assignCountries();
-
-    friend void testLoggingObserver();
-
+  friend void testLoggingObserver();
 };
 
-#endif //WARZONE_GAMEENGINE_H
+#endif // WARZONE_GAMEENGINE_H

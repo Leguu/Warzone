@@ -1,15 +1,14 @@
 #ifndef WARZONE_UTILS_H
 #define WARZONE_UTILS_H
 
-#include <vector>
+#include <stdexcept>
 #include <string>
+#include <vector>
 
+using std::getline;
+using std::runtime_error;
 using std::string;
 using std::vector;
-using std::cout;
-using std::cin;
-using std::getline;
-using std::endl;
 
 class Utils {
 public:
@@ -33,17 +32,33 @@ public:
 
   static bool isEqualLowercase(const string &a, const string &b);
 
-  static void assertCondition(bool condition, const std::string& message);
+  static int randomNumberInRange(int a, int b);
 
-  class CancelledInputException : public std::runtime_error {
+  static bool weightedBoolean(int percentage);
+
+  static void assertCondition(bool condition, const std::string &message);
+
+  class CancelledInputException : public runtime_error {
   public:
-    explicit CancelledInputException();
+	explicit CancelledInputException();
 
-    ~CancelledInputException() override;
+	~CancelledInputException() override;
   };
+
+  template<class T> static T *accessRandomElement(vector<T *> elements) {
+	int randomIndex = rand() % elements.size();
+	return elements[randomIndex];
+  }
+
+  template<class T>
+  static std::pair<T *, T *>
+  accessRandomPair(vector<std::pair<T *, T *>> elements) {
+	int randomIndex = rand() % elements.size();
+	return elements[randomIndex];
+  }
 
 private:
   inline Utils() = default;
 };
 
-#endif //WARZONE_UTILS_H
+#endif // WARZONE_UTILS_H
