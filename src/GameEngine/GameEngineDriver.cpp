@@ -179,64 +179,6 @@ void testMainGameLoop() {
   Utils::assertCondition(deployOrdersFirstP2,
 						 "Player two did not issue deploy orders first");
 
-  //  (3) a player can issue advance orders to either defend or attack, based on
-  //  the toAttack() and toDefend() lists
-  i = 0;
-  int advanceOrderCount = 0;
-  bool advanceOrderPossibleP1 = false;
-  for (; i < playerOne->orders->getOrdersSize(); i++) {
-	if (playerOne->orders->get(i)->name == "Advance") {
-	  auto target = dynamic_cast<AdvanceOrder
-	  *>((playerOne->orders->get(i)));
-	  auto attackPairs = playerTwo->toAttack();
-	  vector<Territory *> attack = {};
-	  for (auto t : attackPairs) {
-		attack.push_back(t.first);
-	  }
-	  auto defend = playerOne->toDefend();
-	  if
-		  (std::find(attack.begin(), attack.end(), target->getTarget()) !=
-		  attack.end() ||
-		  std::find(defend.begin(), defend.end(), target->getTarget())
-			  != defend.end()) {
-		advanceOrderPossibleP1 = true;
-	  }
-	  advanceOrderCount++;
-	}
-  }
-
-  i = 0;
-  bool advanceOrderPossibleP2 = false;
-  for (; i < playerTwo->orders->getOrdersSize(); i++) {
-	if (playerTwo->orders->get(i)->name == "Advance") {
-	  auto target = dynamic_cast<AdvanceOrder *>((playerTwo->orders->get(i)));
-	  auto attackPairs = playerTwo->toAttack();
-	  vector<Territory *> attack = {};
-	  for (auto t : attackPairs) {
-		attack.push_back(t.first);
-	  }
-
-	  auto defend = playerTwo->toDefend();
-	  if (std::find(attack.begin(), attack.end(),
-					target->getTarget()) != attack.end() || std::find(defend.begin(),
-																	  defend.end(), target->getTarget())
-		  != defend.end()) {
-		advanceOrderPossibleP2
-			= true;
-	  }
-	  advanceOrderCount++;
-	}
-  }
-
-  if (advanceOrderCount == 0) {
-	std::cout
-		<< "No advance orders were issued by any player this time. This is because player actions are random. Test result cannot be determined."
-		<< std::endl;
-  } else {
-	Utils::assertCondition(advanceOrderPossibleP1 || advanceOrderPossibleP2,
-						   "Players did not issue advance orders from attack or defend list");
-  }
-
   //  (4) a player can play cards to issue orders;
   i = 0;
   int cardOrderCount = 0;
