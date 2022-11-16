@@ -82,7 +82,7 @@ public:
 
     void setHasBeenAttacked();
 
-    bool getHasBeenAttacked();
+    bool getHasBeenAttacked() const;
 
 private:
     bool hasBeenAttacked;

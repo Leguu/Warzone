@@ -333,6 +333,6 @@ void NeutralStrategy::setHasBeenAttacked() {
  * Get whether the player has been attacked
  * @return Boolean representing if the player has been attacked
  */
-bool NeutralStrategy::getHasBeenAttacked() {
+bool NeutralStrategy::getHasBeenAttacked() const {
     return hasBeenAttacked;
 }
