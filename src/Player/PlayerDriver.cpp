@@ -17,10 +17,6 @@ void testPlayers() {
   ge->map->findTerritory("Byrgius")->setOwner(bob);
   ge->map->findTerritory("Bay of Dew")->setOwner(john);
 
-  Utils::assertCondition(!bob->toAttack().empty(), "to attack not empty");
-
-  Utils::assertCondition(!bob->toDefend().empty(), "to defend not empty");
-
   bob->issueOrder();
 
   delete ge;
