@@ -31,7 +31,7 @@ public:
 
 class HumanStrategy : public PlayerStrategy {
 public:
-    HumanStrategy(Player *pPlayer);
+    explicit HumanStrategy(Player *pPlayer);
 
     [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const override;
 
@@ -47,9 +47,9 @@ private:
     void issueCardOrder(bool debugMode = false);
 };
 
-class CheaterStrategy : public PlayerStrategy {
+class AggressivePlayer : public PlayerStrategy {
 public:
-    HumanStrategy(Player *pPlayer);
+    explicit AggressivePlayer(Player *pPlayer);
 
     [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const override;
 
@@ -58,12 +58,37 @@ public:
     void issueOrder(bool debugMode = false) override;
 
 private:
-    void issueDeployOrder(bool debugMode = false);
+    virtual void issueDeployOrder(bool debugMode = false);
 
-    void issueAdvanceOrder(bool debugMode = false);
+    virtual void issueAdvanceOrder(bool debugMode = false);
 
-    void issueCardOrder(bool debugMode = false);
+    virtual void issueCardOrder(bool debugMode = false);
 };
+
+class CheaterStrategy : public AggressivePlayer {
+public:
+    explicit CheaterStrategy(Player *pPlayer);
+
+
+private:
+    void issueAdvanceOrder(bool debugMode = false);
+};
+
+class NeutralStrategy : public AggressivePlayer {
+public:
+    explicit NeutralStrategy(Player *pPlayer);
+
+    void issueOrder(bool debugMode = false) override;
+
+    void setHasBeenAttacked();
+
+    bool getHasBeenAttacked();
+
+private:
+    bool hasBeenAttacked;
+};
+
+
 
 class Player {
 public:

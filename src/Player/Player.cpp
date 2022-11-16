@@ -3,6 +3,7 @@
 
 #include "../GameEngine/GameEngine.h"
 #include "Player.h"
+#include <set>
 
 /**
  * Get all the enemy territories adjacent to your own
@@ -10,8 +11,8 @@
  */
 vector<Territory *> Player::getAdjacentEnemyTerritories() {
     vector<Territory *> enemyTerritoriesAdjacent;
-    for (auto friendlyTerritory : this->ownedTerritories) {
-        for (auto adjacentTerritory : friendlyTerritory->getAdjTerritories()) {
+    for (auto friendlyTerritory: this->ownedTerritories) {
+        for (auto adjacentTerritory: friendlyTerritory->getAdjTerritories()) {
             if (adjacentTerritory->getOwner() != this &&
                 adjacentTerritory->getOwner() &&
                 find(enemyTerritoriesAdjacent.begin(), enemyTerritoriesAdjacent.end(),
@@ -84,8 +85,8 @@ void HumanStrategy::issueOrder(bool debugMode) {
  */
 std::vector<std::pair<Territory *, Territory *>> HumanStrategy::toAttack() const {
     auto adjacentEnemies = std::vector<std::pair<Territory *, Territory *>>();
-    for (auto t : p->ownedTerritories) {
-        for (auto adj : t->getAdjTerritories()) {
+    for (auto t: p->ownedTerritories) {
+        for (auto adj: t->getAdjTerritories()) {
             if (adj->getOwner() && adj->getOwner() != p) {
                 adjacentEnemies.emplace_back(adj, t);
             }
@@ -158,7 +159,7 @@ void HumanStrategy::issueCardOrder(bool debugMode) {
             Territory *source = nullptr;
             Territory *target = Utils::accessRandomElement(p->ownedTerritories);
 
-            for (auto t : p->ownedTerritories) {
+            for (auto t: p->ownedTerritories) {
                 if (t->getArmies() > 0) {
                     source = t;
                 }
@@ -204,7 +205,8 @@ void HumanStrategy::issueCardOrder(bool debugMode) {
             break;
         }
 
-        default:throw InvalidCardException(randomCardName + " is not a legal card.");
+        default:
+            throw InvalidCardException(randomCardName + " is not a legal card.");
     }
 }
 
@@ -214,7 +216,7 @@ void HumanStrategy::issueAdvanceOrder(bool debugMode) {
     auto targetTerritories = toAttack();
     std::pair<Territory *, Territory *> randomPair;
     bool foundPair = false;
-    for (auto t : targetTerritories) {
+    for (auto t: targetTerritories) {
         randomPair = t;
         if (randomPair.second->getArmies() > 0) {
             target = randomPair.first;
@@ -226,7 +228,7 @@ void HumanStrategy::issueAdvanceOrder(bool debugMode) {
 
     if (!foundPair) {
         target = Utils::accessRandomElement(toDefend());
-        for (auto t : toDefend()) {
+        for (auto t: toDefend()) {
             if (t != target && t->getArmies() > 0) {
                 source = t;
             }
@@ -254,5 +256,83 @@ void HumanStrategy::issueAdvanceOrder(bool debugMode) {
              << endl;
 }
 HumanStrategy::HumanStrategy(Player *pPlayer) : PlayerStrategy(pPlayer) {
+}
+std::vector<std::pair<Territory *, Territory *>> AggressivePlayer::toAttack() const {
+    return std::vector<std::pair<Territory *, Territory *>>();
+}
+vector<Territory *> AggressivePlayer::toDefend() const {
+    return vector<Territory *>();
+}
+void AggressivePlayer::issueOrder(bool debugMode) {
+    cout << "Need to implement" << endl;
+}
+void AggressivePlayer::issueDeployOrder(bool debugMode) {
+    cout << "Need to implement" << endl;
+}
+void AggressivePlayer::issueAdvanceOrder(bool debugMode) {
+    cout << "Need to implement" << endl;
+}
+void AggressivePlayer::issueCardOrder(bool debugMode) {
+    cout << "Need to implement" << endl;
+}
+AggressivePlayer::AggressivePlayer(Player *pPlayer) : PlayerStrategy(pPlayer) {
+}
 
+/**
+ * Advances and immediately conquers with 2x army size each adjacent enemy territory
+ * @param debugMode If debugging show more information
+ */
+void CheaterStrategy::issueAdvanceOrder(bool debugMode) {
+    Territory *source = nullptr, *target = nullptr;
+    std::set<std::string> territoriesAdvanceIssued;
+    auto targetTerritories = toAttack();
+    for (auto targetTerritory: targetTerritories) {
+        source = targetTerritory.second;
+        target = targetTerritory.first;
+        if (territoriesAdvanceIssued.find(target->getName()) != territoriesAdvanceIssued.end()) {
+            territoriesAdvanceIssued.insert(target->getName());
+            p->orders->push(new AdvanceOrder(p, target->getArmies() * 2, source, target));
+            if (debugMode)
+                cout << "Issued Advance Order: " << target->getArmies() << " units from "
+                     << source->getName() << " [armies = " << target->getArmies() * 2 << "] to "
+                     << target->getName() << " [armies = " << target->getArmies() << "]"
+                     << endl;
+        }
+    }
+}
+/**
+ * CheaterStrategy constructor
+ * @param pPlayer The player using this strategy
+ */
+CheaterStrategy::CheaterStrategy(Player *pPlayer) : AggressivePlayer(pPlayer) {
+}
+
+/**
+ * NeutralStrategy constructor
+ * @param pPlayer The player using this strategy
+ */
+NeutralStrategy::NeutralStrategy(Player *pPlayer) : AggressivePlayer(pPlayer) {
+    hasBeenAttacked = false;
+}
+
+/**
+ * Issue orders similarly to an aggressive player ONLY if it has been attacked
+ * @param debugMode If debugging show more information
+ */
+void NeutralStrategy::issueOrder(bool debugMode) {
+    if(hasBeenAttacked)
+        AggressivePlayer::issueOrder(debugMode);
+}
+/**
+ * Set whether the player has been attacked
+ */
+void NeutralStrategy::setHasBeenAttacked() {
+    hasBeenAttacked = true;
+}
+/**
+ * Get whether the player has been attacked
+ * @return Boolean representing if the player has been attacked
+ */
+bool NeutralStrategy::getHasBeenAttacked() {
+    return hasBeenAttacked;
 }

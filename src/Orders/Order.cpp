@@ -6,6 +6,7 @@
 #include <random>
 #include <utility>
 
+#include "../Player/Player.h"
 #include "../Logging/LogObserver.h"
 #include "../Utils/Utils.h"
 #include "Order.h"
@@ -218,6 +219,13 @@ void AdvanceOrder::execute() {
 	  return;
 	}
   }
+    //If territory was neutral, set it to aggressive
+  if(Utils::isEqualLowercase(typeid(target->getOwner()->strategy).name(),"neutralstrategy")){
+      auto* targetStrategy = dynamic_cast<NeutralStrategy*>(target->getOwner()->strategy);
+      if(!targetStrategy->getHasBeenAttacked())
+          targetStrategy->setHasBeenAttacked();
+  }
+
 
   // 1. deduct source armies
   source->setArmies(source->getArmies() - armies);
@@ -255,7 +263,6 @@ void AdvanceOrder::execute() {
 	std::cout << this->issuer->name + " wins territory " + target->getName()
 			  << std::endl;
   }
-
   this->Notify(this);
 }
 
