@@ -19,8 +19,6 @@ class Player;
 
 class Continent;
 
-extern bool debug;
-
 class Territory {
 public:
   // Constructor with necessary parameters
@@ -87,6 +85,8 @@ private:
   Continent *continent = nullptr;
   int armies = 0;
   Player *owner = nullptr;
+
+  friend class Map;
 };
 
 class Continent {
@@ -168,8 +168,6 @@ public:
   Territory *findTerritoryByName(const string &continentName);
 
   Territory *findTerritory(const string &name);
-
-  bool allContinentsOwned();
 
   bool validate();
 

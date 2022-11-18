@@ -17,78 +17,79 @@ using std::string;
 using std::vector;
 
 class GameEngine : public ILoggable, public Subject {
-public:
-    enum GameState {
-        START,
-        MAP_LOADED,
-        MAP_VALIDATED,
-        PLAYERS_ADDED,
-        ASSIGN_REINFORCEMENTS,
-        WIN
-    };
+  public:
+  enum GameState {
+    START,
+    MAP_LOADED,
+    MAP_VALIDATED,
+    PLAYERS_ADDED,
+    ASSIGN_REINFORCEMENTS,
+    WIN
+  };
 
-    static inline string gameStates[6] = {"START",
-                                          "MAP_LOADED",
-                                          "MAP_VALIDATED",
-                                          "PLAYERS_ADDED",
-                                          "ASSIGN_REINFORCEMENTS",
-                                          "WIN"};
+  static inline string gameStates[6] = {"START",
+                                        "MAP_LOADED",
+                                        "MAP_VALIDATED",
+                                        "PLAYERS_ADDED",
+                                        "ASSIGN_REINFORCEMENTS",
+                                        "WIN"};
 
-    bool debugMode = false;
+  bool debugMode = false;
 
-    vector<Player *> players = vector<Player *>();
-    Deck *deck =
-            new Deck({new BombCard, new BombCard, new BombCard, new BombCard, new AirliftCard, new AirliftCard,
-                      new AirliftCard, new AirliftCard,
-                      new BlockadeCard, new BlockadeCard, new BlockadeCard, new BlockadeCard, new NegotiateCard,
-                      new NegotiateCard, new NegotiateCard, new NegotiateCard});
-    CommandProcessor *commandProcessor = new CommandProcessor();
+  vector<Player *> players = vector<Player *>();
+  Deck *deck =
+          new Deck({new BombCard, new BombCard, new BombCard, new BombCard, new BombCard, new BombCard, new AirliftCard, new AirliftCard,
+                    new AirliftCard, new AirliftCard, new AirliftCard, new AirliftCard,
+                    new BlockadeCard, new BlockadeCard, new BlockadeCard, new NegotiateCard});
+  CommandProcessor *commandProcessor = new CommandProcessor();
 
-    Map *map = nullptr;
+  int turnsGone = 0;
 
-    static GameEngine *instance();
+  Map *map = nullptr;
 
-    Player *findPlayerByName(const std::string &name);
+  static GameEngine *instance();
 
-    explicit GameEngine(const std::string &mapPath);
+  Player *findPlayerByName(const std::string &name);
 
-    void reinforcementPhase() const;
+  explicit GameEngine(const std::string &mapPath);
 
-    void issueOrdersPhase();
+  void reinforcementPhase() const;
 
-    bool executeOrdersPhase();
+  void issueOrdersPhase();
 
-    const static string helpText;
+  bool executeOrdersPhase();
 
-    bool startupPhase(std::vector<std::pair<std::string, std::string>> = {});
+  const static string helpText;
 
-    void mainGameLoop();
+  bool startupPhase(std::vector<std::pair<std::string, std::string>> = {});
 
-    GameEngine();
+  void mainGameLoop();
 
-    virtual ~GameEngine();
+  GameEngine();
 
-    GameState getState();
+  virtual ~GameEngine();
 
-    std::string stringToLog() override;
+  GameState getState();
 
-    void transition(GameEngine::GameState newState);
+  std::string stringToLog() override;
 
-private:
-    const static string wrongStateTransitionMessage;
+  void transition(GameEngine::GameState newState);
 
-    static GameEngine *_instance;
-    GameState state = START;
+  private:
+  const static string wrongStateTransitionMessage;
 
-    void loadMap(const string &input);
+  static GameEngine *_instance;
+  GameState state = START;
 
-    void validateMap();
+  void loadMap(const string &input);
 
-    void addPlayer(const string &playerName);
+  void validateMap();
 
-    void assignCountries();
+  void addPlayer(const string &playerName);
 
-    friend void testLoggingObserver();
+  void assignCountries();
+
+  friend void testLoggingObserver();
 };
 
-#endif // WARZONE_GAMEENGINE_H
+#endif// WARZONE_GAMEENGINE_H

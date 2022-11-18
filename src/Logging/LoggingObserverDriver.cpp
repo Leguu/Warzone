@@ -60,4 +60,4 @@ void testLoggingObserver() {
   delete orderList;
   delete ge;
   delete log;
-};
+}

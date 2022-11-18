@@ -22,11 +22,13 @@ public:
 
     explicit PlayerStrategy(Player *P);
 
-    virtual void issueOrder(bool debugMode = false) = 0;
+    virtual void issueOrder() = 0;
 
     virtual std::vector<std::pair<Territory *, Territory *>> toAttack() const = 0;
 
     virtual vector<Territory *> toDefend() const = 0;
+
+    virtual bool isDoneIssuing() = 0;
 };
 
 class DefaultPlayerStrategy : public PlayerStrategy {
@@ -37,14 +39,16 @@ public:
 
     [[nodiscard]] vector<Territory *> toDefend() const override;
 
-    void issueOrder(bool debugMode = false) override;
+    void issueOrder() override;
+
+    bool isDoneIssuing() override;
 
 private:
-    void issueDeployOrder(bool debugMode = false);
+    void issueDeployOrder();
 
-    void issueAdvanceOrder(bool debugMode = false);
+    void issueAdvanceOrder();
 
-    void issueCardOrder(bool debugMode = false);
+    void issueCardOrder();
 };
 
 class Player {
@@ -64,15 +68,13 @@ public:
 
     int cardAwarded = false;
 
-    vector<Player *> cannotAttack = vector<Player *>();
-
-    bool isDoneIssuing = false;
+    vector<Player *> cannotAttack = {};
 
     explicit Player(string name);
 
     vector<Territory *> getAdjacentEnemyTerritories();
 
-    void issueOrder(bool debugMode = false);
+    void issueOrder();
 
     friend std::ostream &operator<<(std::ostream &os, const Player &player);
 

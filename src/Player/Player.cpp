@@ -10,8 +10,8 @@
  */
 vector<Territory *> Player::getAdjacentEnemyTerritories() {
   vector<Territory *> enemyTerritoriesAdjacent;
-  for (auto friendlyTerritory : this->ownedTerritories) {
-    for (auto adjacentTerritory : friendlyTerritory->getAdjTerritories()) {
+  for (auto friendlyTerritory: this->ownedTerritories) {
+    for (auto adjacentTerritory: friendlyTerritory->getAdjTerritories()) {
       if (adjacentTerritory->getOwner() != this &&
           adjacentTerritory->getOwner() &&
           find(enemyTerritoriesAdjacent.begin(), enemyTerritoriesAdjacent.end(),
@@ -42,8 +42,8 @@ Player::Player(string name) : name(std::move(name)), orders(new OrderList()), st
   this->hand = new Hand(this);
 }
 
-void Player::issueOrder(bool debugMode) {
-  this->strategy->issueOrder(debugMode);
+void Player::issueOrder() {
+  this->strategy->issueOrder();
 }
 
 /**
@@ -59,7 +59,7 @@ InvalidCardException::InvalidCardException(const std::string &arg)
     : runtime_error(arg) {}
 PlayerStrategy::PlayerStrategy(Player *P) : p(P) {}
 
-void DefaultPlayerStrategy::issueOrder(bool debugMode) {
+void DefaultPlayerStrategy::issueOrder() {
   // Current Mechanism:
   // ------------------
   // 	1. Keep deploying until zero reinforcements are left. Random number each turn.
@@ -68,12 +68,12 @@ void DefaultPlayerStrategy::issueOrder(bool debugMode) {
   // NOTE: All orders that are issued follow random moves for now.
 
   if (p->reinforcementsAfterDeploy > 0) {
-    issueDeployOrder(debugMode);
+    issueDeployOrder();
   } else if (!p->cardOrderIssued && !p->hand->cards.empty()) {
-    issueCardOrder(debugMode);
+    issueCardOrder();
     p->cardOrderIssued = true;
   } else if (!p->advanceOrderIssued) {
-    issueAdvanceOrder(debugMode);
+    issueAdvanceOrder();
     p->advanceOrderIssued = true;
   }
 }
@@ -84,10 +84,10 @@ void DefaultPlayerStrategy::issueOrder(bool debugMode) {
  */
 std::vector<std::pair<Territory *, Territory *>> DefaultPlayerStrategy::toAttack() const {
   auto adjacentEnemies = std::vector<std::pair<Territory *, Territory *>>();
-  for (auto t : p->ownedTerritories) {
-    for (auto adj : t->getAdjTerritories()) {
-      if (adj->getOwner() && adj->getOwner() != p) {
-        adjacentEnemies.emplace_back(adj, t);
+  for (auto t: p->ownedTerritories) {
+    for (auto adj: t->getAdjTerritories()) {
+      if (adj->getOwner() != p) {
+        adjacentEnemies.emplace_back(std::pair(adj, t));
       }
     }
   }
@@ -100,159 +100,183 @@ std::vector<std::pair<Territory *, Territory *>> DefaultPlayerStrategy::toAttack
  * @return all territories the player owns
  */
 
-vector<Territory *> DefaultPlayerStrategy::toDefend() const { return p->ownedTerritories; }
+vector<Territory *> DefaultPlayerStrategy::toDefend() const {
+  return p->ownedTerritories;
+}
 
-void DefaultPlayerStrategy::issueDeployOrder(bool debugMode) {
-  Territory *target = Utils::accessRandomElement(toDefend());
-  int armies = p->reinforcementsAfterDeploy == 1
-               ? 1
-               : Utils::randomNumberInRange(1, p->reinforcementsAfterDeploy);
+void DefaultPlayerStrategy::issueDeployOrder() {
+  auto ge = GameEngine::instance();
 
-  if (debugMode)
-    cout << "Issued Deploy Order: " << armies
-         << " units to " + target->getContinent()->getName() << endl;
+  auto target = Utils::accessRandomPair(toAttack()).second;
+
+  int armies = p->reinforcementsAfterDeploy == 1 ? 1 : Utils::randomNumberInRange(1, p->reinforcementsAfterDeploy);
+
+  if (ge->debugMode)
+    cout << "Issued Deploy Order: " << armies << " units to " + target->getContinent()->getName() << endl;
 
   p->orders->push(new DeployOrder(p, armies, target));
   p->reinforcementsAfterDeploy -= armies;
 }
 
-void DefaultPlayerStrategy::issueCardOrder(bool debugMode) {
+void DefaultPlayerStrategy::issueCardOrder() {
+  auto ge = GameEngine::instance();
   auto randomCardName = p->hand->cards[0]->name;
 
-  debugMode ? p->hand->debugPlay(randomCardName)
-            : p->hand->play(randomCardName);
-
   std::map<std::string, int> cardNameMap = {
-      {"Bomb", 0},
-      {"Blockade", 1},
-      {"Airlift", 2},
-      {"NegotiateCard", 3}};
+          {"Bomb", 0},
+          {"Blockade", 1},
+          {"Airlift", 2},
+          {"NegotiateCard", 3}};
 
   int cardIndex = (cardNameMap.count(randomCardName) > 0)
-                  ? (*cardNameMap.find(randomCardName)).second
-                  : -1;
+                          ? (*cardNameMap.find(randomCardName)).second
+                          : -1;
 
   switch (cardIndex) {
-  case 0: {
-    std::pair<Territory *, Territory *> attack =
-        Utils::accessRandomPair(toAttack());
-    p->orders->push(new BombOrder(p, attack.first));
+    case 0: {
+      std::pair<Territory *, Territory *> attack =
+              Utils::accessRandomPair(toAttack());
+      p->orders->push(new BombOrder(p, attack.first));
 
-    if (debugMode)
-      cout << "Issued BombOrder on: " << attack.first->getName() << endl;
+      if (ge->debugMode)
+        cout << "Issued BombOrder on: " << attack.first->getName() << endl;
 
-    break;
+      auto c = p->hand->removeByName("Bomb");
+      ge->deck->put(c);
+
+      break;
+    }
+
+    case 1: {
+      Territory *target = Utils::accessRandomElement(p->ownedTerritories);
+      p->orders->push(new BlockadeOrder(p, target));
+
+      if (ge->debugMode)
+        cout << "Issued BlockadeOrder on: " << target->getName() << endl;
+
+      auto c = p->hand->removeByName("Blockade");
+      ge->deck->put(c);
+
+      break;
+    }
+
+    case 2: {
+      Territory *source = nullptr;
+      Territory *target = Utils::accessRandomElement(p->ownedTerritories);
+
+      for (auto t: p->ownedTerritories) {
+        if (t->getArmies() > 0) {
+          source = t;
+        }
+      }
+
+      if (source == nullptr) {
+        return;
+      }
+
+      auto armies = source->getArmies();
+
+      if (armies != 1) {
+        std::random_device rd;
+        std::mt19937 rng(rd());
+        std::uniform_int_distribution<int> dis(1, armies);
+        armies = dis(rng);
+      }
+
+      p->orders->push(new AirliftOrder(p, armies, source, target));
+
+      if (ge->debugMode)
+        cout << "Issued AirliftOrder " << armies
+             << " units from: " << source->getName() << " to "
+             << target->getName() << endl;
+
+      auto c = p->hand->removeByName("Airlift");
+      ge->deck->put(c);
+
+      break;
+    }
+
+    case 3: {
+      Player *randomPlayer;
+      do {
+        randomPlayer = Utils::accessRandomElement(ge->players);
+      } while (randomPlayer == p);
+
+      p->orders->push(new NegotiateOrder(p, randomPlayer));
+
+      if (ge->debugMode)
+        cout << "Issued NegotiateOrder by " << p->name
+             << " against " << randomPlayer->name << endl;
+
+      auto c = p->hand->removeByName("Negotiate");
+      ge->deck->put(c);
+
+      break;
+    }
+
+    default:
+      throw InvalidCardException(randomCardName + " is not a legal card.");
+  }
+}
+
+void DefaultPlayerStrategy::issueAdvanceOrder() {
+  auto ge = GameEngine::instance();
+
+  Territory *source = nullptr;
+  Territory *target = nullptr;
+
+  for (auto pair: toAttack()) {
+    if (pair.second->getArmies() > 5) {
+      target = pair.first;
+      source = pair.second;
+    }
   }
 
-  case 1: {
-    Territory *target = Utils::accessRandomElement(p->ownedTerritories);
-    p->orders->push(new BlockadeOrder(p, target));
+  if (target == nullptr || source == nullptr) {
+    auto rng = std::default_random_engine();
+    rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
+    std::shuffle(p->ownedTerritories.begin(), p->ownedTerritories.end(), rng);
 
-    if (debugMode)
-      cout << "Issued BlockadeOrder on: " << target->getName() << endl;
-
-    break;
-  }
-
-  case 2: {
-    Territory *source = nullptr;
-    Territory *target = Utils::accessRandomElement(p->ownedTerritories);
-
-    for (auto t : p->ownedTerritories) {
+    for (auto t: p->ownedTerritories) {
       if (t->getArmies() > 0) {
         source = t;
       }
     }
 
-    if (source == nullptr) {
+    if (!source) {
       return;
     }
 
-    auto armies = source->getArmies();
-
-    if (armies != 1) {
-      std::random_device rd;
-      std::mt19937 rng(rd());
-      std::uniform_int_distribution<int> dis(1, armies);
-      armies = dis(rng);
-    }
-
-    p->orders->push(new AirliftOrder(p, armies, source, target));
-
-    if (debugMode)
-      cout << "Issued AirliftOrder " << armies
-           << " units from: " << source->getName() << " to "
-           << target->getName() << endl;
-
-    break;
-  }
-
-  case 3: {
-    auto ge = GameEngine::instance();
-
-    Player *randomPlayer;
-    do {
-      randomPlayer = Utils::accessRandomElement(ge->players);
-    } while (randomPlayer == p);
-
-    p->orders->push(new NegotiateOrder(p, randomPlayer));
-
-    if (debugMode)
-      cout << "Issued NegotiateOrder by " << p->name
-           << " against: " << randomPlayer->name << endl;
-
-    break;
-  }
-
-  default:throw InvalidCardException(randomCardName + " is not a legal card.");
-  }
-}
-
-void DefaultPlayerStrategy::issueAdvanceOrder(bool debugMode) {
-  // attack if option available
-  Territory *source = nullptr, *target = nullptr;
-  auto targetTerritories = toAttack();
-  std::pair<Territory *, Territory *> randomPair;
-  bool foundPair = false;
-  for (auto t : targetTerritories) {
-    randomPair = t;
-    if (randomPair.second->getArmies() > 0) {
-      target = randomPair.first;
-      source = randomPair.second;
-      foundPair = true;
-      break;
-    }
-  }
-
-  if (!foundPair) {
-    target = Utils::accessRandomElement(toDefend());
-    for (auto t : toDefend()) {
-      if (t != target && t->getArmies() > 0) {
-        source = t;
+    for (auto t: source->getAdjTerritories()) {
+      if (t->getOwner() == p) {
+        target = t;
       }
     }
   }
 
-  if (source == nullptr) {
+  if (!target) {
     return;
   }
 
   int armies = source->getArmies();
-  if (armies > 1) {
-    std::random_device rd;
-    std::mt19937 rng(rd());
-    std::uniform_int_distribution<int> dis(1, armies);
-    armies = dis(rng);
+  if (armies < 5) {
+    //    std::random_device rd;
+    //    std::mt19937 rng(rd());
+    //    std::uniform_int_distribution<int> dis(1, armies);
+    //    armies = dis(rng);
+    return;
   }
+  armies *= 0.90;// NOLINT(cppcoreguidelines-narrowing-conversions)
 
   p->orders->push(new AdvanceOrder(p, armies, source, target));
 
-  if (debugMode)
+  if (ge->debugMode)
     cout << "Issued Advance Order: " << armies << " units from "
-         << source->getName() << " [armies = " << source->getArmies() << "] to "
-         << target->getName() << " [armies = " << target->getArmies() << "]"
-         << endl;
+         << *source << " to " << *target << endl;
 }
 DefaultPlayerStrategy::DefaultPlayerStrategy(Player *pPlayer) : PlayerStrategy(pPlayer) {
+}
 
+bool DefaultPlayerStrategy::isDoneIssuing() {
+  return p->advanceOrderIssued && (p->cardOrderIssued || p->hand->cards.empty());
 }
