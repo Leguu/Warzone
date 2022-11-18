@@ -136,7 +136,7 @@ void GameEngine::issueOrdersPhase() {
   auto stillIssuing = players.size();
   while (stillIssuing > 0) {
     for (auto player: players) {
-      if (player->strategy->isDoneIssuing()) {
+      if (player->isDoneIssuing()) {
         stillIssuing--;
         if (stillIssuing == 0) break;
         continue;

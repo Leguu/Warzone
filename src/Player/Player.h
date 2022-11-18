@@ -2,7 +2,6 @@
 #define WARZONE_PLAYER_H
 
 class Player;
-class PlayerStrategy;
 
 #include "../Cards/Card.h"
 #include "../Map/Map.h"
@@ -16,41 +15,6 @@ public:
     explicit InvalidCardException(const std::string &arg);
 };
 
-class PlayerStrategy {
-public:
-    Player *p;
-
-    explicit PlayerStrategy(Player *P);
-
-    virtual void issueOrder() = 0;
-
-    virtual std::vector<std::pair<Territory *, Territory *>> toAttack() const = 0;
-
-    virtual vector<Territory *> toDefend() const = 0;
-
-    virtual bool isDoneIssuing() = 0;
-};
-
-class DefaultPlayerStrategy : public PlayerStrategy {
-public:
-    DefaultPlayerStrategy(Player *pPlayer);
-
-    [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const override;
-
-    [[nodiscard]] vector<Territory *> toDefend() const override;
-
-    void issueOrder() override;
-
-    bool isDoneIssuing() override;
-
-private:
-    void issueDeployOrder();
-
-    void issueAdvanceOrder();
-
-    void issueCardOrder();
-};
-
 class Player {
 public:
     const string name;
@@ -58,7 +22,6 @@ public:
     Hand *hand;
     vector<Territory *> ownedTerritories = {};
     int reinforcements = 50;
-    PlayerStrategy *strategy;
 
     int reinforcementsAfterDeploy = 50;
 
@@ -74,11 +37,24 @@ public:
 
     vector<Territory *> getAdjacentEnemyTerritories();
 
-    void issueOrder();
-
     friend std::ostream &operator<<(std::ostream &os, const Player &player);
 
     ~Player();
+
+    [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const ;
+
+    [[nodiscard]] vector<Territory *> toDefend() const ;
+
+    void issueOrder() ;
+
+    bool isDoneIssuing() ;
+
+private:
+    void issueDeployOrder();
+
+    void issueAdvanceOrder();
+
+    void issueCardOrder();
 };
 
 void testPlayers();
