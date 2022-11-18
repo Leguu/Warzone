@@ -140,7 +140,7 @@ private:
 
 class NegotiateOrder : public Order {
 public:
-  explicit NegotiateOrder(Player *issuer, const Player *target);
+  explicit NegotiateOrder(Player *issuer, Player *target);
 
   void validate() override;
 
@@ -153,7 +153,7 @@ public:
   NegotiateOrder(const NegotiateOrder &o);
 
 private:
-  const Player *const target;
+  Player *target;
 };
 
 class OrderList : public ILoggable, public Subject {

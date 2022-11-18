@@ -84,6 +84,8 @@ public:
 private:
   virtual Command *readCommand();
 
+  virtual string getLine();
+
   vector<Command *> commands;
   friend void testLoggingObserver();
   friend class FileCommandProcessorAdapter;
@@ -136,7 +138,7 @@ public:
   FileLineReader *flr = nullptr;
 
 private:
-  Command *readCommand() override;
+  string getLine() override;
 };
 
 #endif // WARZONE_SRC_COMMANDPROCESSOR_COMMANDPROCESSOR_H
