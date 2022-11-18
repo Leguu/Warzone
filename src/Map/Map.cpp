@@ -533,11 +533,11 @@ bool Map::allContinentsOwned() {
       p = c->owner();
     }
 
-    if (p != c->owner()) {
+    if (p == nullptr || p != c->owner()) {
       return false;
     }
   }
-  return p;
+  return true;
 }
 
 /**

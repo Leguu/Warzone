@@ -105,6 +105,8 @@ public:
 
     bool cardOrderIssued = false;
 
+    void removeFromOwnedTerritories(std::string name);
+
     int cardAwarded = false;
 
     vector<Player *> cannotAttack = vector<Player *>();

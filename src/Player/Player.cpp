@@ -46,6 +46,16 @@ Player::Player(string name) : name(std::move(name)), orders(new OrderList()), st
 void Player::issueOrder(bool debugMode) {
     this->strategy->issueOrder(debugMode);
 }
+void Player::removeFromOwnedTerritories(std::string name) {
+    int counter = 0;
+    for(auto ownedTerritory : ownedTerritories){
+        if(Utils::isEqualLowercase(ownedTerritory->getName(), name)){
+            ownedTerritories.erase(ownedTerritories.begin() + counter);
+            break;
+        }
+        counter = counter + 1;
+    }
+}
 
 /**
  * Play destructor
@@ -87,7 +97,7 @@ std::vector<std::pair<Territory *, Territory *>> HumanStrategy::toAttack() const
     auto adjacentEnemies = std::vector<std::pair<Territory *, Territory *>>();
     for (auto t: p->ownedTerritories) {
         for (auto adj: t->getAdjTerritories()) {
-            if (adj->getOwner() && adj->getOwner() != p) {
+            if (adj->getOwner() != p) {
                 adjacentEnemies.emplace_back(adj, t);
             }
         }
@@ -109,7 +119,7 @@ void HumanStrategy::issueDeployOrder(bool debugMode) {
                          ? 1
                          : Utils::randomNumberInRange(1, p->reinforcementsAfterDeploy);
 
-    if (debugMode)
+    if (debugMode && target)
         cout << "Issued Deploy Order: " << armies
              << " units to " + target->getContinent()->getName() << endl;
 
@@ -149,9 +159,11 @@ void HumanStrategy::issueCardOrder(bool debugMode) {
             Territory *target = Utils::accessRandomElement(p->ownedTerritories);
             p->orders->push(new BlockadeOrder(p, target));
 
-            if (debugMode)
+            if (debugMode && target){
                 cout << "Issued BlockadeOrder on: " << target->getName() << endl;
-
+                p->removeFromOwnedTerritories(target->getName());
+                target->setOwner(nullptr);
+            }
             break;
         }
 
@@ -180,7 +192,7 @@ void HumanStrategy::issueCardOrder(bool debugMode) {
 
             p->orders->push(new AirliftOrder(p, armies, source, target));
 
-            if (debugMode)
+            if (debugMode && target)
                 cout << "Issued AirliftOrder " << armies
                      << " units from: " << source->getName() << " to "
                      << target->getName() << endl;
@@ -229,7 +241,7 @@ void HumanStrategy::issueAdvanceOrder(bool debugMode) {
     if (!foundPair) {
         target = Utils::accessRandomElement(toDefend());
         for (auto t: toDefend()) {
-            if (t != target && t->getArmies() > 0) {
+            if (target != nullptr && t != target && t->getArmies() > 0) {
                 source = t;
             }
         }

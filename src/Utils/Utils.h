@@ -46,8 +46,10 @@ public:
   };
 
   template<class T> static T *accessRandomElement(vector<T *> elements) {
-	int randomIndex = rand() % elements.size();
-	return elements[randomIndex];
+      if(!elements.empty()){
+          int randomIndex = rand() % elements.size();
+          return elements[randomIndex];
+      }
   }
 
   template<class T>

@@ -125,7 +125,7 @@ void GameEngine::issueOrdersPhase() {
 	for (auto player : players) {
 	  if (player->advanceOrderIssued && player->cardOrderIssued) {
 		stillIssuing--;
-	  } else {
+	  } else if (!player->ownedTerritories.empty()){
 		cout << player->name << " is issuing an order" << endl;
 		player->issueOrder(this->debugMode);
 	  }
@@ -344,6 +344,7 @@ void GameEngine::assignCountries() {
   // valid
   for (auto t : map->getAllTerritories()) {
 	t->setOwner(players[i]);
+    players[i]->ownedTerritories.push_back(t);
 	i = (i + 1) % players.size();
   }
 }

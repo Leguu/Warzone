@@ -6,8 +6,8 @@
 #include <random>
 #include <utility>
 
-#include "../Player/Player.h"
 #include "../Logging/LogObserver.h"
+#include "../Player/Player.h"
 #include "../Utils/Utils.h"
 #include "Order.h"
 
@@ -18,8 +18,8 @@
  * @param name the name of the order
  */
 Order::Order(Player *issuer, std::string name)
-	: name(std::move(name)), issuer(issuer) {
-  this->Attach(LogObserver::instance());
+    : name(std::move(name)), issuer(issuer) {
+    this->Attach(LogObserver::instance());
 }
 
 /**
@@ -29,8 +29,8 @@ Order::Order(Player *issuer, std::string name)
  * @return A string containing the content's of the order
  */
 std::ostream &operator<<(std::ostream &os, Order &order) {
-  os << order.name << ": " << order.description();
-  return os;
+    os << order.name << ": " << order.description();
+    return os;
 }
 
 /**
@@ -38,16 +38,16 @@ std::ostream &operator<<(std::ostream &os, Order &order) {
  * @return a String containing the information that will be logged
  */
 std::string Order::stringToLog() {
-  std::ofstream file;
-  file.open("../logs/gamelog.txt", std::ios_base::app);
-  auto time = std::chrono::system_clock::now();
-  std::time_t time_t = std::chrono::system_clock::to_time_t(time);
-  file << std::ctime(&time_t);
-  file << "Order Executed: \"" << this->name << "\" by Player \""
-	   << this->issuer->name << "\"" << std::endl
-	   << std::endl;
-  return "Order Executed: \"" + this->name + "\" by Player \"" +
-	  this->issuer->name + "\"";
+    std::ofstream file;
+    file.open("../logs/gamelog.txt", std::ios_base::app);
+    auto time = std::chrono::system_clock::now();
+    std::time_t time_t = std::chrono::system_clock::to_time_t(time);
+    file << std::ctime(&time_t);
+    file << "Order Executed: \"" << this->name << "\" by Player \""
+         << this->issuer->name << "\"" << std::endl
+         << std::endl;
+    return "Order Executed: \"" + this->name + "\" by Player \"" +
+           this->issuer->name + "\"";
 }
 
 /**
@@ -55,17 +55,17 @@ std::string Order::stringToLog() {
  * @return a String containing the information that will be logged
  */
 std::string OrderList::stringToLog() {
-  std::ofstream file;
-  auto lastOrder = this->orders[this->getOrdersSize() - 1];
-  file.open("../logs/gamelog.txt", std::ios_base::app);
-  auto time = std::chrono::system_clock::now();
-  std::time_t time_t = std::chrono::system_clock::to_time_t(time);
-  file << std::ctime(&time_t);
-  file << "Order Issued: \"" << lastOrder->name << "\" by Player \""
-	   << lastOrder->issuer->name << "\"" << std::endl
-	   << std::endl;
-  return "Order Issued: \"" + lastOrder->name + "\" by Player \"" +
-	  lastOrder->issuer->name + "\"";
+    std::ofstream file;
+    auto lastOrder = this->orders[this->getOrdersSize() - 1];
+    file.open("../logs/gamelog.txt", std::ios_base::app);
+    auto time = std::chrono::system_clock::now();
+    std::time_t time_t = std::chrono::system_clock::to_time_t(time);
+    file << std::ctime(&time_t);
+    file << "Order Issued: \"" << lastOrder->name << "\" by Player \""
+         << lastOrder->issuer->name << "\"" << std::endl
+         << std::endl;
+    return "Order Issued: \"" + lastOrder->name + "\" by Player \"" +
+           lastOrder->issuer->name + "\"";
 }
 
 /**
@@ -82,42 +82,46 @@ Order::~Order() { this->Detach(LogObserver::instance()); }
  * @param target The target territory
  */
 DeployOrder::DeployOrder(Player *issuer, int reinforcements, Territory *target)
-	: Order(issuer, "Deploy"), reinforcements(reinforcements), target(target) {}
+    : Order(issuer, "Deploy"), reinforcements(reinforcements), target(target) {}
 
 /**
  * Description of the deploy order
  * @return String containing the description
  */
 std::string DeployOrder::description() {
-  return issuer->name + " deploys " + std::to_string(reinforcements) +
-	  " armies to " + target->toString();
+    return issuer->name + " deploys " + std::to_string(reinforcements) +
+           " armies to " + target->toString();
 }
 
 /**
  * Validate a deploy order
  */
 void DeployOrder::validate() {
-  if (target->getOwner() && (target->getOwner() != issuer)) {
-	throw InvalidOrderException(
-		issuer->name + " tried to deploy in someone else's territory.");
-  } else if (reinforcements > issuer->reinforcements) {
-	throw InvalidOrderException(
-		issuer->name +
-			" does not have the specified number of reinforcements. Player has " +
-			std::to_string(issuer->reinforcements) +
-			" reinforcements, but requested " + std::to_string(reinforcements) +
-			" reinforcements.");
-  }
+    if (issuer == nullptr) {
+        throw InvalidOrderException(
+                "One of the areas is now a blockaded neutral territory. Can no longer continue action");
+    }
+    if (target->getOwner() && (target->getOwner() != issuer)) {
+        throw InvalidOrderException(
+                issuer->name + " tried to deploy in someone else's territory.");
+    } else if (reinforcements > issuer->reinforcements) {
+        throw InvalidOrderException(
+                issuer->name +
+                " does not have the specified number of reinforcements. Player has " +
+                std::to_string(issuer->reinforcements) +
+                " reinforcements, but requested " + std::to_string(reinforcements) +
+                " reinforcements.");
+    }
 }
 
 /**
  * Execute a deploy order
  */
 void DeployOrder::execute() {
-  validate();
-  this->issuer->reinforcements -= reinforcements;
-  this->target->setArmies(this->target->getArmies() + reinforcements);
-  this->Notify(this);
+    validate();
+    this->issuer->reinforcements -= reinforcements;
+    this->target->setArmies(this->target->getArmies() + reinforcements);
+    this->Notify(this);
 }
 
 /**
@@ -125,8 +129,8 @@ void DeployOrder::execute() {
  * @param other the to-be-copied deploy order
  */
 DeployOrder::DeployOrder(const DeployOrder &other)
-	: Order(other.issuer, other.name), reinforcements(other.reinforcements),
-	  target(other.target) {}
+    : Order(other.issuer, other.name), reinforcements(other.reinforcements),
+      target(other.target) {}
 
 /**
  * Deploy order destructor
@@ -142,8 +146,8 @@ DeployOrder::~DeployOrder() = default;
  * @param target the target territory
  */
 AdvanceOrder::AdvanceOrder(Player *issuer, int armies, Territory *source,
-						   Territory *target)
-	: Order(issuer, "Advance"), armies(armies), source(source), target(target) {
+                           Territory *target)
+    : Order(issuer, "Advance"), armies(armies), source(source), target(target) {
 }
 
 /**
@@ -151,8 +155,8 @@ AdvanceOrder::AdvanceOrder(Player *issuer, int armies, Territory *source,
  * @return String with the description of the advance order
  */
 std::string AdvanceOrder::description() {
-  return issuer->name + " advances " + std::to_string(armies) +
-	  " armies from " + source->toString() + " to " + target->toString();
+    return issuer->name + " advances " + std::to_string(armies) +
+           " armies from " + source->toString() + " to " + target->toString();
 }
 
 /**
@@ -160,110 +164,119 @@ std::string AdvanceOrder::description() {
  */
 void AdvanceOrder::validate() {
 
-  //  auto b = std::find_if(source->getAdjTerritories().begin(),
-  //						source->getAdjTerritories().end(),
-  //						[&target](const Territory *t) { return *t == target;
-  //})
+    //  auto b = std::find_if(source->getAdjTerritories().begin(),
+    //						source->getAdjTerritories().end(),
+    //						[&target](const Territory *t) { return *t == target;
+    //})
 
-  auto result1 =
-	  std::find_if(source->getAdjTerritories().begin(),
-				   source->getAdjTerritories().end(), [this](Territory *item) {
-			if (item == nullptr)
-			  return false;
-			return item == target;
-		  });
+    auto result1 =
+            std::find_if(source->getAdjTerritories().begin(),
+                         source->getAdjTerritories().end(), [this](Territory *item) {
+                             if (item == nullptr)
+                                 return false;
+                             return item == target;
+                         });
 
-  auto result2 =
-	  std::find_if(target->getAdjTerritories().begin(),
-				   target->getAdjTerritories().end(), [this](Territory *item) {
-			if (item == nullptr)
-			  return false;
-			return item == source;
-		  });
+    auto result2 =
+            std::find_if(target->getAdjTerritories().begin(),
+                         target->getAdjTerritories().end(), [this](Territory *item) {
+                             if (item == nullptr)
+                                 return false;
+                             return item == source;
+                         });
 
-  if (source->getOwner() && (source->getOwner() != issuer)) {
-	throw InvalidOrderException(
-		issuer->name + " tried to move from someone else's territory.");
-  } else if (source->getOwner() != target->getOwner() &&
-	  (result1 == source->getAdjTerritories().end()) &&
-	  (result2 == target->getAdjTerritories().end())) {
-	throw InvalidOrderException(
-		"The territory is not adjacent to the source territory");
-  } else if (source->getArmies() - armies < 0) {
-	throw InvalidOrderException(issuer->name + "'s source territory (" +
-		source->getName() + ") does not have " +
-		std::to_string(armies) +
-		" number of army members to advance.");
-  }
+    if (source->getOwner() == nullptr) {
+        throw InvalidOrderException(
+                "One of the areas is now a blockaded neutral territory. Can no longer continue action");
+    }
+    if (source->getOwner() && (source->getOwner() != issuer)) {
+        throw InvalidOrderException(
+                issuer->name + " tried to move from someone else's territory.");
+    } else if (source->getOwner() && target->getOwner() && source->getOwner() != target->getOwner() &&
+               (result1 == source->getAdjTerritories().end()) &&
+               (result2 == target->getAdjTerritories().end())) {
+        throw InvalidOrderException(
+                "The territory is not adjacent to the source territory");
+    } else if (source->getArmies() - armies < 0) {
+        throw InvalidOrderException(issuer->name + "'s source territory (" +
+                                    source->getName() + ") does not have " +
+                                    std::to_string(armies) +
+                                    " number of army members to advance.");
+    }
 }
 
 /**
  * Execute a advance order #1
  */
 void AdvanceOrder::execute() {
-  validate();
+    validate();
 
-  auto sourceOwner = source->getOwner();
-  auto targetOwner = target->getOwner();
-  if (sourceOwner != targetOwner) {
-	auto sourceOwnerCannotAttack = sourceOwner->cannotAttack;
-	auto targetOwnerCannotAttack = targetOwner->cannotAttack;
+    auto sourceOwner = source->getOwner();
+    auto targetOwner = target->getOwner();
+    if (sourceOwner && targetOwner && sourceOwner != targetOwner) {
+        auto sourceOwnerCannotAttack = sourceOwner->cannotAttack;
+        auto targetOwnerCannotAttack = targetOwner->cannotAttack;
 
-	if (std::find(sourceOwnerCannotAttack.begin(),
-				  sourceOwnerCannotAttack.end(),
-				  targetOwner) != sourceOwnerCannotAttack.end() ||
-		std::find(targetOwnerCannotAttack.begin(),
-				  targetOwnerCannotAttack.end(),
-				  sourceOwner) != targetOwnerCannotAttack.end()) {
-	  std::cout << "Attack was blocked due to Diplomacy Card" << std::endl;
-	  return;
-	}
-  }
+        if (std::find(sourceOwnerCannotAttack.begin(),
+                      sourceOwnerCannotAttack.end(),
+                      targetOwner) != sourceOwnerCannotAttack.end() ||
+            std::find(targetOwnerCannotAttack.begin(),
+                      targetOwnerCannotAttack.end(),
+                      sourceOwner) != targetOwnerCannotAttack.end()) {
+            std::cout << "Attack was blocked due to Diplomacy Card" << std::endl;
+            return;
+        }
+    }
     //If territory was neutral, set it to aggressive
-  if(Utils::isEqualLowercase(typeid(target->getOwner()->strategy).name(),"neutralstrategy")){
-      auto* targetStrategy = dynamic_cast<NeutralStrategy*>(target->getOwner()->strategy);
-      if(!targetStrategy->getHasBeenAttacked())
-          targetStrategy->setHasBeenAttacked();
-  }
+    if (Utils::isEqualLowercase(typeid(target->getOwner()->strategy).name(), "neutralstrategy")) {
+        auto *targetStrategy = dynamic_cast<NeutralStrategy *>(target->getOwner()->strategy);
+        if (!targetStrategy->getHasBeenAttacked())
+            targetStrategy->setHasBeenAttacked();
+    }
 
 
-  // 1. deduct source armies
-  source->setArmies(source->getArmies() - armies);
+    // 1. deduct source armies
+    source->setArmies(source->getArmies() - armies);
 
-  // 2. fight until at least one is completely
-  //    swept off
-  while (armies > 0 && target->getArmies() > 0) {
-	int i = 0;
-	while (i < armies) {
-	  if (Utils::weightedBoolean(60))
-		target->setArmies(target->getArmies() - 1);
-	  i++;
-	}
+    // 2. fight until at least one is completely
+    //    swept off
+    while (armies > 0 && target->getArmies() > 0) {
+        int i = 0;
+        while (i < armies) {
+            if (Utils::weightedBoolean(60))
+                target->setArmies(target->getArmies() - 1);
+            i++;
+        }
 
-	i = 0;
-	while (i < target->getArmies()) {
-	  if (Utils::weightedBoolean(70))
-		armies -= 1;
-	  i++;
-	}
-  }
+        i = 0;
+        while (i < target->getArmies()) {
+            if (Utils::weightedBoolean(70))
+                armies -= 1;
+            i++;
+        }
+    }
 
-  // release territory if both armies swept off
-  if (armies == target->getArmies()) {
-	target->setArmies(0);
-	target->setOwner(nullptr);
-  } // draw a card if the attacker captures the territory
-  else if (armies > 0) {
-	if (!issuer->cardAwarded) {
-	  issuer->hand->draw();
-	  issuer->cardAwarded = true;
-	}
-	target->setOwner(this->issuer);
-    target->setArmies(abs(target->getArmies()));
-	std::cout << this->issuer->name + " wins territory " + target->getName()
-			  << std::endl;
-  }
-  this->Notify(this);
+    // release territory if both armies swept off
+    if (armies == target->getArmies()) {
+        target->setArmies(0);
+        target->setOwner(nullptr);
+    }// draw a card if the attacker captures the territory
+    else if (armies > 0) {
+        if (!issuer->cardAwarded) {
+            issuer->hand->draw();
+            issuer->cardAwarded = true;
+        }
+        if(target->getOwner() != nullptr){
+            target->getOwner()->removeFromOwnedTerritories(target->getName());
+        }
+        target->setOwner(this->issuer);
+        source->getOwner()->removeFromOwnedTerritories(target->getName());
+        target->setArmies(abs(target->getArmies()));
+        issuer->ownedTerritories.push_back(target);
+        std::cout << this->issuer->name + " wins territory " + target->getName()
+                  << std::endl;
+    }
+    this->Notify(this);
 }
 
 /**
@@ -271,8 +284,8 @@ void AdvanceOrder::execute() {
  * @param other The to-be-copied object
  */
 AdvanceOrder::AdvanceOrder(const AdvanceOrder &other)
-	: Order(other.issuer, other.name), armies(other.armies),
-	  source(other.source), target(other.target) {}
+    : Order(other.issuer, other.name), armies(other.armies),
+      source(other.source), target(other.target) {}
 
 Territory *AdvanceOrder::getTarget() { return target; }
 
@@ -288,33 +301,33 @@ AdvanceOrder::~AdvanceOrder() = default;
  * @param target The bomb order target territory
  */
 BombOrder::BombOrder(Player *issuer, Territory *target)
-	: Order(issuer, "Bomb"), target(target) {}
+    : Order(issuer, "Bomb"), target(target) {}
 
 /**
  * Description of the bomb order
  * @return string with the description
  */
 std::string BombOrder::description() {
-  return issuer->name + " bombs " + target->toString();
+    return issuer->name + " bombs " + target->toString();
 }
 
 /**
  * Validate if the bomb order can be executed
  */
 void BombOrder::validate() {
-  if (target->getOwner() && (target->getOwner()->name == issuer->name)) {
-	throw InvalidOrderException(issuer->name +
-		" attempts to bomb himself! What an idiot.");
-  }
+    if (issuer && target->getOwner() && (target->getOwner()->name == issuer->name)) {
+        throw InvalidOrderException(issuer->name +
+                                    " attempts to bomb himself! What an idiot.");
+    }
 }
 
 /**
  * Execute the bomb order
  */
 void BombOrder::execute() {
-  validate();
-  this->target->setArmies(this->target->getArmies() / 2);
-  this->Notify(this);
+    validate();
+    this->target->setArmies(this->target->getArmies() / 2);
+    this->Notify(this);
 }
 
 /**
@@ -322,7 +335,7 @@ void BombOrder::execute() {
  * @param other The to-be-copied object
  */
 BombOrder::BombOrder(const BombOrder &other)
-	: Order(other.issuer, other.name), target(other.target) {}
+    : Order(other.issuer, other.name), target(other.target) {}
 
 /**
  * Bomb order destructor
@@ -336,33 +349,33 @@ BombOrder::~BombOrder() = default;
  * @param target The target territory of the blockade order
  */
 BlockadeOrder::BlockadeOrder(Player *issuer, Territory *target)
-	: Order(issuer, "Blockade"), target(target) {}
+    : Order(issuer, "Blockade"), target(target) {}
 
 /**
  * Description of the blockade order
  * @return String with the description
  */
 std::string BlockadeOrder::description() {
-  return issuer->name + " blockades " + target->toString();
+    return issuer->name + " blockades " + target->toString();
 }
 
 /**
  * Validate if the blockade order can be executed
  */
 void BlockadeOrder::validate() {
-  if (target->getOwner() && (target->getOwner() != issuer)) {
-	throw InvalidOrderException(issuer->name + " does not own territory " +
-		target->getName());
-  }
+    if (target->getOwner() && (target->getOwner() != issuer)) {
+        throw InvalidOrderException(issuer->name + " does not own territory " +
+                                    target->getName());
+    }
 }
 
 /**
  * Execute the blockade order
  */
 void BlockadeOrder::execute() {
-  validate();
-  this->target->setArmies(this->target->getArmies() * 2);
-  this->Notify(this);
+    validate();
+    this->target->setArmies(this->target->getArmies() * 2);
+    this->Notify(this);
 }
 
 /**
@@ -370,7 +383,7 @@ void BlockadeOrder::execute() {
  * @param other The to-be-copied object
  */
 BlockadeOrder::BlockadeOrder(const BlockadeOrder &other)
-	: Order(other.issuer, other.name), target(other.target) {}
+    : Order(other.issuer, other.name), target(other.target) {}
 
 /**
  * Blockade order destructor
@@ -386,8 +399,8 @@ BlockadeOrder::~BlockadeOrder() = default;
  * @param target The target territory where the armies will land
  */
 AirliftOrder::AirliftOrder(Player *issuer, int armies, Territory *source,
-						   Territory *target)
-	: Order(issuer, "Airlift"), armies(armies), source(source), target(target) {
+                           Territory *target)
+    : Order(issuer, "Airlift"), armies(armies), source(source), target(target) {
 }
 
 /**
@@ -395,38 +408,42 @@ AirliftOrder::AirliftOrder(Player *issuer, int armies, Territory *source,
  * @return String with the description
  */
 std::string AirliftOrder::description() {
-  return issuer->name + " airlifts " + std::to_string(armies) +
-	  " armies from " + source->toString() + " to " + target->toString();
+    return issuer->name + " airlifts " + std::to_string(armies) +
+           " armies from " + source->toString() + " to " + target->toString();
 }
 
 /**
  * Validate if the airlift order can be executed
  */
 void AirliftOrder::validate() {
-  if (source->getArmies() - armies < 0) {
-	throw InvalidOrderException(issuer->name + "'s source territory (" +
-		source->getName() + ") does not have " +
-		std::to_string(armies) +
-		" number of army members.");
-  } else if (source->getOwner() && (source->getOwner() != issuer)) {
-	throw InvalidOrderException(issuer->name + " does not own territory " +
-		source->getName());
-  } else if (target->getOwner() && (target->getOwner() != issuer)) {
-	throw InvalidOrderException(issuer->name + " does not own territory " +
-		target->getName());
-  }
+    if (source->getOwner() == nullptr) {
+        throw InvalidOrderException(
+                "One of the areas is now a blockaded neutral territory. Can no longer continue action");
+    }
+    if (source->getArmies() - armies < 0) {
+        throw InvalidOrderException(issuer->name + "'s source territory (" +
+                                    source->getName() + ") does not have " +
+                                    std::to_string(armies) +
+                                    " number of army members.");
+    } else if (source->getOwner() && (source->getOwner() != issuer)) {
+        throw InvalidOrderException(issuer->name + " does not own territory " +
+                                    source->getName());
+    } else if (target->getOwner() && (target->getOwner() != issuer)) {
+        throw InvalidOrderException(issuer->name + " does not own territory " +
+                                    target->getName());
+    }
 }
 
 /**
  * Execute the airlift order
  */
 void AirliftOrder::execute() {
-  validate();
-  int sourceArmies = this->source->getArmies();
-  int targetArmies = this->target->getArmies();
-  this->source->setArmies(sourceArmies - armies);
-  this->target->setArmies(targetArmies + armies);
-  this->Notify(this);
+    validate();
+    int sourceArmies = this->source->getArmies();
+    int targetArmies = this->target->getArmies();
+    this->source->setArmies(sourceArmies - armies);
+    this->target->setArmies(targetArmies + armies);
+    this->Notify(this);
 }
 
 /**
@@ -434,8 +451,8 @@ void AirliftOrder::execute() {
  * @param other The to-be-copied object
  */
 AirliftOrder::AirliftOrder(const AirliftOrder &other)
-	: Order(other.issuer, other.name), target(other.target),
-	  source(other.source), armies(other.armies) {}
+    : Order(other.issuer, other.name), target(other.target),
+      source(other.source), armies(other.armies) {}
 
 /**
  * Airlift order destructor
@@ -449,14 +466,14 @@ AirliftOrder::~AirliftOrder() = default;
  * @param target The target player to negotiate with
  */
 NegotiateOrder::NegotiateOrder(Player *issuer, const Player *target)
-	: Order(issuer, "Negotiate"), target(target) {}
+    : Order(issuer, "Negotiate"), target(target) {}
 
 /**
  * Description of the negotiate order
  * @return String with the description
  */
 std::string NegotiateOrder::description() {
-  return issuer->name + " negotiates with " + target->name;
+    return issuer->name + " negotiates with " + target->name;
 }
 
 /**
@@ -464,19 +481,23 @@ std::string NegotiateOrder::description() {
  * @param o The to-be-copied object
  */
 NegotiateOrder::NegotiateOrder(const NegotiateOrder &o)
-	: Order(o.issuer, o.name), target(o.target) {}
+    : Order(o.issuer, o.name), target(o.target) {}
 
 void NegotiateOrder::execute() {
-  validate();
-  this->issuer->cannotAttack.push_back(const_cast<Player *&&>(this->target));
-  const_cast<Player *&&>(this->target)->cannotAttack.push_back(this->issuer);
+    validate();
+    this->issuer->cannotAttack.push_back(const_cast<Player *&&>(this->target));
+    const_cast<Player *&&>(this->target)->cannotAttack.push_back(this->issuer);
 }
 
 void NegotiateOrder::validate() {
-  if (this->target == this->issuer) {
-	throw InvalidOrderException(
-		issuer->name + " tried to negotiate with themselves. Are you okay? :(");
-  }
+    if (this->target == nullptr || this->issuer == nullptr) {
+        throw InvalidOrderException(
+                "One of the areas is now a blockaded neutral territory. Can no longer continue action");
+    }
+    if (this->target == this->issuer) {
+        throw InvalidOrderException(
+                issuer->name + " tried to negotiate with themselves. Are you okay? :(");
+    }
 }
 
 /**
@@ -491,8 +512,8 @@ NegotiateOrder::~NegotiateOrder() = default;
  * @param order The order to be pushed
  */
 void OrderList::push(Order *order) {
-  this->orders.push_back(order);
-  this->Notify(this);
+    this->orders.push_back(order);
+    this->Notify(this);
 }
 
 /**
@@ -500,11 +521,11 @@ void OrderList::push(Order *order) {
  * @return the order that has been removed
  */
 Order *OrderList::pop() {
-  if (this->orders.empty())
-	return nullptr;
-  auto order = this->orders.front();
-  this->orders.erase(this->orders.begin());
-  return order;
+    if (this->orders.empty())
+        return nullptr;
+    auto order = this->orders.front();
+    this->orders.erase(this->orders.begin());
+    return order;
 }
 
 /**
@@ -519,9 +540,9 @@ Order *OrderList::get(int index) { return this->orders[index]; }
  * @param index The index where the order will be removed
  */
 void OrderList::remove(int index) {
-  auto order = orders[index];
-  this->orders.erase(this->orders.begin() + index);
-  delete order;
+    auto order = orders[index];
+    this->orders.erase(this->orders.begin() + index);
+    delete order;
 }
 
 /**
@@ -530,23 +551,23 @@ void OrderList::remove(int index) {
  * @param b The index of the second order
  */
 void OrderList::move(int a, int b) {
-  if ((0 <= a && a < this->orders.size()) &&
-	  (0 <= b && b < this->orders.size())) {
-	std::swap(this->orders[a], this->orders[b]);
-  } else {
-	throw runtime_error("Index out of bounds!");
-  }
+    if ((0 <= a && a < this->orders.size()) &&
+        (0 <= b && b < this->orders.size())) {
+        std::swap(this->orders[a], this->orders[b]);
+    } else {
+        throw runtime_error("Index out of bounds!");
+    }
 }
 
 /**
  * Execute all orders within the order list
  */
 void OrderList::executeOrders() {
-  while (!this->orders.empty()) {
-	auto order = pop();
-	order->execute();
-	delete order;
-  }
+    while (!this->orders.empty()) {
+        auto order = pop();
+        order->execute();
+        delete order;
+    }
 }
 
 /**
@@ -562,26 +583,26 @@ int OrderList::getOrdersSize() { return orders.size(); }
  * @return A string containing the content's of the order list
  */
 std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {
-  auto i = 1;
-  auto divider = "-------------------------------------------------------------"
-				 "-------------------";
+    auto i = 1;
+    auto divider = "-------------------------------------------------------------"
+                   "-------------------";
 
-  std::cout << divider << "\n"
-			<< std::left << std::setw(3) << "Id | " << std::left
-			<< std::setw(10) << "Name"
-			<< "| Description"
-			<< "\n"
-			<< divider << std::endl;
+    std::cout << divider << "\n"
+              << std::left << std::setw(3) << "Id | " << std::left
+              << std::setw(10) << "Name"
+              << "| Description"
+              << "\n"
+              << divider << std::endl;
 
-  for (auto order : orderList.orders) {
-	std::cout << std::left << std::setw(3) << std::to_string(i) << "| "
-			  << std::left << std::setw(10) << order->name
-			  << "| " + order->description() << std::endl;
-	++i;
-  }
+    for (auto order: orderList.orders) {
+        std::cout << std::left << std::setw(3) << std::to_string(i) << "| "
+                  << std::left << std::setw(10) << order->name
+                  << "| " + order->description() << std::endl;
+        ++i;
+    }
 
-  std::cout << divider << std::endl;
-  return os;
+    std::cout << divider << std::endl;
+    return os;
 }
 
 /**
@@ -589,8 +610,8 @@ std::ostream &operator<<(std::ostream &os, const OrderList &orderList) {
  * @param o The to-be-copied object
  */
 OrderList::OrderList(const OrderList &o) {
-  orders = o.orders;
-  this->Attach(LogObserver::instance());
+    orders = o.orders;
+    this->Attach(LogObserver::instance());
 }
 
 /**
@@ -609,4 +630,4 @@ OrderList::~OrderList() { this->Detach(LogObserver::instance()); }
  * @param arg The text that will be printed on error
  */
 InvalidOrderException::InvalidOrderException(const std::string &arg)
-	: runtime_error(arg) {}
+    : runtime_error(arg) {}
