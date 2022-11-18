@@ -58,6 +58,11 @@ ostream &operator<<(ostream &os, const Command &c) {
  */
 Command *CommandProcessor::getCommand() {
   auto command = readCommand();
+
+  if (command == nullptr) {
+    return nullptr;
+  }
+
   validate(command);
   saveCommand(command);
   return command;
@@ -72,6 +77,10 @@ Command *CommandProcessor::readCommand() {
   string line;
   while (true) {
     line = getLine();
+
+    if (line.empty()) {
+      return nullptr;
+    }
 
     auto tokens = Utils::tokenizer(line, ' ');
 
@@ -421,7 +430,7 @@ string FileLineReader::readLineFromFile() {
     return line;
   } else {
     ifile.close();
-    return line;
+    return "";
   }
 }
 
