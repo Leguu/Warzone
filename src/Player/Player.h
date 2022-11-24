@@ -27,6 +27,8 @@ public:
     virtual std::vector<std::pair<Territory *, Territory *>> toAttack() const = 0;
 
     virtual vector<Territory *> toDefend() const = 0;
+
+    virtual bool isDoneIssuing() = 0;
 };
 
 class DefaultPlayerStrategy : public PlayerStrategy {
@@ -38,6 +40,8 @@ public:
     [[nodiscard]] vector<Territory *> toDefend() const override;
 
     void issueOrder() override;
+
+    bool isDoneIssuing() override;
 
 private:
     void issueDeployOrder();
@@ -109,13 +113,12 @@ public:
 
     int cardAwarded = false;
 
-
     vector<Player *> cannotAttack = {};
 
     explicit Player(string name);
 
     vector<Territory *> getAdjacentEnemyTerritories();
-
+    
     friend std::ostream &operator<<(std::ostream &os, const Player &player);
 
     ~Player();

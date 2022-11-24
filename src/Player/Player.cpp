@@ -43,6 +43,12 @@ Player::Player(string name) : name(std::move(name)), orders(new OrderList()), st
     this->hand = new Hand(this);
 }
 
+<<<<<<< HEAD
+=======
+void Player::issueOrder() {
+  this->strategy->issueOrder();
+}
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
 
 /**
  * Play destructor
@@ -58,6 +64,7 @@ InvalidCardException::InvalidCardException(const std::string &arg)
 PlayerStrategy::PlayerStrategy(Player *P) : p(P) {}
 
 void DefaultPlayerStrategy::issueOrder() {
+<<<<<<< HEAD
     // Current Mechanism:
     // ------------------
     // 	1. Keep deploying until zero reinforcements are left. Random number each turn.
@@ -74,6 +81,24 @@ void DefaultPlayerStrategy::issueOrder() {
         issueAdvanceOrder();
         p->advanceOrderIssued = true;
     }
+=======
+  // Current Mechanism:
+  // ------------------
+  // 	1. Keep deploying until zero reinforcements are left. Random number each turn.
+  //    2. If user has a card in their hand, they play it.
+  //    3. If player has not advanced an order this round, they advance order.
+  // NOTE: All orders that are issued follow random moves for now.
+
+  if (p->reinforcementsAfterDeploy > 0) {
+    issueDeployOrder();
+  } else if (!p->cardOrderIssued && !p->hand->cards.empty()) {
+    issueCardOrder();
+    p->cardOrderIssued = true;
+  } else if (!p->advanceOrderIssued) {
+    issueAdvanceOrder();
+    p->advanceOrderIssued = true;
+  }
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
 }
 
 /**
@@ -380,9 +405,15 @@ void Player::issueOrder() {
  */
 std::vector<std::pair<Territory *, Territory *>> Player::toAttack() const {
   auto adjacentEnemies = std::vector<std::pair<Territory *, Territory *>>();
+<<<<<<< HEAD
   for (auto t: ownedTerritories) {
     for (auto adj: t->getAdjTerritories()) {
       if (adj->getOwner() != this) {
+=======
+  for (auto t: p->ownedTerritories) {
+    for (auto adj: t->getAdjTerritories()) {
+      if (adj->getOwner() != p) {
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
         adjacentEnemies.emplace_back(std::pair(adj, t));
       }
     }
@@ -396,6 +427,7 @@ std::vector<std::pair<Territory *, Territory *>> Player::toAttack() const {
  * @return all territories the player owns
  */
 
+<<<<<<< HEAD
 vector<Territory *> Player::toDefend() const {
   return ownedTerritories;
 }
@@ -418,6 +450,30 @@ void Player::issueCardOrder() {
   auto ge = GameEngine::instance();
   auto randomCardName = hand->cards[0]->name;
 
+=======
+vector<Territory *> DefaultPlayerStrategy::toDefend() const {
+  return p->ownedTerritories;
+}
+
+void DefaultPlayerStrategy::issueDeployOrder() {
+  auto ge = GameEngine::instance();
+
+  auto target = Utils::accessRandomPair(toAttack()).second;
+
+  int armies = p->reinforcementsAfterDeploy == 1 ? 1 : Utils::randomNumberInRange(1, p->reinforcementsAfterDeploy);
+
+  if (ge->debugMode)
+    cout << "Issued Deploy Order: " << armies << " units to " + target->getContinent()->getName() << endl;
+
+  p->orders->push(new DeployOrder(p, armies, target));
+  p->reinforcementsAfterDeploy -= armies;
+}
+
+void DefaultPlayerStrategy::issueCardOrder() {
+  auto ge = GameEngine::instance();
+  auto randomCardName = p->hand->cards[0]->name;
+
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
   std::map<std::string, int> cardNameMap = {
           {"Bomb", 0},
           {"Blockade", 1},
@@ -432,25 +488,42 @@ void Player::issueCardOrder() {
     case 0: {
       std::pair<Territory *, Territory *> attack =
               Utils::accessRandomPair(toAttack());
+<<<<<<< HEAD
       orders->push(new BombOrder(this, attack.first));
+=======
+      p->orders->push(new BombOrder(p, attack.first));
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
 
       if (ge->debugMode)
         cout << "Issued BombOrder on: " << attack.first->getName() << endl;
 
+<<<<<<< HEAD
       auto c = hand->removeByName("Bomb");
+=======
+      auto c = p->hand->removeByName("Bomb");
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
       ge->deck->put(c);
 
       break;
     }
 
     case 1: {
+<<<<<<< HEAD
       Territory *target = Utils::accessRandomElement(ownedTerritories);
       orders->push(new BlockadeOrder(this, target));
+=======
+      Territory *target = Utils::accessRandomElement(p->ownedTerritories);
+      p->orders->push(new BlockadeOrder(p, target));
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
 
       if (ge->debugMode)
         cout << "Issued BlockadeOrder on: " << target->getName() << endl;
 
+<<<<<<< HEAD
       auto c = hand->removeByName("Blockade");
+=======
+      auto c = p->hand->removeByName("Blockade");
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
       ge->deck->put(c);
 
       break;
@@ -458,9 +531,15 @@ void Player::issueCardOrder() {
 
     case 2: {
       Territory *source = nullptr;
+<<<<<<< HEAD
       Territory *target = Utils::accessRandomElement(ownedTerritories);
 
       for (auto t: ownedTerritories) {
+=======
+      Territory *target = Utils::accessRandomElement(p->ownedTerritories);
+
+      for (auto t: p->ownedTerritories) {
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
         if (t->getArmies() > 0) {
           source = t;
         }
@@ -479,14 +558,22 @@ void Player::issueCardOrder() {
         armies = dis(rng);
       }
 
+<<<<<<< HEAD
       orders->push(new AirliftOrder(this, armies, source, target));
+=======
+      p->orders->push(new AirliftOrder(p, armies, source, target));
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
 
       if (ge->debugMode)
         cout << "Issued AirliftOrder " << armies
              << " units from: " << source->getName() << " to "
              << target->getName() << endl;
 
+<<<<<<< HEAD
       auto c = hand->removeByName("Airlift");
+=======
+      auto c = p->hand->removeByName("Airlift");
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
       ge->deck->put(c);
 
       break;
@@ -496,6 +583,7 @@ void Player::issueCardOrder() {
       Player *randomPlayer;
       do {
         randomPlayer = Utils::accessRandomElement(ge->players);
+<<<<<<< HEAD
       } while (randomPlayer == this);
 
       orders->push(new NegotiateOrder(this, randomPlayer));
@@ -505,6 +593,17 @@ void Player::issueCardOrder() {
              << " against " << randomPlayer->name << endl;
 
       auto c = hand->removeByName("Negotiate");
+=======
+      } while (randomPlayer == p);
+
+      p->orders->push(new NegotiateOrder(p, randomPlayer));
+
+      if (ge->debugMode)
+        cout << "Issued NegotiateOrder by " << p->name
+             << " against " << randomPlayer->name << endl;
+
+      auto c = p->hand->removeByName("Negotiate");
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
       ge->deck->put(c);
 
       break;
@@ -515,7 +614,11 @@ void Player::issueCardOrder() {
   }
 }
 
+<<<<<<< HEAD
 void Player::issueAdvanceOrder() {
+=======
+void DefaultPlayerStrategy::issueAdvanceOrder() {
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
   auto ge = GameEngine::instance();
 
   Territory *source = nullptr;
@@ -531,9 +634,15 @@ void Player::issueAdvanceOrder() {
   if (target == nullptr || source == nullptr) {
     auto rng = std::default_random_engine();
     rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
+<<<<<<< HEAD
     std::shuffle(ownedTerritories.begin(), ownedTerritories.end(), rng);
 
     for (auto t: ownedTerritories) {
+=======
+    std::shuffle(p->ownedTerritories.begin(), p->ownedTerritories.end(), rng);
+
+    for (auto t: p->ownedTerritories) {
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
       if (t->getArmies() > 0) {
         source = t;
       }
@@ -544,7 +653,11 @@ void Player::issueAdvanceOrder() {
     }
 
     for (auto t: source->getAdjTerritories()) {
+<<<<<<< HEAD
       if (t->getOwner() == this) {
+=======
+      if (t->getOwner() == p) {
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
         target = t;
       }
     }
@@ -570,8 +683,16 @@ void Player::issueAdvanceOrder() {
     cout << "Issued Advance Order: " << armies << " units from "
          << *source << " to " << *target << endl;
 }
+<<<<<<< HEAD
 
 bool Player::isDoneIssuing() {
   return advanceOrderIssued && (cardOrderIssued || hand->cards.empty());
+=======
+DefaultPlayerStrategy::DefaultPlayerStrategy(Player *pPlayer) : PlayerStrategy(pPlayer) {
+}
+
+bool DefaultPlayerStrategy::isDoneIssuing() {
+  return p->advanceOrderIssued && (p->cardOrderIssued || p->hand->cards.empty());
+>>>>>>> f3e11f44e7ff767df141e6b7c4eb6a0c3ae46cc6
 }
 
