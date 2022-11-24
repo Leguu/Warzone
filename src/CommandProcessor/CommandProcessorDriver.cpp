@@ -30,16 +30,13 @@ void testCommandProcessor() {
 	  string path = "../src/CommandProcessor/" + fileName;
 	  auto fcpa = new FileCommandProcessorAdapter(path);
 
-	  fcpa->flr->ifile.open(path);
-
 	  if (!fcpa->flr->ifile.is_open()) {
-		cout << ("File " + fileName + " could not be opened! Try again")
-			 << endl;
+		cout << ("File " + fileName + " could not be opened! Try again") << endl;
 		continue;
 	  }
+
 	  cout << "You are taking commands from a file now." << endl;
 	  while (!fcpa->flr->ifile.eof()) {
-
 		auto input2 =
 			Utils::getInputString("Type Y to read from line or N to exit.");
 

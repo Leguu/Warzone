@@ -22,29 +22,29 @@ public:
 
     explicit PlayerStrategy(Player *P);
 
-    virtual void issueOrder(bool debugMode = false) = 0;
+    virtual void issueOrder() = 0;
 
     virtual std::vector<std::pair<Territory *, Territory *>> toAttack() const = 0;
 
     virtual vector<Territory *> toDefend() const = 0;
 };
 
-class HumanStrategy : public PlayerStrategy {
+class DefaultPlayerStrategy : public PlayerStrategy {
 public:
-    explicit HumanStrategy(Player *pPlayer);
+    explicit DefaultPlayerStrategy(Player *pPlayer);
 
     [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const override;
 
     [[nodiscard]] vector<Territory *> toDefend() const override;
 
-    void issueOrder(bool debugMode = false) override;
+    void issueOrder() override;
 
 private:
-    void issueDeployOrder(bool debugMode = false);
+    void issueDeployOrder();
 
-    void issueAdvanceOrder(bool debugMode = false);
+    void issueAdvanceOrder();
 
-    void issueCardOrder(bool debugMode = false);
+    void issueCardOrder();
 };
 
 class AggressivePlayer : public PlayerStrategy {
@@ -55,14 +55,14 @@ public:
 
     [[nodiscard]] vector<Territory *> toDefend() const override;
 
-    void issueOrder(bool debugMode = false) override;
+    void issueOrder() override;
 
 private:
-    virtual void issueDeployOrder(bool debugMode = false);
+    virtual void issueDeployOrder();
 
-    virtual void issueAdvanceOrder(bool debugMode = false);
+    virtual void issueAdvanceOrder();
 
-    virtual void issueCardOrder(bool debugMode = false);
+    virtual void issueCardOrder();
 };
 
 class CheaterStrategy : public AggressivePlayer {
@@ -71,14 +71,14 @@ public:
 
 
 private:
-    void issueAdvanceOrder(bool debugMode = false);
+    void issueAdvanceOrder();
 };
 
 class NeutralStrategy : public AggressivePlayer {
 public:
     explicit NeutralStrategy(Player *pPlayer);
 
-    void issueOrder(bool debugMode = false) override;
+    void issueOrder() override;
 
     void setHasBeenAttacked();
 
@@ -97,7 +97,9 @@ public:
     Hand *hand;
     vector<Territory *> ownedTerritories = {};
     int reinforcements = 50;
+
     PlayerStrategy *strategy;
+
 
     int reinforcementsAfterDeploy = 50;
 
@@ -107,19 +109,31 @@ public:
 
     int cardAwarded = false;
 
-    vector<Player *> cannotAttack = vector<Player *>();
 
-    bool isDoneIssuing = false;
+    vector<Player *> cannotAttack = {};
 
     explicit Player(string name);
 
     vector<Territory *> getAdjacentEnemyTerritories();
 
-    void issueOrder(bool debugMode = false);
-
     friend std::ostream &operator<<(std::ostream &os, const Player &player);
 
     ~Player();
+
+    [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const ;
+
+    [[nodiscard]] vector<Territory *> toDefend() const ;
+
+    void issueOrder() ;
+
+    bool isDoneIssuing() ;
+
+private:
+    void issueDeployOrder();
+
+    void issueAdvanceOrder();
+
+    void issueCardOrder();
 };
 
 void testPlayers();

@@ -15,16 +15,16 @@
 GameEngine *GameEngine::_instance = nullptr;
 
 const string GameEngine::helpText =
-	"Available commands:\n"
-	"help - display this text\n"
-	"play <card> - play a card from your hand\n"
-	"list hand - list what cards are in your hand\n"
-	"list orders - list what orders you've submitted so far\n"
-	"advance - create an advance order\n"
-	"deploy - create an deploy order\n"
-	"map - display the map\n"
-	"territory <name> - display some information about a territory\n"
-	"done - indicate that you're finished with your turn";
+        "Available commands:\n"
+        "help - display this text\n"
+        "play <card> - play a card from your hand\n"
+        "list hand - list what cards are in your hand\n"
+        "list orders - list what orders you've submitted so far\n"
+        "advance - create an advance order\n"
+        "deploy - create an deploy order\n"
+        "map - display the map\n"
+        "territory <name> - display some information about a territory\n"
+        "done - indicate that you're finished with your turn";
 
 const string GameEngine::wrongStateTransitionMessage = "Wrong state";
 
@@ -43,31 +43,42 @@ GameEngine::GameEngine(const std::string &mp) {
 /// \return whether win condition has been reached
 
 bool GameEngine::executeOrdersPhase() {
-  cout << endl << "Executing orders..." << endl;
+  cout << endl
+       << "Executing orders..." << endl;
   int stillExecuting = players.size();
   while (stillExecuting > 0) {
-	for (auto player : players) {
-	  if (player->orders->getOrdersSize() > 0) {
-		auto order = player->orders->pop();
-		try {
-		  cout << *order << endl;
-		  order->execute();
-		  if (map->allContinentsOwned()) {
-			cout << "	Game is over!" << endl;
-			return true;
-		  }
-		} catch (InvalidOrderException &e) {
-		  cout << order->name << " order issued by " + order->issuer->name
-			   << " was invalid: " << e.what() << endl;
-		}
-	  } else {
-		stillExecuting--;
-	  }
-	}
+    for (auto player: players) {
+      auto order = player->orders->pop();
+
+      if (order == nullptr) {
+        stillExecuting -= 1;
+        continue;
+      }
+
+      try {
+
+        cout << *order << endl;
+        order->execute();
+
+        for (auto p: players) {
+          if (p->ownedTerritories.empty()) {
+            players.erase(std::remove(players.begin(), players.end(), p), players.end());
+            cout << "Player " << p->name << " has lost all territories and is now removed from the game!" << endl;
+            if (players.size() == 1) return true;
+          }
+        }
+
+      } catch (InvalidOrderException &e) {
+        cout << order->name << " order issued by " + order->issuer->name
+             << " was invalid: " << e.what() << endl;
+      }
+    }
   }
 
-  cout << "... All orders have been executed" << endl << endl;
-  cout << "Next round has started" << endl << endl;
+  cout << "... All orders have been executed" << endl
+       << endl;
+  cout << "Next round has started" << endl
+       << endl;
   return false;
 }
 
@@ -77,21 +88,23 @@ bool GameEngine::executeOrdersPhase() {
 
 void GameEngine::mainGameLoop() {
   cout << "Welcome to Warzone! Type in \"help\" at any time to have a list of "
-		  "commands"
-	   << endl;
+          "commands"
+       << endl;
   while (true) {
-	reinforcementPhase();
+    reinforcementPhase();
 
-	issueOrdersPhase();
+    issueOrdersPhase();
 
-	auto gameOver = executeOrdersPhase();
-	// If the game is over
-	if (gameOver) {
-	  break;
-	}
+    auto gameOver = executeOrdersPhase();
+
+    turnsGone += 1;
+
+    // If the game is over
+    if (gameOver) {
+      cout << "It has been " << turnsGone << " turns since the game has started." << endl;
+      break;
+    }
   }
-
-  cout << "Game is over!" << endl;
 }
 
 /**
@@ -100,10 +113,10 @@ void GameEngine::mainGameLoop() {
  * @return The player object
  */
 Player *GameEngine::findPlayerByName(const std::string &name) {
-  for (auto *player : this->players) {
-	if (player->name == name) {
-	  return player;
-	}
+  for (auto *player: this->players) {
+    if (player->name == name) {
+      return player;
+    }
   }
   return nullptr;
 }
@@ -120,26 +133,27 @@ GameEngine::GameEngine() {
  * Issue the orders
  */
 void GameEngine::issueOrdersPhase() {
-  int stillIssuing = players.size();
+  auto stillIssuing = players.size();
   while (stillIssuing > 0) {
-	for (auto player : players) {
-	  if (player->advanceOrderIssued && player->cardOrderIssued) {
-		stillIssuing--;
-	  } else {
-		cout << player->name << " is issuing an order" << endl;
-		player->issueOrder(this->debugMode);
-	  }
-	}
+    for (auto player: players) {
+      if (player->isDoneIssuing()) {
+        stillIssuing--;
+        if (stillIssuing == 0) break;
+        continue;
+      }
+
+      cout << player->name << " is issuing an order: ";
+      player->issueOrder();
+    }
   }
 
   // reset so card can be awarded next round
-  for (auto player : players) {
-	player->cardAwarded = false;
-	player->isDoneIssuing = false;
-	player->cardOrderIssued = false;
-	player->advanceOrderIssued = false;
-	player->reinforcementsAfterDeploy = 0;
-	player->cannotAttack.clear();
+  for (auto player: players) {
+    player->cardAwarded = false;
+    player->cardOrderIssued = false;
+    player->advanceOrderIssued = false;
+    player->reinforcementsAfterDeploy = 0;
+    player->cannotAttack.clear();
   }
 }
 
@@ -149,8 +163,8 @@ void GameEngine::issueOrdersPhase() {
  */
 GameEngine *GameEngine::instance() {
   if (!_instance)
-	throw runtime_error("GameEngine instance not yet initialised. Did you "
-						"forget to create a GameEngine first?");
+    throw runtime_error("GameEngine instance not yet initialised. Did you "
+                        "forget to create a GameEngine first?");
   return _instance;
 }
 
@@ -158,113 +172,115 @@ GameEngine *GameEngine::instance() {
  * Assign the reinforcements to all territories
  */
 void GameEngine::reinforcementPhase() const {
-  for (auto p : players) {
-	auto reinforcementsToAssign = 0;
+  for (auto p: players) {
+    auto reinforcementsToAssign = 0;
 
-	reinforcementsToAssign += p->ownedTerritories.size();
+    reinforcementsToAssign += p->ownedTerritories.size();
 
-	for (auto c : map->getContinents()) {
-	  if (c->owner() == p) {
-		reinforcementsToAssign += c->getBonus();
-	  }
-	}
+    for (auto c: map->getContinents()) {
+      if (c->owner() == p) {
+        reinforcementsToAssign += c->getBonus();
+      }
+    }
 
-	reinforcementsToAssign = std::min(3, reinforcementsToAssign);
+    reinforcementsToAssign = std::min(3, reinforcementsToAssign);
 
-	p->reinforcements += reinforcementsToAssign;
-	p->reinforcementsAfterDeploy = p->reinforcements;
+    p->reinforcements += reinforcementsToAssign;
+    p->reinforcementsAfterDeploy = p->reinforcements;
   }
 }
 
 bool GameEngine::startupPhase(
-	std::vector<std::pair<std::string, std::string>> testCommands) {
+        std::vector<std::pair<std::string, std::string>> testCommands) {
   const string commands =
-	  "Available commands:\n"
-	  "LoadMap <Map Name> - Load a map\n"
-	  "ValidateMap - Validate the map has been loaded successfully\n"
-	  "AddPlayer <Name> - Add a player\n"
-	  "GameStart - Start the game\n"
-	  "Replay - Restart the game\n"
-	  "Quit - Quit the game";
+          "Available commands:\n"
+          "LoadMap <Map Name> - Load a map\n"
+          "ValidateMap - Validate the map has been loaded successfully\n"
+          "AddPlayer <Name> - Add a player\n"
+          "GameStart - Start the game\n"
+          "Replay - Restart the game\n"
+          "Quit - Quit the game";
 
   Command *input;
   transition(GameState::START);
   int commandsCounter = 0;
   if (!testCommands.empty()) {
-	this->debugMode = true;
+    this->debugMode = true;
   }
   while (testCommands.empty() || commandsCounter < testCommands.size()) {
-	input = testCommands.empty()
-			? commandProcessor->getCommand(
-			"Input your command, write \"help\" for help")
-			: commandProcessor->getCommand(
-			"testPrompt", testCommands[commandsCounter].first,
-			testCommands[commandsCounter].second);
+    input = testCommands.empty()
+                    ? commandProcessor->getCommand(
+                              "Input your command, write \"help\" for help")
+                    : commandProcessor->getCommand(
+                              "testPrompt", testCommands[commandsCounter].first,
+                              testCommands[commandsCounter].second);
 
-	if (input == nullptr) {
-	  continue;
-	}
-	std::string inputText = input->getCommand();
-	if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')),
-								"loadmap")) {
-	  loadMap("../assets/" + input->getArg() + ".map");
-	} else if (*input == "help") {
-	  cout << commands << endl;
-	} else if (Utils::isEqualLowercase(inputText, "validatemap")) {
-	  validateMap();
-	} else if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')),
-									   "addplayer")) {
-	  addPlayer(input->getArg());
-	} else if (Utils::isEqualLowercase(inputText, "gamestart")) {
-	  if (state != GameState::PLAYERS_ADDED) {
-		cout << wrongStateTransitionMessage << endl;
-		continue;
-	  }
+    if (input == nullptr) {
+      continue;
+    }
+    std::string inputText = input->getCommand();
+    if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')),
+                                "loadmap")) {
+      loadMap("../assets/" + input->getArg() + ".map");
+    } else if (*input == "help") {
+      cout << commands << endl;
+    } else if (Utils::isEqualLowercase(inputText, "validatemap")) {
+      validateMap();
+    } else if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')),
+                                       "addplayer")) {
+      addPlayer(input->getArg());
+    } else if (Utils::isEqualLowercase(inputText, "gamestart")) {
+      if (state != GameState::PLAYERS_ADDED) {
+        cout << wrongStateTransitionMessage << endl;
+        continue;
+      }
 
-	  if (players.size() < 2) {
-		cout << "You can't have"
-				" a game of less than 2 players, unless you're "
-				"schizophrenic"
-			 << endl;
-		continue;
-	  }
+      if (players.size() < 2) {
+        cout << "You can't have"
+                " a game of less than 2 players, unless you're "
+                "schizophrenic"
+             << endl;
+        continue;
+      }
 
-	  auto rng = std::default_random_engine();
-	  rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
-	  std::shuffle(players.begin(), players.end(), rng);
+      auto rng = std::default_random_engine();
+      rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
+      std::shuffle(players.begin(), players.end(), rng);
 
-	  assignCountries();
+      assignCountries();
 
-	  for (auto p : players) {
-		p->hand->draw();
-		p->hand->draw();
-	  }
+      for (auto p: players) {
+        p->hand->draw();
+        p->hand->draw();
+      }
 
-	  if (testCommands.size() > 0)
-		return false;
+      if (!testCommands.empty())
+        return false;
 
-	  mainGameLoop();
+      mainGameLoop();
 
-	  transition(GameState::WIN);
-	} else if (Utils::isEqualLowercase(input->getCommand(), "quit")) {
-	  if (state != GameState::WIN) {
-		cout << wrongStateTransitionMessage << endl;
-		continue;
-	  }
-	  return true;
-	} else if (Utils::isEqualLowercase(input->getCommand(), "replay")) {
-	  if (state != GameState::WIN) {
-		cout << wrongStateTransitionMessage << endl;
-		continue;
-	  }
-	  return true;
-	} else {
-	  cout << "Type the right command" << endl;
-	}
-	if (testCommands.size() == 0) {
-	  cout << "-----------------------------" << endl;
-	}
-	commandsCounter++;
+      cout << "Game is over! Player " << players[0]->name << " has won!" << endl;
+
+      transition(GameState::WIN);
+    } else if (Utils::isEqualLowercase(input->getCommand(), "quit")) {
+      if (state != GameState::WIN) {
+        cout << wrongStateTransitionMessage << endl;
+        continue;
+      }
+      return true;
+    } else if (Utils::isEqualLowercase(input->getCommand(), "replay")) {
+      if (state != GameState::WIN) {
+        cout << wrongStateTransitionMessage << endl;
+        continue;
+      }
+      return true;
+    } else {
+      cout << "Type the right command" << endl;
+    }
+    if (testCommands.size() == 0) {
+      cout << "-----------------------------" << endl;
+    }
+    commandsCounter++;
   }
 
   return true;
@@ -276,20 +292,20 @@ bool GameEngine::startupPhase(
  */
 void GameEngine::loadMap(const string &input) {
   if (state != MAP_LOADED && state != START) {
-	cout << wrongStateTransitionMessage << endl;
-	return;
+    cout << wrongStateTransitionMessage << endl;
+    return;
   }
 
   if (input.empty()) {
-	cout << "You need to input the map name!" << endl;
-	return;
+    cout << "You need to input the map name!" << endl;
+    return;
   }
 
   try {
-	map = MapLoader::importMap(input);
+    map = MapLoader::importMap(input);
   } catch (runtime_error &e) {
-	cout << "Error with that map file: " << e.what() << endl;
-	return;
+    cout << "Error with that map file: " << e.what() << endl;
+    return;
   }
 
   transition(GameState::MAP_LOADED);
@@ -301,13 +317,13 @@ void GameEngine::loadMap(const string &input) {
 
 void GameEngine::validateMap() {
   if (state != MAP_LOADED) {
-	cout << wrongStateTransitionMessage << endl;
-	return;
+    cout << wrongStateTransitionMessage << endl;
+    return;
   }
   try {
-	map->validate();
+    map->validate();
   } catch (runtime_error &e) {
-	cout << "This map is not valid: " << e.what() << endl;
+    cout << "This map is not valid: " << e.what() << endl;
   }
   transition(GameState::MAP_VALIDATED);
 }
@@ -318,18 +334,18 @@ void GameEngine::validateMap() {
  */
 void GameEngine::addPlayer(const string &playerName) {
   if (state != MAP_VALIDATED && state != PLAYERS_ADDED) {
-	cout << wrongStateTransitionMessage << endl;
-	return;
+    cout << wrongStateTransitionMessage << endl;
+    return;
   }
 
   if (players.size() >= 6) {
-	cout << "Can't add more than 6 players!" << endl;
-	return;
+    cout << "Can't add more than 6 players!" << endl;
+    return;
   }
 
   if (playerName.empty()) {
-	cout << "Can't add a player named nothing baka" << endl;
-	return;
+    cout << "Can't add a player named nothing baka" << endl;
+    return;
   }
   players.push_back(new Player(playerName));
   transition(GameState::PLAYERS_ADDED);
@@ -342,9 +358,9 @@ void GameEngine::assignCountries() {
   auto i = 0;
   // Territories are randomly shuffled by the Map class, so this operation is
   // valid
-  for (auto t : map->getAllTerritories()) {
-	t->setOwner(players[i]);
-	i = (i + 1) % players.size();
+  for (auto t: map->getAllTerritories()) {
+    t->setOwner(players[i]);
+    i = (i + 1) % players.size();
   }
 }
 
@@ -354,8 +370,8 @@ void GameEngine::assignCountries() {
 GameEngine::~GameEngine() {
   _instance = nullptr;
   this->Detach(LogObserver::instance());
-  for (auto p : players) {
-	delete p;
+  for (auto p: players) {
+    delete p;
   }
   delete deck;
   delete map;
@@ -368,7 +384,7 @@ std::string GameEngine::stringToLog() {
   std::time_t time_t = std::chrono::system_clock::to_time_t(time);
   file << std::ctime(&time_t);
   file << "Game State Modified: " << this->gameStates[this->state] << std::endl
-	   << std::endl;
+       << std::endl;
   return "Game State Modified: " + this->gameStates[this->state];
 }
 
