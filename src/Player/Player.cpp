@@ -288,7 +288,7 @@ bool DefaultPlayerStrategy::isDoneIssuing() {
 
 vector<std::pair<Territory *, Territory *>> AggressivePlayer::toAttack() const {
 
-  auto adjacentEnemies = std::vector<std::pair<Territory *, Territory *>>();
+  DefaultPlayerStrategy *defStart;
 
   struct compareTerritoriesAscending {
     inline bool operator()(std::pair<Territory *, Territory *> t1, std::pair<Territory *, Territory *> t2) {
@@ -296,13 +296,7 @@ vector<std::pair<Territory *, Territory *>> AggressivePlayer::toAttack() const {
     }
   } compareAsc;
 
-  for (auto t: p->ownedTerritories) {
-    for (auto adj: t->getAdjTerritories()) {
-      if (adj->getOwner() != p) {
-        adjacentEnemies.emplace_back(std::pair(adj, t));
-      }
-    }
-  }
+  auto adjacentEnemies = defStart->toAttack();
 
   if (!adjacentEnemies.empty()) {
     cout << " Territories to attack:" << endl;
