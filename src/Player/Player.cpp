@@ -286,9 +286,13 @@ bool DefaultPlayerStrategy::isDoneIssuing() {
  * then always advances to enemy territories until it cannot do so anymore
  */
 
-vector<std::pair<Territory *, Territory *>> AggressivePlayer::toAttack() const {
+void AggressivePlayer::issueOrder() {
 
-  DefaultPlayerStrategy *defStart;
+  cout << "Need to implement" << endl;
+}
+
+
+vector<std::pair<Territory *, Territory *>> AggressivePlayer::toAttack() const {
 
   struct compareTerritoriesAscending {
     inline bool operator()(std::pair<Territory *, Territory *> t1, std::pair<Territory *, Territory *> t2) {
@@ -296,7 +300,8 @@ vector<std::pair<Territory *, Territory *>> AggressivePlayer::toAttack() const {
     }
   } compareAsc;
 
-  auto adjacentEnemies = defStart->toAttack();
+  DefaultPlayerStrategy defStrategy(p) ;
+  auto adjacentEnemies = defStrategy.toAttack();
 
   if (!adjacentEnemies.empty()) {
     cout << " Territories to attack:" << endl;
@@ -336,26 +341,31 @@ vector<Territory *> AggressivePlayer::toDefend() const {
            << ownedTerritories[i]->getArmies() << endl;
       toDefendTerritories.push_back(ownedTerritories[i]);
     }
+    return toDefendTerritories;
 
   } else {
     cout << " You currently don't own any territory." << endl;
-    return toDefendTerritories;
+    return ownedTerritories;
   }
 }
 
-void AggressivePlayer::issueOrder() {
 
-
-  cout << "Need to implement" << endl;
-}
 void AggressivePlayer::issueDeployOrder() {
   cout << "Need to implement" << endl;
 }
-void AggressivePlayer::issueAdvanceOrder() {
-  cout << "Need to implement" << endl;
-}
+
 void AggressivePlayer::issueCardOrder() {
   cout << "Need to implement" << endl;
 }
+
+void AggressivePlayer::issueAdvanceOrder() {
+  cout << "Need to implement" << endl;
+}
+
+bool AggressivePlayer::isDoneIssuing() {
+  return false;
+}
+
 AggressivePlayer::AggressivePlayer(Player *pPlayer) : PlayerStrategy(pPlayer) {
 }
+

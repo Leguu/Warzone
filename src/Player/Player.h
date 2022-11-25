@@ -61,6 +61,8 @@ class AggressivePlayer : public PlayerStrategy {
 
   void issueOrder() override;
 
+  bool isDoneIssuing() override;
+
   private:
   virtual void issueDeployOrder();
 
