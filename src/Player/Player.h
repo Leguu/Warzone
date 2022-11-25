@@ -51,6 +51,25 @@ private:
     void issueCardOrder();
 };
 
+class AggressivePlayer : public PlayerStrategy {
+  public:
+  explicit AggressivePlayer(Player *pPlayer);
+
+  [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const override;
+
+  [[nodiscard]] vector<Territory *> toDefend() const override;
+
+  void issueOrder() override;
+
+  private:
+  virtual void issueDeployOrder();
+
+  virtual void issueAdvanceOrder();
+
+  virtual void issueCardOrder();
+};
+
+
 class Player {
 public:
     const string name;
