@@ -292,7 +292,7 @@ bool DefaultPlayerStrategy::isDoneIssuing() {
 
 void AggressivePlayer::issueOrder() {
 
-  cout << "Need to implement" << endl;
+  issueAdvanceOrder();
 }
 
 
@@ -305,22 +305,25 @@ vector<std::pair<Territory *, Territory *>> AggressivePlayer::toAttack() const {
   } comparePair;
 
   DefaultPlayerStrategy defStrategy(p);
-  auto adjacentEnemies = defStrategy.toAttack();
+  auto sortedPairs = defStrategy.toAttack();
 
-  if (!adjacentEnemies.empty()) {
-    cout << " Territories to attack:" << endl;
-    std::sort(adjacentEnemies.begin(), adjacentEnemies.end(), comparePair);
-    for (int i = 0; i < adjacentEnemies.size(); i++) {
-      cout << "  (" << i << ") " + adjacentEnemies[i].first->getName() + "   " << adjacentEnemies[i].first->getArmies() << endl;
+  if (!sortedPairs.empty()) {
+
+    std::sort(sortedPairs.begin(), sortedPairs.end(), comparePair);
+    for (int i = 0; i < sortedPairs.size(); i++) {
+      cout << sortedPairs[i].first->getName() + " "
+           << sortedPairs[i].first->getArmies()
+           << " <--- enemy ||| owned ---> "
+           << sortedPairs[i].second->getName() + " "
+           << sortedPairs[i].second->getArmies() << endl;
     }
-    return adjacentEnemies;
+    return sortedPairs;
 
   } else {
     cout << " You currently don't have neighboring enemies." << endl;
-    return adjacentEnemies;
+    return sortedPairs;
   }
 }
-
 
 struct compareTerritoriesDescending {
   inline bool operator()(Territory *t1, const Territory *t2) {
@@ -329,33 +332,37 @@ struct compareTerritoriesDescending {
 } compDesc;
 
 /**
- * Aggressive player will choose to defend the territories with the most armies
+ * Aggressive player will choose to defend the territories,
+ * ordered in descending number of armies
  * @return list of territories to defend.
  */
 
 vector<Territory *> AggressivePlayer::toDefend() const {
 
   vector<Territory *> toDefendTerritories;
-  vector<Territory *> ownedTerritories = p->ownedTerritories;
+  auto vulnerableTerritories = toAttack();
 
-
-  if (!ownedTerritories.empty()) {
-
-    std::sort(ownedTerritories.begin(), ownedTerritories.end(), compDesc);
-    cout << "\nPlayer " << p->name << "'s currently owned territories and armies:" << endl;
-    for (int i = 0; i < ownedTerritories.size(); i++) {
-      cout << " (" << i << ") " + ownedTerritories[i]->getName() + "   "
-           << ownedTerritories[i]->getArmies() << endl;
-      toDefendTerritories.push_back(ownedTerritories[i]);
+  if (!vulnerableTerritories.empty()) {
+    cout << "\nPlayer " << p->name << "'s territories that need defending:" << endl;
+    for (auto t: vulnerableTerritories) {
+      if (std::find(toDefendTerritories.begin(), toDefendTerritories.end(), t.second) == toDefendTerritories.end()) {
+        cout << t.second->getName() + "   "
+             << t.second->getArmies() << endl;
+        toDefendTerritories.push_back(t.second);
+      }
     }
     return toDefendTerritories;
 
   } else {
     cout << " You currently don't own any territory." << endl;
-    return ownedTerritories;
+    return toDefendTerritories;
   }
 }
 
+/**
+ * Aggressive player will deploy reinforcements
+ * to its strongest territory
+ */
 
 void AggressivePlayer::issueDeployOrder() {
 
@@ -365,9 +372,9 @@ void AggressivePlayer::issueDeployOrder() {
     std::sort(strongestOwnedTerritories.begin(), strongestOwnedTerritories.end(), compDesc);
 
     if (p->reinforcementsAfterDeploy > 0) {
-      int armies = rand() % p->reinforcementsAfterDeploy + 1;
+      int armies = Utils::randomNumberInRange(1, p->reinforcementsAfterDeploy);
       auto strongestTerritory = strongestOwnedTerritories[0];
-      cout << "Issued Deploy Order: " << armies << " units to " + strongestTerritory->getContinent()->getName() << endl;
+      cout << "Issued Deploy Order: " << armies << " units to " + strongestTerritory->getName() << endl;
       p->orders->push(new DeployOrder(p, armies, strongestTerritory));
       p->reinforcementsAfterDeploy -= armies;
     } else {
@@ -378,63 +385,73 @@ void AggressivePlayer::issueDeployOrder() {
   }
 }
 
-void AggressivePlayer::issueCardOrder() {
-  cout << "Need to implement" << endl;
-}
+
+/**
+ * Issue orders by the aggressive player,
+ * they attack first, otherwise they defend edge territories.
+ */
 
 void AggressivePlayer::issueAdvanceOrder() {
 
   Territory *target;
   Territory *source;
 
-  cout << p->name + " is ready to issue attacks its strongest territory." << endl;
+  cout << p->name + " is ready to issue attacks" << endl;
 
-  auto toAttackTerritory = toAttack();
+  auto pairs = toAttack();
 
-  if (!toAttackTerritory.empty()) {
+  if (!pairs.empty()) {
 
-    for (auto pair: toAttackTerritory) {
+    auto randomPair = Utils::accessRandomPair(pairs);
 
-      target = pair.first;
-      source = pair.second;
+    target = randomPair.first;
+    source = randomPair.second;
 
-      int armyInTerritory = source->getArmies();
-      int attackNum = rand() % armyInTerritory + target->getArmies();
+    int armyInTerritory = source->getArmies();
+    int attackNum = rand() % armyInTerritory + target->getArmies();
 
-      if (attackNum > 0) {
-        cout << source->getName() << " chosen enemy to attack "
-             << target->getName() << " with " << attackNum << " armies" << endl;
+    if (attackNum > 3) {
+      cout << source->getName() << " chosen enemy to attack "
+           << target->getName() << " with " << attackNum << " armies" << endl;
 
-        p->orders->push(new AdvanceOrder(p, attackNum, source, target));
+      p->orders->push(new AdvanceOrder(p, attackNum, source, target));
 
-        source->setArmies(armyInTerritory - attackNum);
+      source->setArmies(armyInTerritory - attackNum);
 
-      } else {
-        cout << "There are no armies in " << source->getName();
-      }
-    }
-  } else {
-    cout << "No armies to attack, will advance army to nearby allied territories" << endl;
-
-    auto toDefendTerritory = toDefend();
-
-    for (auto territory: toDefendTerritory) {
-      for (auto neighbor: territory->getAdjTerritories()) {
-        if (neighbor->getOwner()->name == p->name) {
-          int armyInSource = territory->getArmies();
-          int armyToGive = rand() % armyInSource + 1;
-          if (armyToGive > 0) {
-            cout << territory->getName() << " will deploy to ally "
-                 << neighbor->getName() <<  armyToGive << endl;
-            p->orders->push(new AdvanceOrder(p, armyToGive, territory, neighbor));
-            territory->setArmies(armyInSource - armyToGive);
-          } else {
-            cout << "No armies to deploy to neighboring ally" << endl;
+    } else {
+      cout << source->getName() + " is not confident in attacking" << endl;
+      Territory *strongest = pairs[0].second;
+      cout << "Deploying armies from strongest region " << strongest->getName() << endl;
+      int armyInSource = strongest->getArmies();
+      int armyToGive = rand() % armyInSource + 1;
+      if (armyToGive > 0) {
+        vector<Territory *> friendlies;
+        for (auto neighbor: strongest->getAdjTerritories()) {
+          if (neighbor->getOwner()->name == strongest->getOwner()->name) {
+            friendlies.push_back(neighbor);
           }
         }
+
+        int randomFriendIndex = Utils::randomNumberInRange(0, friendlies.size() - 1);
+
+        cout << strongest->getName() << " will deploy to ally "
+             << friendlies[randomFriendIndex]->getName() << " "
+             << armyToGive << " armies" << endl;
+
+        p->orders->push(new AdvanceOrder(p, armyToGive, strongest, friendlies[randomFriendIndex]));
+        strongest->setArmies(armyInSource - armyToGive);
+      } else {
+        cout << strongest->getName() << " has refused to deploy armies to neighboring ally" << endl;
       }
     }
+
+  } else {
+    cout << "No armies to attack, you are all alone" << endl;
   }
+}
+
+void AggressivePlayer::issueCardOrder() {
+  cout << "Need to implement" << endl;
 }
 
 bool AggressivePlayer::isDoneIssuing() {

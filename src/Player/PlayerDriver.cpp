@@ -17,8 +17,6 @@ void testPlayers() {
   ge->map->findTerritory("Byrgius")->setOwner(bob);
   ge->map->findTerritory("Bay of Dew")->setOwner(john);
 
-  auto p1 = AggressivePlayer(bob);
-  auto list =  p1.toDefend();
   bob->issueOrder();
 
   delete ge;
