@@ -32,6 +32,8 @@ public:
 
   Card *removeByName(const string &name);
 
+  void removeAll();
+
   ~Hand();
 
   friend std::ostream &operator<<(std::ostream &os, const Hand &hand);

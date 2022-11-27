@@ -440,6 +440,14 @@ void Hand::debugPlay(const string &name) {
 		 << endl;
   }
 }
+void Hand::removeAll() {
+  auto ge = GameEngine::instance();
+  while (!cards.empty()) {
+    auto card = cards.back();
+    ge->deck->put(card);
+    cards.pop_back();
+  }
+}
 
 /**
  * Deck destructor

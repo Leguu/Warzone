@@ -1,4 +1,4 @@
-loadmap new york
+loadmap newyork
 validatemap
 addplayer Alice
 addplayer Bob

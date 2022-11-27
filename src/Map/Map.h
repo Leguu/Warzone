@@ -20,7 +20,7 @@ class Player;
 class Continent;
 
 class Territory {
-public:
+  public:
   // Constructor with necessary parameters
   Territory(const string &territory, Continent *continent);
 
@@ -71,13 +71,13 @@ public:
   // To string method
   [[nodiscard]] string toString() const;
 
-protected:
+  protected:
   /// Global variable for assigning territory ids.
   /// The ids for allTerritories need to be globally unique, so this can be
   /// static.
   static int idIncrement;
 
-private:
+  private:
   vector<Territory *> adjacentTerritories;
   // Variables
   int id = idIncrement++;
@@ -90,7 +90,7 @@ private:
 };
 
 class Continent {
-public:
+  public:
   // Constructor with necessary name and optional bonus
   Continent(string name, int bonus);
 
@@ -119,14 +119,16 @@ public:
   // A method to add a territory to a continent
   void addTerritoryToContinent(Territory *territory);
 
-private:
+  private:
   vector<Territory *> territories;
   string name;
   int bonus;
 };
 
 class Map {
-public:
+  public:
+  string name;
+
   // Default Constructors
   Map();
 
@@ -158,7 +160,7 @@ public:
   Territory *getInputTerritory(const std::string &inputRequest);
 
   Territory *getInputTerritory(const std::string &inputRequest,
-							   bool cancelable);
+                               bool cancelable);
 
   // A method to add a continent
   void addContinent(Continent *continent);
@@ -174,8 +176,7 @@ public:
   [[nodiscard]] Territory *findById(int id) const;
 
   // private properties for Map class
-private:
-  string name;
+  private:
   vector<Continent *> continents;
   vector<Territory *> territories;
 
@@ -197,13 +198,13 @@ private:
 };
 
 class MapLoader {
-public:
+  public:
   static Map *importMap(const string &path) noexcept(false);
 
-private:
+  private:
   inline MapLoader() = default;
 };
 
 void testLoadMaps();
 
-#endif // WARZONE_MAP_H
+#endif// WARZONE_MAP_H
