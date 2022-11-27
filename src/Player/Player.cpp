@@ -1,5 +1,7 @@
+#include <algorithm>
 #include <iostream>
 #include <map>
+#include <random>
 
 #include "../GameEngine/GameEngine.h"
 #include "Player.h"
@@ -310,13 +312,14 @@ vector<std::pair<Territory *, Territory *>> AggressivePlayer::toAttack() const {
   if (!sortedPairs.empty()) {
 
     std::sort(sortedPairs.begin(), sortedPairs.end(), comparePair);
-    for (int i = 0; i < sortedPairs.size(); i++) {
-      cout << sortedPairs[i].first->getName() + " "
-           << sortedPairs[i].first->getArmies()
+    for (auto &sortedPair: sortedPairs) {
+      cout << sortedPair.first->getName() + " "
+           << sortedPair.first->getArmies()
            << " <--- enemy ||| owned ---> "
-           << sortedPairs[i].second->getName() + " "
-           << sortedPairs[i].second->getArmies() << endl;
+           << sortedPair.second->getName() + " "
+           << sortedPair.second->getArmies() << endl;
     }
+    cout << "----" << endl;
     return sortedPairs;
 
   } else {
@@ -398,55 +401,74 @@ void AggressivePlayer::issueAdvanceOrder() {
 
   cout << p->name + " is ready to issue attacks" << endl;
 
+
   auto pairs = toAttack();
 
+  std::set<string> territoriesAdvanceIssued;
   if (!pairs.empty()) {
 
-    auto randomPair = Utils::accessRandomPair(pairs);
+    auto shuffledPairs = pairs;
+    auto engine = std::default_random_engine{};
+    std::shuffle(std::begin(shuffledPairs), std::end(shuffledPairs), engine);
 
-    target = randomPair.first;
-    source = randomPair.second;
+    for (auto pair: shuffledPairs) {
 
-    int armyInTerritory = source->getArmies();
-    int attackNum = rand() % armyInTerritory + target->getArmies();
+      target = pair.first;
+      source = pair.second;
 
-    if (attackNum > 3) {
-      cout << source->getName() << " chosen enemy to attack "
-           << target->getName() << " with " << attackNum << " armies" << endl;
+      if (territoriesAdvanceIssued.find(source->getName()) == territoriesAdvanceIssued.end())  {
 
-      p->orders->push(new AdvanceOrder(p, attackNum, source, target));
+        territoriesAdvanceIssued.insert(source->getName());
 
-      source->setArmies(armyInTerritory - attackNum);
+        int armyInTerritory = source->getArmies();
 
-    } else {
-      cout << source->getName() + " is not confident in attacking" << endl;
-      Territory *strongest = pairs[0].second;
-      cout << "Deploying armies from strongest region " << strongest->getName() << endl;
-      int armyInSource = strongest->getArmies();
-      int armyToGive = rand() % armyInSource + 1;
-      if (armyToGive > 0) {
-        vector<Territory *> friendlies;
-        for (auto neighbor: strongest->getAdjTerritories()) {
-          if (neighbor->getOwner()->name == strongest->getOwner()->name) {
-            friendlies.push_back(neighbor);
+        int attackNum = Utils::randomNumberInRange(1, armyInTerritory);
+
+        if (attackNum > 3) {
+          cout << source->getName() << " chosen enemy to attack "
+               << target->getName() << " with " << attackNum << " units" << endl;
+
+          p->orders->push(new AdvanceOrder(p, attackNum, source, target));
+
+          source->setArmies(armyInTerritory - attackNum);
+          cout << source->getArmies() << " units remaining" << endl;
+
+        } else {
+          cout << source->getName() + " is not confident in attacking" << endl;
+          Territory *strongest = pairs[0].second;
+          cout << "Deploying units from strongest region " << strongest->getName() << endl;
+          int armyInSource = strongest->getArmies();
+          int armyToGive = Utils::randomNumberInRange(0, armyInSource);
+          if (armyToGive > 0) {
+            vector<Territory *> friendlies;
+            for (auto neighbor: strongest->getAdjTerritories()) {
+              if (neighbor->getOwner()->name == strongest->getOwner()->name) {
+                friendlies.push_back(neighbor);
+              }
+            }
+
+            if (!friendlies.empty()) {
+
+              int randomFriendIndex = Utils::randomNumberInRange(0, friendlies.size() - 1);
+
+              cout << strongest->getName() << " will deploy to ally "
+                   << friendlies[randomFriendIndex]->getName() << " "
+                   << armyToGive << " units" << endl;
+
+              p->orders->push(new AdvanceOrder(p, armyToGive, strongest, friendlies[randomFriendIndex]));
+              strongest->setArmies(armyInSource - armyToGive);
+            } else {
+              cout << strongest->getName() << " has no neighboring ally" << endl;
+            }
+          } else {
+            cout << strongest->getName() << " has refused to deploy armies to neighboring ally" << endl;
           }
         }
-
-        int randomFriendIndex = Utils::randomNumberInRange(0, friendlies.size() - 1);
-
-        cout << strongest->getName() << " will deploy to ally "
-             << friendlies[randomFriendIndex]->getName() << " "
-             << armyToGive << " armies" << endl;
-
-        p->orders->push(new AdvanceOrder(p, armyToGive, strongest, friendlies[randomFriendIndex]));
-        strongest->setArmies(armyInSource - armyToGive);
-      } else {
-        cout << strongest->getName() << " has refused to deploy armies to neighboring ally" << endl;
+        cout << "----" << endl;
       }
     }
-
   } else {
-    cout << "No armies to attack, you are all alone" << endl;
+    cout << "No units to attack, you are all alone" << endl;
   }
 }
 
@@ -455,7 +477,7 @@ void AggressivePlayer::issueCardOrder() {
 }
 
 bool AggressivePlayer::isDoneIssuing() {
-  return false;
+  return p->advanceOrderIssued && (p->cardOrderIssued || p->hand->cards.empty());
 }
 
 AggressivePlayer::AggressivePlayer(Player *pPlayer) : PlayerStrategy(pPlayer) {
