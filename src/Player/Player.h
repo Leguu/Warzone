@@ -87,7 +87,7 @@ class NeutralStrategy : public PlayerStrategy {
   public:
   explicit NeutralStrategy(Player *pPlayer);
 
-  inline bool isDoneIssuing() override {return true};
+  inline bool isDoneIssuing() override {return true;}
   void issueOrder() override;
 };
 
