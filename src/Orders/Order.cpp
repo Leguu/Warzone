@@ -6,9 +6,8 @@
 #include <random>
 #include <utility>
 
-#include "../Player/Player.h"
 #include "../Logging/LogObserver.h"
-#include "../Utils/Utils.h"
+#include "../Player/Player.h"
 #include "Order.h"
 
 // ------------------ Order -------------------------
@@ -202,11 +201,9 @@ void AdvanceOrder::execute() {
     target->setArmies(armies);
     return;
   }
-    //If territory was neutral, set it to aggressive
-  if(Utils::isEqualLowercase(typeid(target->getOwner()->strategy).name(),"neutralstrategy")){
-      auto* targetStrategy = dynamic_cast<NeutralStrategy*>(target->getOwner()->strategy);
-      if(!targetStrategy->getHasBeenAttacked())
-          targetStrategy->setHasBeenAttacked();
+  //If player was neutral and gets attacked, set it to aggressive
+  if (typeid(target->getOwner()->strategy) == typeid(NeutralStrategy)) {
+    target->getOwner()->strategy = new AggressivePlayerStrategy(target->getOwner());
   }
 
 
@@ -297,6 +294,10 @@ void BombOrder::validate() {
 void BombOrder::execute() {
   validate();
   this->target->setArmies(this->target->getArmies() / 2);
+  //If player was neutral and gets attacked, set it to aggressive
+  if (typeid(target->getOwner()->strategy) == typeid(NeutralStrategy)) {
+    target->getOwner()->strategy = new AggressivePlayerStrategy(target->getOwner());
+  }
   this->Notify(this);
 }
 

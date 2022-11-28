@@ -12,131 +12,129 @@ class PlayerStrategy;
 #include <vector>
 
 class InvalidCardException : public std::runtime_error {
-public:
-    explicit InvalidCardException(const std::string &arg);
+  public:
+  explicit InvalidCardException(const std::string &arg);
 };
 
 class PlayerStrategy {
-public:
-    Player *p;
+  public:
+  Player *p;
 
-    explicit PlayerStrategy(Player *P);
+  explicit PlayerStrategy(Player *P);
 
-    virtual void issueOrder() = 0;
+  virtual void issueOrder();
 
-    virtual std::vector<std::pair<Territory *, Territory *>> toAttack() const = 0;
+  virtual std::vector<std::pair<Territory *, Territory *>> toAttack() const = 0;
 
-    virtual vector<Territory *> toDefend() const = 0;
+  virtual vector<Territory *> toDefend() const = 0;
 
-    virtual bool isDoneIssuing() = 0;
+  virtual bool isDoneIssuing() = 0;
+
+  private:
+  virtual void issueDeployOrder() = 0;
+
+  virtual void issueAdvanceOrder() = 0;
+
+  virtual void issueCardOrder() = 0;
 };
 
 class DefaultPlayerStrategy : public PlayerStrategy {
-public:
-    explicit DefaultPlayerStrategy(Player *pPlayer);
+  public:
+  explicit DefaultPlayerStrategy(Player *pPlayer);
 
-    [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const override;
+  [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const override;
 
-    [[nodiscard]] vector<Territory *> toDefend() const override;
+  [[nodiscard]] vector<Territory *> toDefend() const override;
 
-    void issueOrder() override;
+  bool isDoneIssuing() override;
 
-    bool isDoneIssuing() override;
+  private:
+  void issueDeployOrder();
 
-private:
-    void issueDeployOrder();
+  void issueAdvanceOrder();
 
-    void issueAdvanceOrder();
-
-    void issueCardOrder();
+  void issueCardOrder();
 };
 
-class AggressivePlayer : public PlayerStrategy {
-public:
-    explicit AggressivePlayer(Player *pPlayer);
+class AggressivePlayerStrategy : public PlayerStrategy {
+  public:
+  explicit AggressivePlayerStrategy(Player *pPlayer);
 
-    [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const override;
+  [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const override;
 
-    [[nodiscard]] vector<Territory *> toDefend() const override;
+  [[nodiscard]] vector<Territory *> toDefend() const override;
 
-    void issueOrder() override;
+  bool isDoneIssuing() override;
 
-private:
-    virtual void issueDeployOrder();
+  private:
+  virtual void issueDeployOrder();
 
-    virtual void issueAdvanceOrder();
+  virtual void issueAdvanceOrder();
 
-    virtual void issueCardOrder();
+  virtual void issueCardOrder();
 };
 
-class CheaterStrategy : public AggressivePlayer {
-public:
-    explicit CheaterStrategy(Player *pPlayer);
+class CheaterStrategy : public AggressivePlayerStrategy {
+  public:
+  explicit CheaterStrategy(Player *pPlayer);
 
 
-private:
-    void issueAdvanceOrder();
+  private:
+  void issueAdvanceOrder();
 };
 
-class NeutralStrategy : public AggressivePlayer {
-public:
-    explicit NeutralStrategy(Player *pPlayer);
+class NeutralStrategy : public PlayerStrategy {
+  public:
+  explicit NeutralStrategy(Player *pPlayer);
 
-    void issueOrder() override;
-
-    void setHasBeenAttacked();
-
-    bool getHasBeenAttacked() const;
-
-private:
-    bool hasBeenAttacked;
+  inline bool isDoneIssuing() override {return true};
+  void issueOrder() override;
 };
-
 
 
 class Player {
-public:
-    const string name;
-    OrderList *orders;
-    Hand *hand;
-    vector<Territory *> ownedTerritories = {};
-    int reinforcements = 50;
+  public:
+  const string name;
+  OrderList *orders;
+  Hand *hand;
+  vector<Territory *> ownedTerritories = {};
+  int reinforcements = 50;
 
-    PlayerStrategy *strategy;
+  PlayerStrategy *strategy;
 
 
-    int reinforcementsAfterDeploy = 50;
+  int reinforcementsAfterDeploy = 50;
 
-    bool advanceOrderIssued = false;
+  bool advanceOrderIssued = false;
 
-    bool cardOrderIssued = false;
+  bool cardOrderIssued = false;
 
-    int cardAwarded = false;
+  int cardAwarded = false;
 
-    vector<Player *> cannotAttack = {};
+  vector<Player *> cannotAttack = {};
 
-    explicit Player(string name);
+  explicit Player(string name);
 
-    vector<Territory *> getAdjacentEnemyTerritories();
+  vector<Territory *> getAdjacentEnemyTerritories();
 
-    friend std::ostream &operator<<(std::ostream &os, const Player &player);
+  friend std::ostream &operator<<(std::ostream &os, const Player &player);
 
-    ~Player();
+  ~Player();
 
-    [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const ;
+  [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const;
 
-    [[nodiscard]] vector<Territory *> toDefend() const ;
+  [[nodiscard]] vector<Territory *> toDefend() const;
 
-    void issueOrder() ;
+  void issueOrder();
 
-    bool isDoneIssuing() ;
+  bool isDoneIssuing();
 
-private:
-    void issueDeployOrder();
+  private:
+  void issueDeployOrder();
 
-    void issueAdvanceOrder();
+  void issueAdvanceOrder();
 
-    void issueCardOrder();
+  void issueCardOrder();
 };
 
 void testPlayers();
