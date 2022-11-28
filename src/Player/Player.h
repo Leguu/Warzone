@@ -51,8 +51,6 @@ private:
     void issueCardOrder();
 };
 
-<<<<<<< Updated upstream
-=======
 class BenevolentPlayer : public PlayerStrategy {
   public:
   explicit BenevolentPlayer(Player *pPlayer);
@@ -73,8 +71,6 @@ class BenevolentPlayer : public PlayerStrategy {
   virtual void issueCardOrder();
 };
 
-
->>>>>>> Stashed changes
 class Player {
 public:
     const string name;
