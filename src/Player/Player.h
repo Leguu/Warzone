@@ -135,8 +135,6 @@ class BenevolentPlayer : public PlayerStrategy {
   virtual void issueCardOrder();
 };
 
-
->>>>>>> Stashed changes
 class Player {
   public:
   const string name;

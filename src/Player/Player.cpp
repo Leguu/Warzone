@@ -482,8 +482,6 @@ DefaultPlayerStrategy::DefaultPlayerStrategy(Player *pPlayer) : PlayerStrategy(p
 bool DefaultPlayerStrategy::isDoneIssuing() {
   return p->advanceOrderIssued && (p->cardOrderIssued || p->hand->cards.empty());
 }
-<<<<<<< Updated upstream
-=======
 
 
 // ------------------ Benevolent strategy -------------------------
@@ -776,7 +774,7 @@ bool BenevolentPlayer::isDoneIssuing() {
  */
 BenevolentPlayer::BenevolentPlayer(Player *pPlayer) : PlayerStrategy(pPlayer) {
 }
->>>>>>> Stashed changes
+
 
 // ------------------ Aggressive strategy -------------------------
 
