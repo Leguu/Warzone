@@ -51,6 +51,30 @@ private:
     void issueCardOrder();
 };
 
+<<<<<<< Updated upstream
+=======
+class BenevolentPlayer : public PlayerStrategy {
+  public:
+  explicit BenevolentPlayer(Player *pPlayer);
+
+  [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const override;
+
+  [[nodiscard]] vector<Territory *> toDefend() const override;
+
+  void issueOrder() override;
+
+  bool isDoneIssuing() override;
+
+  private:
+  virtual void issueDeployOrder();
+
+  virtual void issueAdvanceOrder();
+
+  virtual void issueCardOrder();
+};
+
+
+>>>>>>> Stashed changes
 class Player {
 public:
     const string name;
