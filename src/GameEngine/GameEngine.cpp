@@ -99,6 +99,11 @@ void GameEngine::mainGameLoop() {
 
     turnsGone += 1;
 
+    if (turnsGone >= maxTurns) {
+      cout << "Max turns have been reached! The game is over." << endl;
+      break;
+    }
+
     // If the game is over
     if (gameOver) {
       cout << "It has been " << turnsGone << " turns since the game has started." << endl;
@@ -190,8 +195,7 @@ void GameEngine::reinforcementPhase() const {
   }
 }
 
-bool GameEngine::startupPhase(
-        std::vector<std::pair<std::string, std::string>> testCommands) {
+bool GameEngine::startupPhase() {
   const string commands =
           "Available commands:\n"
           "LoadMap <Map Name> - Load a map\n"
@@ -203,22 +207,20 @@ bool GameEngine::startupPhase(
 
   Command *input;
   transition(GameState::START);
-  int commandsCounter = 0;
-  if (!testCommands.empty()) {
-    this->debugMode = true;
-  }
-  while (testCommands.empty() || commandsCounter < testCommands.size()) {
-    input = testCommands.empty()
-                    ? commandProcessor->getCommand(
-                              "Input your command, write \"help\" for help")
-                    : commandProcessor->getCommand(
-                              "testPrompt", testCommands[commandsCounter].first,
-                              testCommands[commandsCounter].second);
+
+  while (true) {
+    input = commandProcessor->getCommand("Input your command, write \"help\" for help");
 
     if (input == nullptr) {
       continue;
     }
     std::string inputText = input->getCommand();
+
+    if (Utils::isEqualLowercase(inputText, "tournament")) {
+      tournamentMode(input);
+      return true;
+    }
+
     if (Utils::isEqualLowercase(inputText.substr(0, inputText.find(' ')),
                                 "loadmap")) {
       loadMap("../assets/" + input->getArg() + ".map");
@@ -243,19 +245,12 @@ bool GameEngine::startupPhase(
         continue;
       }
 
-      auto rng = std::default_random_engine();
-      rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
-      std::shuffle(players.begin(), players.end(), rng);
-
       assignCountries();
 
       for (auto p: players) {
         p->hand->draw();
         p->hand->draw();
       }
-
-      if (!testCommands.empty())
-        return false;
 
       mainGameLoop();
 
@@ -277,13 +272,7 @@ bool GameEngine::startupPhase(
     } else {
       cout << "Type the right command" << endl;
     }
-    if (testCommands.size() == 0) {
-      cout << "-----------------------------" << endl;
-    }
-    commandsCounter++;
   }
-
-  return true;
 }
 
 /**
@@ -355,10 +344,13 @@ void GameEngine::addPlayer(const string &playerName) {
  * Assign the countries like the teacher wants
  */
 void GameEngine::assignCountries() {
+  auto rng = std::default_random_engine();
+  rng.seed(std::chrono::system_clock::now().time_since_epoch().count());
+  std::shuffle(players.begin(), players.end(), rng);
+
   auto i = 0;
-  // Territories are randomly shuffled by the Map class, so this operation is
-  // valid
   for (auto t: map->getAllTerritories()) {
+    t->setArmies(0);
     t->setOwner(players[i]);
     i = (i + 1) % players.size();
   }
@@ -393,4 +385,106 @@ GameEngine::GameState GameEngine::getState() { return state; }
 void GameEngine::transition(GameEngine::GameState newState) {
   this->state = newState;
   this->Notify(this);
+}
+
+void GameEngine::tournamentMode(Command *command) {
+  auto args = Utils::tokenizer(command->getArg(), ' ');
+
+  vector<Map *> mapsToPlayOn = {};
+  vector<Player *> playersToPlay = {};
+  string mode;
+  auto playerNameIncrement = 0;
+  for (const auto &argument: args) {
+    auto arg = Utils::trim(Utils::toLowercase(argument));
+    if (Utils::isEqualLowercase(arg, "-m") ||
+        Utils::isEqualLowercase(arg, "-p") ||
+        Utils::isEqualLowercase(arg, "-g") ||
+        Utils::isEqualLowercase(arg, "-d")) {
+      mode = arg;
+      continue;
+    }
+
+    if (mode.empty()) {
+      cout << "Invalid command" << endl;
+      return;
+    }
+
+    if (mode == "-m") {
+      auto mapToPlayOn = MapLoader::importMap("../assets/" + arg + ".map");
+      mapToPlayOn->name = arg;
+      mapsToPlayOn.push_back(mapToPlayOn);
+    } else if (mode == "-p") {
+      auto player = new Player(arg + std::to_string(playerNameIncrement));
+      playerNameIncrement += 1;
+
+      playersToPlay.push_back(player);
+    } else if (mode == "-g") {
+      gamesToRun = std::stoi(arg);
+    } else if (mode == "-d") {
+      maxTurns = std::stoi(arg);
+    }
+  }
+
+  if (playersToPlay.size() < 2) {
+    cout << "Can't have a game with fewer than 2 players. Don't forget to use -P to initialise players" << endl;
+    return;
+  }
+
+  if (mapsToPlayOn.empty()) {
+    cout << "Missing -M map" << endl;
+    return;
+  }
+
+  auto logFile = std::fopen("../tournament.txt", "w");
+
+  if (!logFile) {
+    cout << "Log file couldn't be opened. Aborting..." << endl;
+    return;
+  }
+
+  std::fprintf(logFile, "Running this command: `%s %s`\n\n", command->getCommand().c_str(), command->getArg().c_str());
+
+  std::fprintf(logFile, "%s\n\n", ("Playing " + std::to_string(gamesToRun) + " with " + std::to_string(maxTurns) + " maximum turns per game").c_str());
+
+  std::fprintf(logFile, "%10s", "Map");
+
+  for (int i = 1; i <= gamesToRun; i += 1) {
+    std::fprintf(logFile, " | %10s", ("Game " + std::to_string(i)).c_str());
+  }
+
+  std::fprintf(logFile, "\n");
+
+  for (auto mapToPlayOn: mapsToPlayOn) {
+    map = mapToPlayOn;
+
+    std::fprintf(logFile, "%10s", map->name.c_str());
+
+    for (int i = 0; i < gamesToRun; i += 1) {
+      players = playersToPlay;
+
+      for (auto player: players) {
+        player->ownedTerritories.clear();
+        player->reinforcements = 50;
+        player->hand->removeAll();
+        player->hand->draw();
+        player->hand->draw();
+      }
+
+      assignCountries();
+
+      mainGameLoop();
+
+      if (this->turnsGone < maxTurns)
+        std::fprintf(logFile, " | %10s", players[0]->name.c_str());
+      else
+        std::fprintf(logFile, " | %10s", "Draw");
+    }
+
+    std::fprintf(logFile, "\n");
+
+    delete mapToPlayOn;
+    map = nullptr;
+  }
+
+  std::fclose(logFile);
 }
