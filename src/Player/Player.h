@@ -118,7 +118,7 @@ public:
     explicit Player(string name);
 
     vector<Territory *> getAdjacentEnemyTerritories();
-    
+
     friend std::ostream &operator<<(std::ostream &os, const Player &player);
 
     ~Player();
