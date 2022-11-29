@@ -486,17 +486,14 @@ bool DefaultPlayerStrategy::isDoneIssuing() {
 
 // ------------------ Benevolent strategy -------------------------
 
-
 /*
  * Benevolent player deploys or advances armies on its weakest country,
  * then only defends and is never the aggressor with attack or cards.
  */
-
 void BenevolentPlayer::issueOrder() {
-
   if (p->reinforcementsAfterDeploy > 0) {
     issueDeployOrder();
-  } else if (!p->cardOrderIssued && !p->hand->cards.empty()) {
+  } else if (!p->cardOrderIssued) {
     issueCardOrder();
     p->cardOrderIssued = true;
   } else if (!p->advanceOrderIssued) {
@@ -506,45 +503,7 @@ void BenevolentPlayer::issueOrder() {
 }
 
 /**
- * Benevolent player will have a vector of territories that
- * are adjacent to enemy territories that will focus on attacking
- * @return A list in ascending order of pairs of vectors <enemy, owned>
- */
-/*
-vector<std::pair<Territory *, Territory *>> BenevolentPlayer::toAttack() const {
-  auto ge = GameEngine::instance();
-  struct compareTerritoriesPair {
-    inline bool operator()(std::pair<Territory *, Territory *> t1, std::pair<Territory *, Territory *> t2) {
-      return (t1.second->getArmies() > t2.second->getArmies());
-    }
-  } comparePair;
-
-  DefaultPlayerStrategy defStrategy(p);
-  auto sortedPairs = defStrategy.toAttack();
-
-  if (!sortedPairs.empty()) {
-
-    std::sort(sortedPairs.begin(), sortedPairs.end(), comparePair);
-    for (auto &sortedPair: sortedPairs) {
-      if (ge->debugMode)
-        cout << sortedPair.first->getName() + " "
-             << sortedPair.first->getArmies()
-             << " <--- enemy ||| owned ---> "
-             << sortedPair.second->getName() + " "
-             << sortedPair.second->getArmies() << endl;
-    }
-    cout << "----" << endl;
-    return sortedPairs;
-
-  } else {
-    cout << " You currently don't have neighboring enemies." << endl;
-    return sortedPairs;
-  }
-}
-*/
-
-/**
- * custom comparator to get a list in descending order of units
+ * custom comparator to get a list in ascending order of units
  */
 struct compareTerritoriesAscending {
   inline bool operator()(Territory *t1, const Territory *t2) {
@@ -552,167 +511,101 @@ struct compareTerritoriesAscending {
   }
 } compAsc;
 
+
+// NOTE: toAttack() <-> toDefend() for Benevolent Player
+
 /**
- * Benevolent player will choose to defend the territories,
- * ordered in ascending number of armies
- * @return list of territories to defend.
+ * Benevolent player will have a vector of territories that
+ * are adjacent to an owned territory that is to be defended.
+ * Ordered in ascending number of armies of target territory.
+ * @return A list in ascending order of pairs of vectors <owned, owned>
  */
-
-vector<Territory *> BenevolentPlayer::toDefend() const {
-  auto ge = GameEngine::instance();
-  vector<Territory *> toDefendTerritories;
-  auto vulnerableTerritories = toAttack();
-
-  if (!vulnerableTerritories.empty()) {
-    cout << "\nPlayer " << p->name << "'s territories that need defending:" << endl;
-    for (auto t: vulnerableTerritories) {
-      if (std::find(toDefendTerritories.begin(), toDefendTerritories.end(), t.second) == toDefendTerritories.end()) {
-        if (ge->debugMode)
-          cout << t.second->getName() + "   "
-               << t.second->getArmies() << endl;
-        toDefendTerritories.push_back(t.second);
+vector<std::pair<Territory *, Territory *>> BenevolentPlayer::toAttack() const {
+  auto adjacentFriends = std::vector<std::pair<Territory *, Territory *>>();
+  for (auto t: p->ownedTerritories) {
+    for (auto adj: t->getAdjTerritories()) {
+      if (adj->getOwner() == p) {
+        adjacentFriends.emplace_back(std::pair(adj, t));
       }
     }
-    return toDefendTerritories;
-
-  } else {
-    cout << " You currently don't own any territory." << endl;
-    return toDefendTerritories;
   }
+
+  std::sort(adjacentFriends.begin(), adjacentFriends.end(),
+            [](std::pair<Territory *, Territory *> &left, std::pair<Territory *, Territory *> &right) {
+              return left.second->getArmies() < right.second->getArmies();
+            });
+
+  return adjacentFriends;
+}
+
+/**
+ * Returns a list of owned territories.
+ * @return list of territories to defend.
+ */
+std::vector<Territory *> BenevolentPlayer::toDefend() const {
+  return p->ownedTerritories;
 }
 
 /**
  * Benevolent player will deploy reinforcements
  * to its strongest territory
  */
-
 void BenevolentPlayer::issueDeployOrder() {
+  auto ge = GameEngine::instance();
 
-  vector<Territory *> strongestOwnedTerritories = p->ownedTerritories;
+  vector<Territory *> weakestOwnedTerritories = p->ownedTerritories;
+  std::sort(weakestOwnedTerritories.begin(), weakestOwnedTerritories.end(), compAsc);
 
-  if (!strongestOwnedTerritories.empty()) {
-    std::sort(strongestOwnedTerritories.begin(), strongestOwnedTerritories.end(), compAsc);
+  int armies = p->reinforcementsAfterDeploy == 1 ? 1 : Utils::randomNumberInRange(1, p->reinforcementsAfterDeploy);
+  auto weakestTerritory = weakestOwnedTerritories[0];
 
-    if (p->reinforcementsAfterDeploy > 0) {
-      int armies = p->reinforcementsAfterDeploy;
-      auto strongestTerritory = strongestOwnedTerritories[0];
-      cout << "Issued Deploy Order: " << armies << " units to " + strongestTerritory->getName() << endl;
-      p->orders->push(new DeployOrder(p, armies, strongestTerritory));
-      p->reinforcementsAfterDeploy -= armies;
-    } else {
-      cout << "No armies to deploy." << endl;
-    }
-  } else {
-    cout << " You currently don't own any territory." << endl;
-  }
+  if (ge->debugMode)
+    cout << "Issued Deploy Order: " << armies << " units to weakest territory (" << weakestTerritory->getName() << ")" << endl;
+
+  p->orders->push(new DeployOrder(p, armies, weakestTerritory));
+  p->reinforcementsAfterDeploy -= armies;
 }
-
 
 /**
  * Issue orders by the benevolent player,
  * they never attack and always defend the weakest regions.
  */
-
 void BenevolentPlayer::issueAdvanceOrder() {
-
-  Territory *target;
-  Territory *source;
-
   cout << p->name + " is ready to advance.. but nothing more" << endl;
 
-
   auto pairs = toAttack();
-
-  std::set<string> territoriesAdvanceIssued;
-  if (!pairs.empty()) {
-
-    auto shuffledPairs = pairs;
-    auto engine = std::default_random_engine{};
-    std::shuffle(std::begin(shuffledPairs), std::end(shuffledPairs), engine);
-
-    for (auto pair: shuffledPairs) {
-
-      target = pair.first;
-      source = pair.second;
-
-      if (territoriesAdvanceIssued.find(source->getName()) == territoriesAdvanceIssued.end()) {
-
-        territoriesAdvanceIssued.insert(source->getName());
-
-          Territory *weakest = pairs[0].second;
-          cout << "Deploying units to weakest region " << weakest->getName() << endl;
-          int armyInSource = weakest->getArmies();
-          int armyToGive = Utils::randomNumberInRange(0, armyInSource);
-          if (armyToGive > 0) {
-            vector<Territory *> friendlies;
-            for (auto neighbor: weakest->getAdjTerritories()) {
-              if (neighbor->getOwner()->name == weakest->getOwner()->name) {
-                friendlies.push_back(neighbor);
-              }
-            }
-
-            if (!friendlies.empty()) {
-
-              int randomFriendIndex = Utils::randomNumberInRange(0, friendlies.size() - 1);
-
-              cout << weakest->getName() << " will deploy to ally "
-                   << friendlies[randomFriendIndex]->getName() << " "
-                   << armyToGive << " units" << endl;
-
-              p->orders->push(new AdvanceOrder(p, armyToGive, weakest, friendlies[randomFriendIndex]));
-              weakest->setArmies(armyInSource - armyToGive);
-            } else {
-              cout << weakest->getName() << " has no neighboring ally" << endl;
-            }
-          } else {
-            cout << weakest->getName() << " has refused to deploy armies to neighboring ally" << endl;
-          }
-
-        cout << "----" << endl;
-      }
-    }
-  } else {
-    cout << "No units to attack, you are all alone" << endl;
+  if (pairs.empty()) {
+    cout << "No units to advance to, none of the owned territories are adjacent" << endl;
+    return;
   }
+
+  Territory *source = pairs[0].first;
+  Territory *target = pairs[0].second;
+
+  int armies = Utils::randomNumberInRange(0, source->getArmies());
+  p->orders->push(new AdvanceOrder(p, armies, source, target));
 }
 
 void BenevolentPlayer::issueCardOrder() {
   auto ge = GameEngine::instance();
   auto randomCardName = p->hand->cards[0]->name;
-  auto cards = p->hand->cards;
-  int cardIndex;
 
-  std::map<std::string, int> cardNameMap = {
-          {"Airlift", 0},
-          {"NegotiateCard", 1}};
+  std::map<std::string, int> cardNameMap = {{"Airlift", 0}, {"NegotiateCard", 1}};
 
-
-    auto it = find_if(cards.begin(), cards.end(), [&](Card *c) { return c->name == "Airlift"; });
-
-    if (it != cards.end()) {
-      cardIndex = (cardNameMap.count("Airlift") > 0)
-                          ? (*cardNameMap.find("Airlift")).second
-                          : -1;;
-    } else {
-      cardIndex = (cardNameMap.count(randomCardName) > 0)
+  int cardIndex = (cardNameMap.count(randomCardName) > 0)
                           ? (*cardNameMap.find(randomCardName)).second
                           : -1;
-    }
 
   switch (cardIndex) {
     case 0: {
-      Territory *source = nullptr;
-      Territory *target = Utils::accessRandomElement(p->ownedTerritories);
-
-      for (auto t: p->ownedTerritories) {
-        if (t->getArmies() > 0) {
-          source = t;
-        }
-      }
-
-      if (source == nullptr) {
+      auto pairs = toAttack();
+      if (pairs.empty()) {
+        cout << "No units to advance to, none of the owned territories are adjacent" << endl;
         return;
       }
+
+      Territory *source = pairs[0].first;
+      Territory *target = pairs[0].second;
 
       auto armies = source->getArmies();
 
@@ -755,7 +648,7 @@ void BenevolentPlayer::issueCardOrder() {
     }
 
     default:
-      throw InvalidCardException(randomCardName + " is not a legal card.");
+      throw InvalidCardException(randomCardName + " is not a legal card for this (benevolent) player strategy.");
   }
 }
 
@@ -772,8 +665,7 @@ bool BenevolentPlayer::isDoneIssuing() {
  * Constructor to give a certain player a benevolent strategy
  * @param pPlayer Any player with units, territories and a deck
  */
-BenevolentPlayer::BenevolentPlayer(Player *pPlayer) : PlayerStrategy(pPlayer) {
-}
+BenevolentPlayer::BenevolentPlayer(Player *pPlayer) : PlayerStrategy(pPlayer) {}
 
 
 // ------------------ Aggressive strategy -------------------------
