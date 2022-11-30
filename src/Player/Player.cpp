@@ -81,35 +81,41 @@ void PlayerStrategy::issueOrder() {
   }
 }
 
-/**
- * Advances and immediately conquers with 2x army size each adjacent enemy territory
- * @param  If debugging show more information
- */
 void CheaterStrategy::issueAdvanceOrder() {
-  auto ge = GameEngine::instance();
-    Territory *source = nullptr, *target = nullptr;
-    std::set<std::string> territoriesAdvanceIssued;
-    auto targetTerritories = toAttack();
-    for (auto targetTerritory: targetTerritories) {
-        source = targetTerritory.second;
-        target = targetTerritory.first;
-        if (territoriesAdvanceIssued.find(target->getName()) != territoriesAdvanceIssued.end()) {
-            territoriesAdvanceIssued.insert(target->getName());
-            p->orders->push(new AdvanceOrder(p, target->getArmies() * 2, source, target));
-        }
-        if(ge->debugMode){
-            cout << "Issued Advance Order: " << target->getArmies() << " units from "
-                 << source->getName() << " [armies = " << target->getArmies() * 2 << "] to "
-                 << target->getName() << " [armies = " << target->getArmies() << "]"
-                 << endl;
-        }
-    }
+  //do nothing
 }
 /**
  * CheaterStrategy constructor
  * @param pPlayer The player using this strategy
  */
-CheaterStrategy::CheaterStrategy(Player *pPlayer) : AggressivePlayerStrategy(pPlayer) {
+CheaterStrategy::CheaterStrategy(Player *pPlayer) : PlayerStrategy(pPlayer) {
+}
+void CheaterStrategy::issueOrder() {
+  auto ge = GameEngine::instance();
+  Territory *source = nullptr, *target = nullptr;
+  std::set<std::string> territoriesCaptured;
+  auto targetTerritories = toAttack();
+  for (auto targetTerritory: targetTerritories) {
+    source = targetTerritory.second;
+    target = targetTerritory.first;
+    if (territoriesCaptured.find(target->getName()) != territoriesCaptured.end()) {
+      territoriesCaptured.insert(target->getName());
+      target->setOwner(source->getOwner());
+    }
+    if(ge->debugMode){
+      cout << "Player " << source->getName() << " cheated and captured Territory: " << target->getName() << " [armies = " << target->getArmies() << "]" << endl;
+    }
+  }
+    p->advanceOrderIssued = true;
+}
+void CheaterStrategy::issueDeployOrder() {
+  //do nothing
+}
+void CheaterStrategy::issueCardOrder() {
+  //do nothing
+}
+bool CheaterStrategy::isDoneIssuing() {
+   return p->advanceOrderIssued;
 }
 
 /**

@@ -67,27 +67,34 @@ class AggressivePlayerStrategy : public PlayerStrategy {
   bool isDoneIssuing() override;
 
   private:
-  virtual void issueDeployOrder();
+  void issueDeployOrder();
 
-  virtual void issueAdvanceOrder();
+  void issueAdvanceOrder();
 
-  virtual void issueCardOrder();
+  void issueCardOrder();
 };
 
-class CheaterStrategy : public AggressivePlayerStrategy {
+class CheaterStrategy : public PlayerStrategy {
   public:
   explicit CheaterStrategy(Player *pPlayer);
 
+  bool isDoneIssuing() override;
+
+  void issueOrder() override;
 
   private:
-  void issueAdvanceOrder();
+  void issueDeployOrder() override;
+
+  void issueAdvanceOrder() override;
+
+  void issueCardOrder() override;
 };
 
 class NeutralStrategy : public PlayerStrategy {
   public:
   explicit NeutralStrategy(Player *pPlayer);
 
-  inline bool isDoneIssuing() override {return true;}
+  inline bool isDoneIssuing() override { return true; }
   void issueOrder() override;
 };
 
