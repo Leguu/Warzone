@@ -100,7 +100,7 @@ void CheaterStrategy::issueOrder() {
     target = targetTerritory.first;
     if (territoriesCaptured.find(target->getName()) != territoriesCaptured.end()) {
       territoriesCaptured.insert(target->getName());
-      target->setOwner(source->getOwner());
+      target->setOwner(this->p);
     }
     if(ge->debugMode){
       cout << "Player " << source->getName() << " cheated and captured Territory: " << target->getName() << " [armies = " << target->getArmies() << "]" << endl;
