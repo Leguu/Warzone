@@ -87,6 +87,31 @@ class AggressivePlayerStrategy : public PlayerStrategy {
   void issueAdvanceOrder() override;
 };
 
+class CheaterStrategy : public PlayerStrategy {
+  public:
+  explicit CheaterStrategy(Player *pPlayer);
+
+  bool isDoneIssuing() override;
+
+  void issueOrder() override;
+
+  private:
+  void issueDeployOrder() override;
+
+  void issueAdvanceOrder() override;
+
+  void issueCardOrder() override;
+};
+
+class NeutralStrategy : public PlayerStrategy {
+  public:
+  explicit NeutralStrategy(Player *pPlayer);
+
+  inline bool isDoneIssuing() override { return true; }
+  void issueOrder() override;
+
+};
+
 
 class Player {
   public:
@@ -95,6 +120,7 @@ class Player {
   Hand *hand;
   vector<Territory *> ownedTerritories = {};
   int reinforcements = 50;
+
   PlayerStrategy *strategy;
 
   int reinforcementsAfterDeploy = 50;

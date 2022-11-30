@@ -7,7 +7,7 @@
 #include <utility>
 
 #include "../Logging/LogObserver.h"
-#include "../Utils/Utils.h"
+#include "../Player/Player.h"
 #include "Order.h"
 
 // ------------------ Order -------------------------
@@ -201,6 +201,11 @@ void AdvanceOrder::execute() {
     target->setArmies(armies);
     return;
   }
+  //If player was neutral and gets attacked, set it to aggressive
+  if (typeid(target->getOwner()->strategy) == typeid(NeutralStrategy)) {
+    target->getOwner()->strategy = new AggressivePlayerStrategy(target->getOwner());
+  }
+
 
   // 1. deduct source armies
   source->setArmies(source->getArmies() - armies);
@@ -238,7 +243,6 @@ void AdvanceOrder::execute() {
     std::cout << this->issuer->name + " wins territory " + target->getName()
               << std::endl;
   }
-
   this->Notify(this);
 }
 
@@ -290,6 +294,10 @@ void BombOrder::validate() {
 void BombOrder::execute() {
   validate();
   this->target->setArmies(this->target->getArmies() / 2);
+  //If player was neutral and gets attacked, set it to aggressive
+  if (typeid(target->getOwner()->strategy) == typeid(NeutralStrategy)) {
+    target->getOwner()->strategy = new AggressivePlayerStrategy(target->getOwner());
+  }
   this->Notify(this);
 }
 

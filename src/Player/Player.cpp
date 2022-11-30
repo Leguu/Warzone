@@ -2,9 +2,10 @@
 #include <iostream>
 #include <map>
 #include <random>
-
 #include "../GameEngine/GameEngine.h"
 #include "Player.h"
+#include <set>
+
 
 /**
  * Get all the enemy territories adjacent to your own
@@ -32,8 +33,8 @@ vector<Territory *> Player::getAdjacentEnemyTerritories() {
  * @return A string containing a player's information
  */
 std::ostream &operator<<(std::ostream &os, const Player &player) {
-  os << player.name << endl;
-  return os;
+    os << player.name << endl;
+    return os;
 }
 
 /**
@@ -41,7 +42,7 @@ std::ostream &operator<<(std::ostream &os, const Player &player) {
  * @param name The name of the player
  */
 Player::Player(string name) : name(std::move(name)), orders(new OrderList()), strategy(new DefaultPlayerStrategy(this)) {
-  this->hand = new Hand(this);
+    this->hand = new Hand(this);
 }
 
 void Player::issueOrder() {
@@ -204,6 +205,7 @@ void PlayerStrategy::issueCardOrder() {
 
 PlayerStrategy::PlayerStrategy(Player *P) : p(P) {}
 
+
 bool PlayerStrategy::isDoneIssuing() {
   return p->advanceOrderIssued && (p->cardOrderIssued || p->hand->cards.empty());
 }
@@ -226,6 +228,56 @@ void DefaultPlayerStrategy::issueOrder() {
     p->advanceOrderIssued = true;
   }
 }
+
+void CheaterStrategy::issueAdvanceOrder() {
+  //do nothing
+}
+/**
+ * CheaterStrategy constructor
+ * @param pPlayer The player using this strategy
+ */
+CheaterStrategy::CheaterStrategy(Player *pPlayer) : PlayerStrategy(pPlayer) {
+}
+void CheaterStrategy::issueOrder() {
+  auto ge = GameEngine::instance();
+  Territory *source = nullptr, *target = nullptr;
+  auto targetTerritories = toAttack();
+  for (auto targetTerritory: targetTerritories) {
+    source = targetTerritory.second;
+    target = targetTerritory.first;
+    target->setOwner(this->p);
+    if(ge->debugMode){
+      cout << "Player " << source->getName() << " cheated and captured Territory: " << target->getName() << " [armies = " << target->getArmies() << "]" << endl;
+    }
+  }
+    p->advanceOrderIssued = true;
+}
+void CheaterStrategy::issueDeployOrder() {
+  //do nothing
+}
+void CheaterStrategy::issueCardOrder() {
+  //do nothing
+}
+bool CheaterStrategy::isDoneIssuing() {
+   return p->advanceOrderIssued;
+}
+
+/**
+ * NeutralStrategy constructor
+ * @param pPlayer The player using this strategy
+ */
+
+NeutralStrategy::NeutralStrategy(Player *pPlayer) : PlayerStrategy(pPlayer) {
+}
+
+/**
+ * Issue orders similarly to an aggressive player ONLY if it has been attacked
+ * @param  If debugging show more information
+ */
+void NeutralStrategy::issueOrder() {
+  //do nothing
+}
+
 
 /**
  * Find all adjacent enemy territories
@@ -423,13 +475,13 @@ void DefaultPlayerStrategy::issueAdvanceOrder() {
     cout << "Issued Advance Order: " << armies << " units from "
          << *source << " to " << *target << endl;
 }
+
 DefaultPlayerStrategy::DefaultPlayerStrategy(Player *pPlayer) : PlayerStrategy(pPlayer) {
 }
 
 bool DefaultPlayerStrategy::isDoneIssuing() {
   return p->advanceOrderIssued && (p->cardOrderIssued || p->hand->cards.empty());
 }
-
 
 // ------------------ Aggressive strategy -------------------------
 
@@ -440,7 +492,6 @@ bool DefaultPlayerStrategy::isDoneIssuing() {
  * @return A list in descending order of pairs of vectors <enemy, owned>
  */
 vector<std::pair<Territory *, Territory *>> AggressivePlayerStrategy::toAttack() const {
-
   auto sortedPairs = PlayerStrategy::toAttack();
 
   if (!sortedPairs.empty()) {
@@ -449,7 +500,6 @@ vector<std::pair<Territory *, Territory *>> AggressivePlayerStrategy::toAttack()
               [](const std::pair<Territory *, Territory *> &t1, std::pair<Territory *, Territory *> &t2) -> bool {
                 return (t1.second->getArmies() > t2.second->getArmies());
               });
-
     return sortedPairs;
 
   } else {
