@@ -61,7 +61,7 @@ class GameEngine : public ILoggable, public Subject {
 
   const static string helpText;
 
-  bool startupPhase(std::vector<std::pair<std::string, std::string>> = {});
+  bool startupPhase();
 
   void mainGameLoop();
 
@@ -90,6 +90,10 @@ class GameEngine : public ILoggable, public Subject {
   void assignCountries();
 
   friend void testLoggingObserver();
+  void tournamentMode(Command *pCommand);
+
+  int gamesToRun = 1;
+  int maxTurns = 100;
 };
 
 #endif// WARZONE_GAMEENGINE_H

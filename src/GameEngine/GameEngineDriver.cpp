@@ -4,6 +4,7 @@
 
 #include "GameEngine.h"
 
+/// THIS IS BROKEN AND INVALID NOW
 void testStartupPhase() {
   auto ge = new GameEngine();
 
@@ -17,7 +18,7 @@ void testStartupPhase() {
 	  {"addplayer", playerTwoName},
 	  {"gamestart", string()}};
 
-  auto gameStarted = !ge->startupPhase(testCommands);
+  auto gameStarted = !ge->startupPhase();
 
   //  1) use the loadmap <filename> command to select a map from a list of map
   //  files as stored in a directory, which results in the map being loaded in

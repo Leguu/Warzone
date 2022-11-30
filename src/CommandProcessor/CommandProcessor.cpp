@@ -85,7 +85,8 @@ Command *CommandProcessor::readCommand() {
     auto tokens = Utils::tokenizer(line, ' ');
 
     if (Utils::isEqualLowercase(tokens[0], "loadmap") ||
-        Utils::isEqualLowercase(tokens[0], "addplayer")) {
+        Utils::isEqualLowercase(tokens[0], "addplayer") ||
+        Utils::isEqualLowercase(tokens[0], "tournament")) {
       if (tokens.size() == 1) {
         cout << "This command is missing an argument." << endl;
         continue;
@@ -96,10 +97,10 @@ Command *CommandProcessor::readCommand() {
       return command;
 
     } else if (Utils::isEqualLowercase(tokens[0], "validatemap") ||
-               Utils::isEqualLowercase(tokens[0], "gamestart") ||
-               Utils::isEqualLowercase(tokens[0], "replay") ||
-               Utils::isEqualLowercase(tokens[0], "quit") ||
-               Utils::isEqualLowercase(tokens[0], "help")) {
+        Utils::isEqualLowercase(tokens[0], "gamestart") ||
+        Utils::isEqualLowercase(tokens[0], "replay") ||
+        Utils::isEqualLowercase(tokens[0], "quit") ||
+        Utils::isEqualLowercase(tokens[0], "help")) {
       auto command = new Command();
       command->command = Utils::trim(line);
       return command;
@@ -126,9 +127,14 @@ bool CommandProcessor::validate(Command *command) {
 
     GameEngine::GameState currState = engine->getState();
     string okString =
-            "Valid command. Moving from state " + GameEngine::gameStates[currState];
+        "Valid command. Moving from state " + GameEngine::gameStates[currState];
 
-    if (Utils::isEqualLowercase(command->getCommand(), "loadmap") &&
+    if (Utils::isEqualLowercase(command->getCommand(), "tournament")) {
+      if (currState == GameEngine::START) {
+        command->saveEffect(okString);
+        return true;
+      }
+    } else if (Utils::isEqualLowercase(command->getCommand(), "loadmap") &&
         !command->getArg().empty()) {
       if (currState == GameEngine::START ||
           currState == GameEngine::MAP_LOADED) {
@@ -141,7 +147,7 @@ bool CommandProcessor::validate(Command *command) {
         return true;
       }
     } else if (Utils::isEqualLowercase(command->getCommand(), "addplayer") &&
-               !command->getArg().empty()) {
+        !command->getArg().empty()) {
       if (currState == GameEngine::MAP_VALIDATED ||
           currState == GameEngine::PLAYERS_ADDED) {
         command->saveEffect(okString);
@@ -153,7 +159,7 @@ bool CommandProcessor::validate(Command *command) {
         return true;
       }
     } else if (Utils::isEqualLowercase(command->getCommand(), "replay") ||
-               Utils::isEqualLowercase(command->getCommand(), "quit")) {
+        Utils::isEqualLowercase(command->getCommand(), "quit")) {
       if (currState == GameEngine::WIN) {
         command->saveEffect(okString);
         return true;
@@ -193,7 +199,7 @@ CommandProcessor::operator=(const CommandProcessor &commandProcessor) = default;
 ostream &operator<<(ostream &os, const CommandProcessor &commandProcessor) {
   os << "list of commands: \n";
 
-  for (auto i: commandProcessor.commands) {
+  for (auto i : commandProcessor.commands) {
     os << i->getCommand() << endl;
   }
   return os;
@@ -283,7 +289,7 @@ std::string CommandProcessor::stringToLog() {
        << this->commands[this->commands.size() - 1]->command << std::endl
        << std::endl;
   return "New Command Added: " +
-         this->commands[this->commands.size() - 1]->command;
+      this->commands[this->commands.size() - 1]->command;
 }
 
 /**
@@ -334,7 +340,7 @@ FileCommandProcessorAdapter::FileCommandProcessorAdapter(string path)
  * @param fcpa Another adapter to copy from
  */
 FileCommandProcessorAdapter::FileCommandProcessorAdapter(
-        const FileCommandProcessorAdapter &fcpa)
+    const FileCommandProcessorAdapter &fcpa)
     : CommandProcessor(fcpa) {
   this->flr = fcpa.flr;
 }
@@ -345,7 +351,7 @@ FileCommandProcessorAdapter::FileCommandProcessorAdapter(
  * @return
  */
 FileCommandProcessorAdapter &FileCommandProcessorAdapter::operator=(
-        const FileCommandProcessorAdapter &fcpa) {
+    const FileCommandProcessorAdapter &fcpa) {
   CommandProcessor::operator=(fcpa);
   this->flr = fcpa.flr;
   return *this;
@@ -359,8 +365,7 @@ FileCommandProcessorAdapter &FileCommandProcessorAdapter::operator=(
  */
 ostream &operator<<(ostream &os, const FileCommandProcessorAdapter &fcpa) {
   os << "The path of the file command processor adaptor is: "
-     << fcpa.flr->getPath() << endl;
-  ;
+     << fcpa.flr->getPath() << endl;;
   return os;
 }
 
