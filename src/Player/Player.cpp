@@ -93,13 +93,13 @@ CheaterStrategy::CheaterStrategy(Player *pPlayer) : PlayerStrategy(pPlayer) {
 void CheaterStrategy::issueOrder() {
   auto ge = GameEngine::instance();
   Territory *source = nullptr, *target = nullptr;
-  std::set<std::string> territoriesCaptured;
+  std::set<Territory*> territoriesCaptured;
   auto targetTerritories = toAttack();
   for (auto targetTerritory: targetTerritories) {
     source = targetTerritory.second;
     target = targetTerritory.first;
-    if (territoriesCaptured.find(target->getName()) != territoriesCaptured.end()) {
-      territoriesCaptured.insert(target->getName());
+    if (territoriesCaptured.find(target) != territoriesCaptured.end()) {
+      territoriesCaptured.insert(target);
       target->setOwner(this->p);
     }
     if(ge->debugMode){
