@@ -59,7 +59,154 @@ Player::~Player() = default;
  */
 InvalidCardException::InvalidCardException(const std::string &arg)
     : runtime_error(arg) {}
+
+
+void PlayerStrategy::issueOrder() {
+  // Current Mechanism:
+  // ------------------
+  // 	1. Keep deploying until zero reinforcements are left. Random number each turn.
+  //    2. If user has a card in their hand, they play it.
+  //    3. If player has not advanced an order this round, they advance order.
+  // NOTE: All orders that are issued follow random moves for now.
+
+  if (p->reinforcementsAfterDeploy > 0) {
+    issueDeployOrder();
+  } else if (!p->cardOrderIssued && !p->hand->cards.empty()) {
+    issueCardOrder();
+    p->cardOrderIssued = true;
+  } else if (!p->advanceOrderIssued) {
+    issueAdvanceOrder();
+    p->advanceOrderIssued = true;
+  }
+}
+
+std::vector<std::pair<Territory *, Territory *>> PlayerStrategy::toAttack() const {
+  auto adjacentEnemies = std::vector<std::pair<Territory *, Territory *>>();
+  for (auto t: p->ownedTerritories) {
+    for (auto adj: t->getAdjTerritories()) {
+      if (adj->getOwner() != p) {
+        adjacentEnemies.emplace_back(std::pair(adj, t));
+      }
+    }
+  }
+  return adjacentEnemies;
+}
+
+void PlayerStrategy::issueDeployOrder() {
+  auto ge = GameEngine::instance();
+
+  auto target = toDefend()[0];
+
+  int armies = p->reinforcementsAfterDeploy == 1 ? 1 : Utils::randomNumberInRange(1, p->reinforcementsAfterDeploy);
+
+  if (ge->debugMode)
+    cout << "Issued Deploy Order: " << armies << " units to " + target->getContinent()->getName() << endl;
+
+  p->orders->push(new DeployOrder(p, armies, target));
+  p->reinforcementsAfterDeploy -= armies;
+}
+
+
+void PlayerStrategy::issueCardOrder() {
+  auto ge = GameEngine::instance();
+  auto randomCardName = p->hand->cards[0]->name;
+  auto cardNameMap = getCardNameMap();
+  int cardIndex = (cardNameMap.count(randomCardName) > 0)
+                          ? (*cardNameMap.find(randomCardName)).second
+                          : -1;
+
+  switch (cardIndex) {
+    case 0: {
+      std::pair<Territory *, Territory *> attack =
+              Utils::accessRandomPair(toAttack());
+      p->orders->push(new BombOrder(p, attack.first));
+
+      if (ge->debugMode)
+        cout << "Issued BombOrder on: " << attack.first->getName() << endl;
+
+      auto c = p->hand->removeByName("Bomb");
+      ge->deck->put(c);
+
+      break;
+    }
+
+    case 1: {
+      Territory *target = Utils::accessRandomElement(p->ownedTerritories);
+      p->orders->push(new BlockadeOrder(p, target));
+
+      if (ge->debugMode)
+        cout << "Issued BlockadeOrder on: " << target->getName() << endl;
+
+      auto c = p->hand->removeByName("Blockade");
+      ge->deck->put(c);
+
+      break;
+    }
+
+    case 2: {
+      Territory *source = nullptr;
+      Territory *target = Utils::accessRandomElement(p->ownedTerritories);
+
+      for (auto t: p->ownedTerritories) {
+        if (t->getArmies() > 0) {
+          source = t;
+        }
+      }
+
+      if (source == nullptr) {
+        return;
+      }
+
+      auto armies = source->getArmies();
+
+      if (armies != 1) {
+        std::random_device rd;
+        std::mt19937 rng(rd());
+        std::uniform_int_distribution<int> dis(1, armies);
+        armies = dis(rng);
+      }
+
+      p->orders->push(new AirliftOrder(p, armies, source, target));
+
+      if (ge->debugMode)
+        cout << "Issued AirliftOrder " << armies
+             << " units from: " << source->getName() << " to "
+             << target->getName() << endl;
+
+      auto c = p->hand->removeByName("Airlift");
+      ge->deck->put(c);
+
+      break;
+    }
+
+    case 3: {
+      Player *randomPlayer;
+      do {
+        randomPlayer = Utils::accessRandomElement(ge->players);
+      } while (randomPlayer == p);
+
+      p->orders->push(new NegotiateOrder(p, randomPlayer));
+
+      if (ge->debugMode)
+        cout << "Issued NegotiateOrder by " << p->name
+             << " against " << randomPlayer->name << endl;
+
+      auto c = p->hand->removeByName("Negotiate");
+      ge->deck->put(c);
+
+      break;
+    }
+
+    default:
+      throw InvalidCardException(randomCardName + " is not a legal card.");
+  }
+}
+
 PlayerStrategy::PlayerStrategy(Player *P) : p(P) {}
+
+bool PlayerStrategy::isDoneIssuing() {
+  return p->advanceOrderIssued && (p->cardOrderIssued || p->hand->cards.empty());
+}
 
 void DefaultPlayerStrategy::issueOrder() {
   // Current Mechanism:
@@ -287,52 +434,23 @@ bool DefaultPlayerStrategy::isDoneIssuing() {
 // ------------------ Aggressive strategy -------------------------
 
 
-/*
- * Aggressive player deploys or advances armies on its strongest country,
- * then always advances to enemy territories until it cannot do so anymore
- */
-
-void AggressivePlayer::issueOrder() {
-
-  if (p->reinforcementsAfterDeploy > 0) {
-    issueDeployOrder();
-  } else if (!p->cardOrderIssued && !p->hand->cards.empty()) {
-    issueCardOrder();
-    p->cardOrderIssued = true;
-  } else if (!p->advanceOrderIssued) {
-    issueAdvanceOrder();
-    p->advanceOrderIssued = true;
-  }
-}
-
 /**
  * Aggressive player will have a vector of territories that
  * are adjacent to enemy territories that will focus on attacking
  * @return A list in descending order of pairs of vectors <enemy, owned>
  */
-vector<std::pair<Territory *, Territory *>> AggressivePlayer::toAttack() const {
-  auto ge = GameEngine::instance();
-  struct compareTerritoriesPair {
-    inline bool operator()(std::pair<Territory *, Territory *> t1, std::pair<Territory *, Territory *> t2) {
-      return (t1.second->getArmies() > t2.second->getArmies());
-    }
-  } comparePair;
+vector<std::pair<Territory *, Territory *>> AggressivePlayerStrategy::toAttack() const {
 
-  DefaultPlayerStrategy defStrategy(p);
-  auto sortedPairs = defStrategy.toAttack();
+  p->strategy = new DefaultPlayerStrategy(p);
+  auto sortedPairs = p->strategy->toAttack();
 
   if (!sortedPairs.empty()) {
 
-    std::sort(sortedPairs.begin(), sortedPairs.end(), comparePair);
-    for (auto &sortedPair: sortedPairs) {
-      if (ge->debugMode)
-        cout << sortedPair.first->getName() + " "
-             << sortedPair.first->getArmies()
-             << " <--- enemy ||| owned ---> "
-             << sortedPair.second->getName() + " "
-             << sortedPair.second->getArmies() << endl;
-    }
-    cout << "----" << endl;
+    std::sort(sortedPairs.begin(), sortedPairs.end(),
+              [](const std::pair<Territory *, Territory *> &t1, std::pair<Territory *, Territory *> &t2) -> bool {
+                return (t1.second->getArmies() > t2.second->getArmies());
+              });
+
     return sortedPairs;
 
   } else {
@@ -342,67 +460,26 @@ vector<std::pair<Territory *, Territory *>> AggressivePlayer::toAttack() const {
 }
 
 /**
- * custom comparator to get a list in descending order of units
- */
-struct compareTerritoriesDescending {
-  inline bool operator()(Territory *t1, const Territory *t2) {
-    return (t1->getArmies() > t2->getArmies());
-  }
-} compDesc;
-
-/**
  * Aggressive player will choose to defend the territories,
  * ordered in descending number of armies
  * @return list of territories to defend.
  */
 
-vector<Territory *> AggressivePlayer::toDefend() const {
+vector<Territory *> AggressivePlayerStrategy::toDefend() const {
   auto ge = GameEngine::instance();
   vector<Territory *> toDefendTerritories;
   auto vulnerableTerritories = toAttack();
 
-  if (!vulnerableTerritories.empty()) {
-    cout << "\nPlayer " << p->name << "'s territories that need defending:" << endl;
-    for (auto t: vulnerableTerritories) {
-      if (std::find(toDefendTerritories.begin(), toDefendTerritories.end(), t.second) == toDefendTerritories.end()) {
-        if (ge->debugMode)
-          cout << t.second->getName() + "   "
-               << t.second->getArmies() << endl;
-        toDefendTerritories.push_back(t.second);
-      }
+  cout << "\nPlayer " << p->name << "'s territories that need defending:" << endl;
+  for (auto t: vulnerableTerritories) {
+    if (std::find(toDefendTerritories.begin(), toDefendTerritories.end(), t.second) == toDefendTerritories.end()) {
+      if (ge->debugMode)
+        cout << t.second->getName() + "   "
+             << t.second->getArmies() << endl;
+      toDefendTerritories.push_back(t.second);
     }
-    return toDefendTerritories;
-
-  } else {
-    cout << " You currently don't own any territory." << endl;
-    return toDefendTerritories;
   }
-}
-
-/**
- * Aggressive player will deploy reinforcements
- * to its strongest territory
- */
-
-void AggressivePlayer::issueDeployOrder() {
-
-  vector<Territory *> strongestOwnedTerritories = p->ownedTerritories;
-
-  if (!strongestOwnedTerritories.empty()) {
-    std::sort(strongestOwnedTerritories.begin(), strongestOwnedTerritories.end(), compDesc);
-
-    if (p->reinforcementsAfterDeploy > 0) {
-      int armies = p->reinforcementsAfterDeploy;
-      auto strongestTerritory = strongestOwnedTerritories[0];
-      cout << "Issued Deploy Order: " << armies << " units to " + strongestTerritory->getName() << endl;
-      p->orders->push(new DeployOrder(p, armies, strongestTerritory));
-      p->reinforcementsAfterDeploy -= armies;
-    } else {
-      cout << "No armies to deploy." << endl;
-    }
-  } else {
-    cout << " You currently don't own any territory." << endl;
-  }
+  return toDefendTerritories;
 }
 
 
@@ -411,209 +488,36 @@ void AggressivePlayer::issueDeployOrder() {
  * they attack first, otherwise they defend edge territories.
  */
 
-void AggressivePlayer::issueAdvanceOrder() {
+void AggressivePlayerStrategy::issueAdvanceOrder() {
 
   Territory *target;
   Territory *source;
 
   cout << p->name + " is ready to issue attacks" << endl;
 
+  if (nextToAttack >= toAttack().size())
+    nextToAttack = 0;
 
-  auto pairs = toAttack();
+  auto pair = toAttack()[nextToAttack];
 
-  std::set<string> territoriesAdvanceIssued;
-  if (!pairs.empty()) {
+  target = pair.first;
+  source = pair.second;
 
-    auto shuffledPairs = pairs;
-    auto engine = std::default_random_engine{};
-    std::shuffle(std::begin(shuffledPairs), std::end(shuffledPairs), engine);
+  int armyInTerritory = source->getArmies();
 
-    for (auto pair: shuffledPairs) {
+  int attackNum = (armyInTerritory - 1) > 0 ? (armyInTerritory - 1) : 0;
 
-      target = pair.first;
-      source = pair.second;
+  if (attackNum > 0) {
+    cout << source->getName() << " chosen enemy to attack "
+         << target->getName() << " with " << attackNum << " units" << endl;
 
-      if (territoriesAdvanceIssued.find(source->getName()) == territoriesAdvanceIssued.end()) {
+    p->orders->push(new AdvanceOrder(p, attackNum, source, target));
 
-        territoriesAdvanceIssued.insert(source->getName());
-
-        int armyInTerritory = source->getArmies();
-
-        int attackNum = (armyInTerritory - 1) > 0 ? (armyInTerritory - 1) : 0;
-
-        if (attackNum > 3) {
-          cout << source->getName() << " chosen enemy to attack "
-               << target->getName() << " with " << attackNum << " units" << endl;
-
-          p->orders->push(new AdvanceOrder(p, attackNum, source, target));
-
-          source->setArmies(armyInTerritory - attackNum);
-          cout << source->getArmies() << " units remaining" << endl;
-
-        } else {
-          cout << source->getName() + " is not confident in attacking" << endl;
-          Territory *strongest = pairs[0].second;
-          cout << "Deploying units from strongest region " << strongest->getName() << endl;
-          int armyInSource = strongest->getArmies();
-          int armyToGive = Utils::randomNumberInRange(0, armyInSource);
-          if (armyToGive > 0) {
-            vector<Territory *> friendlies;
-            for (auto neighbor: strongest->getAdjTerritories()) {
-              if (neighbor->getOwner()->name == strongest->getOwner()->name) {
-                friendlies.push_back(neighbor);
-              }
-            }
-
-            if (!friendlies.empty()) {
-
-              int randomFriendIndex = Utils::randomNumberInRange(0, friendlies.size() - 1);
-
-              cout << strongest->getName() << " will deploy to ally "
-                   << friendlies[randomFriendIndex]->getName() << " "
-                   << armyToGive << " units" << endl;
-
-              p->orders->push(new AdvanceOrder(p, armyToGive, strongest, friendlies[randomFriendIndex]));
-              strongest->setArmies(armyInSource - armyToGive);
-            } else {
-              cout << strongest->getName() << " has no neighboring ally" << endl;
-            }
-          } else {
-            cout << strongest->getName() << " has refused to deploy armies to neighboring ally" << endl;
-          }
-        }
-        cout << "----" << endl;
-      }
-    }
+    cout << "----" << endl;
   } else {
-    cout << "No units to attack, you are all alone" << endl;
+    cout << source->getName() << " does not have enough units to attack " << endl;
   }
-}
-
-void AggressivePlayer::issueCardOrder() {
-  auto ge = GameEngine::instance();
-  auto randomCardName = p->hand->cards[0]->name;
-  auto cards = p->hand->cards;
-  int cardIndex;
-
-  std::map<std::string, int> cardNameMap = {
-          {"Bomb", 0},
-          {"Blockade", 1},
-          {"Airlift", 2},
-          {"NegotiateCard", 3}};
-
-  auto it = find_if(cards.begin(), cards.end(), [&](Card *c) { return c->name == "Bomb"; });
-
-  if (it != cards.end()) {
-    cardIndex = (cardNameMap.count("Bomb") > 0)
-                        ? (*cardNameMap.find("Bomb")).second
-                        : -1;;
-  } else {
-    auto it2 = find_if(cards.begin(), cards.end(), [&](Card *c) { return c->name == "Airlift"; });
-
-    if (it2 != cards.end()) {
-      cardIndex = (cardNameMap.count("Airlift") > 0)
-                          ? (*cardNameMap.find("Airlift")).second
-                          : -1;;
-    } else {
-      cardIndex = (cardNameMap.count(randomCardName) > 0)
-                          ? (*cardNameMap.find(randomCardName)).second
-                          : -1;
-    }
-  }
-
-  switch (cardIndex) {
-    case 0: {
-      std::pair<Territory *, Territory *> attack =
-              Utils::accessRandomPair(toAttack());
-      p->orders->push(new BombOrder(p, attack.first));
-
-      if (ge->debugMode)
-        cout << "Issued BombOrder on: " << attack.first->getName() << endl;
-
-      auto c = p->hand->removeByName("Bomb");
-      ge->deck->put(c);
-
-      break;
-    }
-
-    case 1: {
-      Territory *target = Utils::accessRandomElement(p->ownedTerritories);
-      p->orders->push(new BlockadeOrder(p, target));
-
-      if (ge->debugMode)
-        cout << "Issued BlockadeOrder on: " << target->getName() << endl;
-
-      auto c = p->hand->removeByName("Blockade");
-      ge->deck->put(c);
-
-      break;
-    }
-
-    case 2: {
-      Territory *source = nullptr;
-      Territory *target = Utils::accessRandomElement(p->ownedTerritories);
-
-      for (auto t: p->ownedTerritories) {
-        if (t->getArmies() > 0) {
-          source = t;
-        }
-      }
-
-      if (source == nullptr) {
-        return;
-      }
-
-      auto armies = source->getArmies();
-
-      if (armies != 1) {
-        std::random_device rd;
-        std::mt19937 rng(rd());
-        std::uniform_int_distribution<int> dis(1, armies);
-        armies = dis(rng);
-      }
-
-      p->orders->push(new AirliftOrder(p, armies, source, target));
-
-      if (ge->debugMode)
-        cout << "Issued AirliftOrder " << armies
-             << " units from: " << source->getName() << " to "
-             << target->getName() << endl;
-
-      auto c = p->hand->removeByName("Airlift");
-      ge->deck->put(c);
-
-      break;
-    }
-
-    case 3: {
-      Player *randomPlayer;
-      do {
-        randomPlayer = Utils::accessRandomElement(ge->players);
-      } while (randomPlayer == p);
-
-      p->orders->push(new NegotiateOrder(p, randomPlayer));
-
-      if (ge->debugMode)
-        cout << "Issued NegotiateOrder by " << p->name
-             << " against " << randomPlayer->name << endl;
-
-      auto c = p->hand->removeByName("Negotiate");
-      ge->deck->put(c);
-
-      break;
-    }
-
-    default:
-      throw InvalidCardException(randomCardName + " is not a legal card.");
-  }
-}
-
-/**
- * A check if the aggressive player has finished executing all orders
- * @return a bool if the aggressive player has exhausted all options
- */
-bool AggressivePlayer::isDoneIssuing() {
-  return p->advanceOrderIssued && (p->cardOrderIssued || p->hand->cards.empty());
+  nextToAttack++;
 }
 
 
@@ -621,5 +525,5 @@ bool AggressivePlayer::isDoneIssuing() {
  * Constructor to give a certain player an aggressive strategy
  * @param pPlayer Any player with units, territories and a deck
  */
-AggressivePlayer::AggressivePlayer(Player *pPlayer) : PlayerStrategy(pPlayer) {
+AggressivePlayerStrategy::AggressivePlayerStrategy(Player *pPlayer) : PlayerStrategy(pPlayer) {
 }
