@@ -441,8 +441,7 @@ bool DefaultPlayerStrategy::isDoneIssuing() {
  */
 vector<std::pair<Territory *, Territory *>> AggressivePlayerStrategy::toAttack() const {
 
-  p->strategy = new DefaultPlayerStrategy(p);
-  auto sortedPairs = p->strategy->toAttack();
+  auto sortedPairs = PlayerStrategy::toAttack();
 
   if (!sortedPairs.empty()) {
 
@@ -462,7 +461,7 @@ vector<std::pair<Territory *, Territory *>> AggressivePlayerStrategy::toAttack()
 /**
  * Aggressive player will choose to defend the territories,
  * ordered in descending number of armies
- * @return list of territories to defend.
+ * @return list of territories to defend, not all owned territories.
  */
 
 vector<Territory *> AggressivePlayerStrategy::toDefend() const {
