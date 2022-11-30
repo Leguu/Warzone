@@ -7,6 +7,7 @@ class PlayerStrategy;
 #include "../Cards/Card.h"
 #include "../Map/Map.h"
 #include "../Orders/Order.h"
+#include <map>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -24,18 +25,25 @@ class PlayerStrategy {
 
   virtual void issueOrder();
 
-  virtual std::vector<std::pair<Territory *, Territory *>> toAttack() const = 0;
+  [[nodiscard]] virtual std::vector<std::pair<Territory *, Territory *>> toAttack() const;
 
-  virtual vector<Territory *> toDefend() const = 0;
+  [[nodiscard]] virtual vector<Territory *> toDefend() const = 0;
 
-  virtual bool isDoneIssuing() = 0;
+  virtual bool isDoneIssuing();
 
   private:
-  virtual void issueDeployOrder() = 0;
+  virtual std::map<std::string, int> getCardNameMap() {
+    return {{"Bomb", 0},
+            {"Blockade", 1},
+            {"Airlift", 2},
+            {"NegotiateCard", 3}};
+  }
+
+  virtual void issueDeployOrder();
 
   virtual void issueAdvanceOrder() = 0;
 
-  virtual void issueCardOrder() = 0;
+  virtual void issueCardOrder();
 };
 
 class DefaultPlayerStrategy : public PlayerStrategy {
@@ -46,14 +54,16 @@ class DefaultPlayerStrategy : public PlayerStrategy {
 
   [[nodiscard]] vector<Territory *> toDefend() const override;
 
+  void issueOrder() override;
+
   bool isDoneIssuing() override;
 
   private:
-  void issueDeployOrder();
+  void issueDeployOrder() override;
 
-  void issueAdvanceOrder();
+  void issueAdvanceOrder() override;
 
-  void issueCardOrder();
+  void issueCardOrder() override;
 };
 
 class AggressivePlayerStrategy : public PlayerStrategy {
@@ -64,14 +74,17 @@ class AggressivePlayerStrategy : public PlayerStrategy {
 
   [[nodiscard]] vector<Territory *> toDefend() const override;
 
-  bool isDoneIssuing() override;
-
   private:
-  void issueDeployOrder();
+  std::map<std::string, int> getCardNameMap() override {
+    return {
+            {"Bomb", 0},
+            {"Airlift", 2},
+    };
+  }
 
-  void issueAdvanceOrder();
+  int nextToAttack = 0;
 
-  void issueCardOrder();
+  void issueAdvanceOrder() override;
 };
 
 class CheaterStrategy : public PlayerStrategy {
@@ -96,6 +109,7 @@ class NeutralStrategy : public PlayerStrategy {
 
   inline bool isDoneIssuing() override { return true; }
   void issueOrder() override;
+
 };
 
 
@@ -108,7 +122,6 @@ class Player {
   int reinforcements = 50;
 
   PlayerStrategy *strategy;
-
 
   int reinforcementsAfterDeploy = 50;
 
@@ -124,24 +137,11 @@ class Player {
 
   vector<Territory *> getAdjacentEnemyTerritories();
 
+  void issueOrder();
+
   friend std::ostream &operator<<(std::ostream &os, const Player &player);
 
   ~Player();
-
-  [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const;
-
-  [[nodiscard]] vector<Territory *> toDefend() const;
-
-  void issueOrder();
-
-  bool isDoneIssuing();
-
-  private:
-  void issueDeployOrder();
-
-  void issueAdvanceOrder();
-
-  void issueCardOrder();
 };
 
 void testPlayers();
