@@ -112,6 +112,29 @@ class NeutralStrategy : public PlayerStrategy {
 
 };
 
+class BenevolentPlayer : public PlayerStrategy {
+  public:
+  explicit BenevolentPlayer(Player *pPlayer);
+
+  [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const override;
+
+  [[nodiscard]] vector<Territory *> toDefend() const override;
+
+  void issueOrder() override;
+
+  bool isDoneIssuing() override;
+
+  private:
+  std::map<std::string, int> getCardNameMap() override {
+    return {
+            {"Airlift", 2},
+            {"NegotiateCard", 3},
+    };
+  }
+
+  void issueDeployOrder() override;
+  void issueAdvanceOrder() override;
+};
 
 class Player {
   public:
