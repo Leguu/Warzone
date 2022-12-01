@@ -153,7 +153,7 @@ void GameEngine::issueOrdersPhase() {
         continue;
       }
 
-      cout << player->name << " is issuing an order: ";
+      cout << player->name << " is issuing an order: " << endl;
       player->issueOrder();
     }
   }
@@ -419,7 +419,9 @@ void GameEngine::tournamentMode(Command *command) {
         player->strategy = new AggressivePlayerStrategy(player);
       } else if (Utils::isEqualLowercase(arg, "cheater")) {
         player->strategy = new CheaterStrategy(player);
-      } else if (Utils::isEqualLowercase(arg, "human")) {
+      }else if (Utils::isEqualLowercase(arg, "benevolent")) {
+        player->strategy = new BenevolentPlayer(player);
+      }else if (Utils::isEqualLowercase(arg, "human")) {
         player->strategy = new HumanStrategy(player);
       } else if (Utils::isEqualLowercase(arg, "neutral")) {
         player->strategy = new NeutralStrategy(player);

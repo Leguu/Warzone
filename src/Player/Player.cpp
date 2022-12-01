@@ -441,9 +441,10 @@ void BenevolentPlayer::issueDeployOrder() {
 
   auto target = territories[0];
 
-  int armies = p->reinforcementsAfterDeploy == 1 ? 1 : Utils::randomNumberInRange(1, p->reinforcementsAfterDeploy);
+  //int armies = p->reinforcementsAfterDeploy == 1 ? 1 : Utils::randomNumberInRange(1, p->reinforcementsAfterDeploy);
+  int armies = p->reinforcementsAfterDeploy == 1 ? 1 : (0.5* p->reinforcementsAfterDeploy);
 
-  cout << "Issued Deploy Order: " << armies << " units to weakest region " + target->getName() << endl;
+  cout << "Issued Deploy Order: " << armies << " units to weakest region " + target->getName() <<"armies size"  << endl;
 
   p->orders->push(new DeployOrder(p, armies, target));
   p->reinforcementsAfterDeploy -= armies;
