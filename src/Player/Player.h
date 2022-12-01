@@ -139,8 +139,6 @@ class BenevolentPlayer : public PlayerStrategy {
 
   [[nodiscard]] vector<Territory *> toDefend() const override;
 
-  void issueOrder() override;
-
   bool isDoneIssuing() override;
 
   private:
