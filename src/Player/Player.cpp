@@ -490,6 +490,8 @@ bool DefaultPlayerStrategy::isDoneIssuing() {
  * Benevolent player deploys or advances armies on its weakest country,
  * then only defends and is never the aggressor with attack or cards.
  */
+
+// TODO DELETE THIS (From parent no need)
 void BenevolentPlayer::issueOrder() {
   if (p->reinforcementsAfterDeploy > 0) {
     issueDeployOrder();
