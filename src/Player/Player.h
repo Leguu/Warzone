@@ -139,7 +139,7 @@ class BenevolentPlayer : public PlayerStrategy {
 
   [[nodiscard]] vector<Territory *> toDefend() const override;
 
-  bool isDoneIssuing() override;
+  //bool isDoneIssuing() override;
 
   private:
   std::map<std::string, int> getCardNameMap() override {

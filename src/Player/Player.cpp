@@ -365,9 +365,10 @@ void DefaultPlayerStrategy::issueAdvanceOrder() {
 DefaultPlayerStrategy::DefaultPlayerStrategy(Player *pPlayer) : PlayerStrategy(pPlayer) {
 }
 
-bool DefaultPlayerStrategy::isDoneIssuing() {
-  return p->advanceOrderIssued && (p->cardOrderIssued || p->hand->cards.empty());
-}
+//TODO Check if required
+//bool DefaultPlayerStrategy::isDoneIssuing() {
+ // return p->advanceOrderIssued && (p->cardOrderIssued || p->hand->cards.empty());
+//}
 
 
 // ------------------ Benevolent strategy -------------------------
@@ -466,9 +467,9 @@ void BenevolentPlayer::issueAdvanceOrder() {
  * Check if the benevolent player has finished executing all orders
  * @return a bool if the benevolent player has exhausted all options
  */
-bool BenevolentPlayer::isDoneIssuing() {
-  return p->advanceOrderIssued && (p->cardOrderIssued || p->hand->cards.empty());
-}
+//bool BenevolentPlayer::isDoneIssuing() {
+//  return p->advanceOrderIssued && (p->cardOrderIssued || p->hand->cards.empty());
+//}
 
 
 /**
