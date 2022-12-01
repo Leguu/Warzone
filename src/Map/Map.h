@@ -86,6 +86,7 @@ class Territory {
   int armies = 0;
   Player *owner = nullptr;
 
+  friend class GameEngine;
   friend class Map;
 };
 

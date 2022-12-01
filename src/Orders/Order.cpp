@@ -6,6 +6,7 @@
 #include <random>
 #include <utility>
 
+#include "../GameEngine/GameEngine.h"
 #include "../Logging/LogObserver.h"
 #include "../Player/Player.h"
 #include "Order.h"
@@ -96,9 +97,10 @@ std::string DeployOrder::description() {
  * Validate a deploy order
  */
 void DeployOrder::validate() {
-  if (target->getOwner() && (target->getOwner() != issuer)) {
-    throw InvalidOrderException(
-            issuer->name + " tried to deploy in someone else's territory.");
+  if (target->getOwner() == nullptr) {
+    throw InvalidOrderException(issuer->name + " tried to deploy in neutral territory.");
+  } else if (target->getOwner() != issuer) {
+    throw InvalidOrderException(issuer->name + " tried to deploy in " + target->getOwner()->name + "'s territory.");
   } else if (reinforcements > issuer->reinforcements) {
     throw InvalidOrderException(
             issuer->name +
@@ -116,7 +118,6 @@ void DeployOrder::execute() {
   validate();
   this->issuer->reinforcements -= reinforcements;
   this->target->setArmies(this->target->getArmies() + reinforcements);
-  this->Notify(this);
 }
 
 /**
@@ -201,11 +202,8 @@ void AdvanceOrder::execute() {
     target->setArmies(armies);
     return;
   }
-  //If player was neutral and gets attacked, set it to aggressive
-  if (typeid(target->getOwner()->strategy) == typeid(NeutralStrategy)) {
-    target->getOwner()->strategy = new AggressivePlayerStrategy(target->getOwner());
-  }
 
+  targetOwner->strategy->onAttack();
 
   // 1. deduct source armies
   source->setArmies(source->getArmies() - armies);
@@ -243,7 +241,6 @@ void AdvanceOrder::execute() {
     std::cout << this->issuer->name + " wins territory " + target->getName()
               << std::endl;
   }
-  this->Notify(this);
 }
 
 /**
@@ -295,9 +292,7 @@ void BombOrder::execute() {
   validate();
   this->target->setArmies(this->target->getArmies() / 2);
   //If player was neutral and gets attacked, set it to aggressive
-  if (typeid(target->getOwner()->strategy) == typeid(NeutralStrategy)) {
-    target->getOwner()->strategy = new AggressivePlayerStrategy(target->getOwner());
-  }
+  target->getOwner()->strategy->onAttack();
   this->Notify(this);
 }
 
@@ -337,6 +332,9 @@ void BlockadeOrder::validate() {
   if (target->getOwner() && (target->getOwner() != issuer)) {
     throw InvalidOrderException(issuer->name + " does not own territory " +
                                 target->getName());
+  }
+  if (issuer->ownedTerritories.size() == 1) {
+    throw InvalidOrderException(issuer->name + " tried to blockade their last territory!");
   }
 }
 
@@ -587,6 +585,9 @@ OrderList::OrderList() { this->Attach(LogObserver::instance()); }
  * Destructor for OrderList
  */
 OrderList::~OrderList() { this->Detach(LogObserver::instance()); }
+void OrderList::clear() {
+  orders.clear();
+}
 
 // ------------------ Exception ------------------------
 /**

@@ -166,6 +166,8 @@ public:
 
   Order *pop();
 
+  void clear();
+
   void push(Order *order);
 
   void executeOrders();

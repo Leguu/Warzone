@@ -57,7 +57,7 @@ class GameEngine : public ILoggable, public Subject {
 
   void issueOrdersPhase();
 
-  bool executeOrdersPhase();
+  void executeOrdersPhase();
 
   const static string helpText;
 
