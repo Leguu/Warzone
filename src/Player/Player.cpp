@@ -365,12 +365,6 @@ void DefaultPlayerStrategy::issueAdvanceOrder() {
 DefaultPlayerStrategy::DefaultPlayerStrategy(Player *pPlayer) : PlayerStrategy(pPlayer) {
 }
 
-//TODO Check if required
-//bool DefaultPlayerStrategy::isDoneIssuing() {
- // return p->advanceOrderIssued && (p->cardOrderIssued || p->hand->cards.empty());
-//}
-
-
 // ------------------ Benevolent strategy -------------------------
 
 /*
@@ -416,30 +410,42 @@ vector<std::pair<Territory *, Territory *>> BenevolentPlayer::toAttack() const {
 }
 
 /**
- * Returns a list of owned territories.
+ * Returns a list of owned territories in ascending order (weakest regions).
  * @return list of territories to defend.
  */
 std::vector<Territory *> BenevolentPlayer::toDefend() const {
-  return p->ownedTerritories;
+  auto ge = GameEngine::instance();
+  vector<Territory *> toDefendTerritories;
+  auto weakestTerritories = toAttack();
+
+  for (auto t: weakestTerritories) {
+    if (std::find(toDefendTerritories.begin(), toDefendTerritories.end(), t.second) == toDefendTerritories.end()) {
+      if (ge->debugMode)
+        toDefendTerritories.push_back(t.second);
+    }
+  }
+  return toDefendTerritories;
 }
+
 
 /**
  * Benevolent player will deploy reinforcements
- * to its strongest territory
+ * to its weakest territory
  */
 void BenevolentPlayer::issueDeployOrder() {
-  auto ge = GameEngine::instance();
+  auto territories = toDefend();
 
-  vector<Territory *> weakestOwnedTerritories = p->ownedTerritories;
-  std::sort(weakestOwnedTerritories.begin(), weakestOwnedTerritories.end(), compAsc);
+  if (territories.empty()) {
+    return;
+  }
+
+  auto target = territories[0];
 
   int armies = p->reinforcementsAfterDeploy == 1 ? 1 : Utils::randomNumberInRange(1, p->reinforcementsAfterDeploy);
-  auto weakestTerritory = weakestOwnedTerritories[0];
 
-  if (ge->debugMode)
-    cout << "Issued Deploy Order: " << armies << " units to weakest territory (" << weakestTerritory->getName() << ")" << endl;
+  cout << "Issued Deploy Order: " << armies << " units to weakest region " + target->getName() << endl;
 
-  p->orders->push(new DeployOrder(p, armies, weakestTerritory));
+  p->orders->push(new DeployOrder(p, armies, target));
   p->reinforcementsAfterDeploy -= armies;
 }
 
@@ -456,21 +462,13 @@ void BenevolentPlayer::issueAdvanceOrder() {
     return;
   }
 
-  Territory *source = pairs[0].first;
-  Territory *target = pairs[0].second;
+  auto target = pairs[0].first;
+  auto source = pairs[0].second;
 
   int armies = Utils::randomNumberInRange(0, source->getArmies());
   p->orders->push(new AdvanceOrder(p, armies, source, target));
+  advanceOrderIssued = true;
 }
-
-/**
- * Check if the benevolent player has finished executing all orders
- * @return a bool if the benevolent player has exhausted all options
- */
-//bool BenevolentPlayer::isDoneIssuing() {
-//  return p->advanceOrderIssued && (p->cardOrderIssued || p->hand->cards.empty());
-//}
-
 
 /**
  * Constructor to give a certain player a benevolent strategy
