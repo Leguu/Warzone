@@ -372,17 +372,6 @@ DefaultPlayerStrategy::DefaultPlayerStrategy(Player *pPlayer) : PlayerStrategy(p
  * then only defends and is never the aggressor with attack or cards.
  */
 
-
-/**
- * custom comparator to get a list in ascending order of units
- */
-struct compareTerritoriesAscending {
-  inline bool operator()(Territory *t1, const Territory *t2) {
-    return (t1->getArmies() < t2->getArmies());
-  }
-} compAsc;
-
-
 // NOTE: toAttack() <-> toDefend() for Benevolent Player
 
 /**
