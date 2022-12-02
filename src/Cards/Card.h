@@ -18,8 +18,6 @@ class Hand {
 public:
   void remove(Card *card);
 
-  std::vector<Card *> cards = {};
-
   explicit Hand(Player *player);
 
   Hand(const Hand &h);
@@ -31,6 +29,8 @@ public:
   Card *draw();
 
   Card *removeByName(const string &name);
+
+  Card *removeRandomCard();
 
   void removeAll();
 
@@ -46,6 +46,7 @@ public:
 
   void debugPlay(string const &name);
 
+  std::vector<Card *> cards = {};
 private:
   Player *player;
 
@@ -72,7 +73,6 @@ public:
 
   unsigned long long int getCardsSize();
 
-private:
   std::vector<Card *> cards = vector<Card *>();
 };
 
@@ -142,7 +142,7 @@ public:
 class NegotiateCard : public Card {
 public:
   inline NegotiateCard()
-	  : Card("NegotiateCard",
+	  : Card("Negotiate",
 			 "Use to prevent attacks between you and another player",
 			 {"negotiate", "negotiatecard", "negotiate card"}) {}
 

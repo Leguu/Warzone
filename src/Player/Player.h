@@ -31,19 +31,14 @@ class PlayerStrategy {
 
   virtual void onAttack();
 
-  private:
-  virtual std::map<std::string, int> getCardNameMap() {
-    return {{"Bomb", 0},
-            {"Blockade", 1},
-            {"Airlift", 2},
-            {"NegotiateCard", 3}};
-  }
+  virtual vector<string> allowedCards();
 
+  private:
   virtual void issueAdvanceOrder() = 0;
 
   protected:
   virtual void issueDeployOrder();
-      virtual void issueCardOrder();
+  virtual void issueCardOrder();
 };
 
 class DefaultPlayerStrategy : public PlayerStrategy {
@@ -66,13 +61,9 @@ class AggressivePlayerStrategy : public PlayerStrategy {
 
   [[nodiscard]] vector<Territory *> toDefend() const override;
 
+  vector<string> allowedCards() override;
+
   private:
-  std::map<std::string, int> getCardNameMap() override {
-    return {
-            {"Bomb", 0},
-            {"Airlift", 2},
-    };
-  }
 
   int nextToAttack = 0;
 
@@ -139,13 +130,9 @@ class BenevolentPlayer : public PlayerStrategy {
 
   [[nodiscard]] vector<Territory *> toDefend() const override;
 
+  vector<string> allowedCards() override;
+
   private:
-  std::map<std::string, int> getCardNameMap() override {
-    return {
-            {"Airlift", 2},
-            {"NegotiateCard", 3},
-    };
-  }
 
   void issueDeployOrder() override;
   void issueAdvanceOrder() override;
