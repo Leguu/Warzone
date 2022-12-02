@@ -1,4 +1,3 @@
-
 #include "Player.h"
 #include "../GameEngine/GameEngine.h"
 #include <iostream>
@@ -356,6 +355,7 @@ vector<std::pair<Territory *, Territory *>> BenevolentPlayer::toAttack() const {
             });
 
   return adjacentFriends;
+
 }
 
 /**

@@ -216,6 +216,10 @@ void AdvanceOrder::execute() {
     targetOwner->strategy->onAttack();
   }
 
+  if (targetOwner) {
+    targetOwner->strategy->onAttack();
+  }
+
   // 1. deduct source armies
   source->setArmies(source->getArmies() - armies);
 

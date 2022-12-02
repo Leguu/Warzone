@@ -78,7 +78,6 @@ class CheaterStrategy : public PlayerStrategy {
 
   void issueOrder() override;
 
-
   [[nodiscard]] vector<Territory *> toDefend() const override;
 
   private:
