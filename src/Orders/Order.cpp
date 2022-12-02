@@ -206,16 +206,7 @@ void AdvanceOrder::execute() {
     target->setArmies(armies);
     return;
   }
-  //If player was neutral and gets attacked, set it to aggressive
-  if (typeid(target->getOwner()->strategy) == typeid(NeutralStrategy)) {
-    target->getOwner()->strategy = new AggressivePlayerStrategy(target->getOwner());
-  }
-
-
-  if (targetOwner) {
-    targetOwner->strategy->onAttack();
-  }
-
+  
   if (targetOwner) {
     targetOwner->strategy->onAttack();
   }
