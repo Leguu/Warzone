@@ -1,13 +1,9 @@
 #include "Map.h"
-#include "../Player/Player.h"
-#include <algorithm>
-#include <fstream>
+#include "../GameEngine/GameEngine.h"
 #include <iostream>
 #include <map>
 #include <set>
-#include <sstream>
 #include <string>
-#include <utility>
 #include <vector>
 
 // ------------------ Territory ------------------------
@@ -110,13 +106,25 @@ Player *Territory::getOwner() { return owner; }
  * @param newOwner The new player object who owns this territory
  */
 void Territory::setOwner(Player *newOwner) {
-  if (owner) {
+  if (owner == newOwner) {
+    return;
+  }
+
+  if (owner != nullptr) {
     owner->ownedTerritories.erase(std::remove(owner->ownedTerritories.begin(), owner->ownedTerritories.end(), this), owner->ownedTerritories.end());
+
+    if (owner->ownedTerritories.empty()) {
+      auto ge = GameEngine::instance();
+
+      ge->players.erase(std::remove(ge->players.begin(), ge->players.end(), owner), ge->players.end());
+      cout << "Player " << owner->name << " has lost all territories and is now removed from the game!" << endl;
+    }
   }
 
   owner = newOwner;
 
-  if (newOwner != nullptr) {
+  if (newOwner != nullptr &&
+      std::find(newOwner->ownedTerritories.begin(), newOwner->ownedTerritories.end(), this) == newOwner->ownedTerritories.end()) {
     newOwner->ownedTerritories.push_back(this);
   }
 }

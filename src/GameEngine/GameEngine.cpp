@@ -42,44 +42,41 @@ GameEngine::GameEngine(const std::string &mp) {
 /// Execute all the orders
 /// \return whether win condition has been reached
 
-bool GameEngine::executeOrdersPhase() {
+void GameEngine::executeOrdersPhase() {
   cout << endl
        << "Executing orders..." << endl;
-  int stillExecuting = players.size();
-  while (stillExecuting > 0) {
+
+  while (true) {
     for (auto player: players) {
+      auto allDoneExecuting = std::all_of(players.begin(), players.end(), [](Player *p) {
+        return p->orders->getOrdersSize() == 0;
+      });
+
+      if (allDoneExecuting) {
+        goto outerloop;
+      }
+
       auto order = player->orders->pop();
 
       if (order == nullptr) {
-        stillExecuting -= 1;
         continue;
       }
 
       try {
-
         cout << *order << endl;
         order->execute();
-
-        for (auto p: players) {
-          if (p->ownedTerritories.empty()) {
-            players.erase(std::remove(players.begin(), players.end(), p), players.end());
-            cout << "Player " << p->name << " has lost all territories and is now removed from the game!" << endl;
-            if (players.size() == 1) return true;
-          }
-        }
-
       } catch (InvalidOrderException &e) {
         cout << order->name << " order issued by " + order->issuer->name
              << " was invalid: " << e.what() << endl;
       }
     }
   }
+outerloop:
 
   cout << "... All orders have been executed" << endl
        << endl;
   cout << "Next round has started" << endl
        << endl;
-  return false;
 }
 
 /**
@@ -87,27 +84,30 @@ bool GameEngine::executeOrdersPhase() {
  */
 
 void GameEngine::mainGameLoop() {
-  cout << "Welcome to Warzone! Type in \"help\" at any time to have a list of "
-          "commands"
-       << endl;
   while (true) {
     reinforcementPhase();
 
     issueOrdersPhase();
 
-    auto gameOver = executeOrdersPhase();
+    executeOrdersPhase();
 
     turnsGone += 1;
+
+    if (players.size() == 1) {
+      cout << "It has been " << turnsGone << " turns since the game has started." << endl;
+      break;
+    }
 
     if (turnsGone >= maxTurns) {
       cout << "Max turns have been reached! The game is over." << endl;
       break;
     }
 
-    // If the game is over
-    if (gameOver) {
-      cout << "It has been " << turnsGone << " turns since the game has started." << endl;
-      break;
+    for (auto player: players) {
+      player->cardAwarded = false;
+      player->strategy->resetTurn();
+      player->reinforcementsAfterDeploy = 0;
+      player->cannotAttack.clear();
     }
   }
 }
@@ -138,27 +138,24 @@ GameEngine::GameEngine() {
  * Issue the orders
  */
 void GameEngine::issueOrdersPhase() {
-  auto stillIssuing = players.size();
-  while (stillIssuing > 0) {
+  while (true) {
     for (auto player: players) {
-      if (player->strategy->isDoneIssuing()) {
-        stillIssuing--;
-        if (stillIssuing == 0) break;
+      auto allPlayersDone = std::all_of(players.begin(), players.end(), [](auto item) {
+        return item->strategy->isDoneIssuing();
+      });
+
+      if (allPlayersDone) {
+        return;
+      }
+
+      if (player->strategy->isDoneIssuing() ||
+          std::find(players.begin(), players.end(), player) == players.end()) {
         continue;
       }
 
-      cout << player->name << " is issuing an order: ";
+      cout << player->name << " is issuing an order: " << endl;
       player->issueOrder();
     }
-  }
-
-  // reset so card can be awarded next round
-  for (auto player: players) {
-    player->cardAwarded = false;
-    player->cardOrderIssued = false;
-    player->advanceOrderIssued = false;
-    player->reinforcementsAfterDeploy = 0;
-    player->cannotAttack.clear();
   }
 }
 
@@ -350,6 +347,7 @@ void GameEngine::assignCountries() {
 
   auto i = 0;
   for (auto t: map->getAllTerritories()) {
+    t->owner = nullptr;
     t->setArmies(0);
     t->setOwner(players[i]);
     i = (i + 1) % players.size();
@@ -417,6 +415,22 @@ void GameEngine::tournamentMode(Command *command) {
       auto player = new Player(arg + std::to_string(playerNameIncrement));
       playerNameIncrement += 1;
 
+      if (Utils::isEqualLowercase(arg, "aggressive")) {
+        player->strategy = new AggressivePlayerStrategy(player);
+      } else if (Utils::isEqualLowercase(arg, "cheater")) {
+        player->strategy = new CheaterStrategy(player);
+      } else if (Utils::isEqualLowercase(arg, "benevolent")) {
+        player->strategy = new BenevolentPlayer(player);
+      } else if (Utils::isEqualLowercase(arg, "human")) {
+        player->strategy = new HumanStrategy(player);
+      } else if (Utils::isEqualLowercase(arg, "neutral")) {
+        player->strategy = new NeutralStrategy(player);
+      } else if (Utils::isEqualLowercase(arg, "default")) {
+        player->strategy = new DefaultPlayerStrategy(player);
+      } else {
+        player->strategy = new HumanStrategy(player);
+      }
+
       playersToPlay.push_back(player);
     } else if (mode == "-g") {
       gamesToRun = std::stoi(arg);
@@ -449,7 +463,7 @@ void GameEngine::tournamentMode(Command *command) {
   std::fprintf(logFile, "%10s", "Map");
 
   for (int i = 1; i <= gamesToRun; i += 1) {
-    std::fprintf(logFile, " | %10s", ("Game " + std::to_string(i)).c_str());
+    std::fprintf(logFile, " | %16s", ("Game " + std::to_string(i)).c_str());
   }
 
   std::fprintf(logFile, "\n");
@@ -461,10 +475,12 @@ void GameEngine::tournamentMode(Command *command) {
 
     for (int i = 0; i < gamesToRun; i += 1) {
       players = playersToPlay;
+      turnsGone = 0;
 
       for (auto player: players) {
         player->ownedTerritories.clear();
         player->reinforcements = 50;
+        player->orders->clear();
         player->hand->removeAll();
         player->hand->draw();
         player->hand->draw();
@@ -475,9 +491,9 @@ void GameEngine::tournamentMode(Command *command) {
       mainGameLoop();
 
       if (this->turnsGone < maxTurns)
-        std::fprintf(logFile, " | %10s", players[0]->name.c_str());
+        std::fprintf(logFile, " | %16s", players[0]->name.c_str());
       else
-        std::fprintf(logFile, " | %10s", "Draw");
+        std::fprintf(logFile, " | %16s", "Draw");
     }
 
     std::fprintf(logFile, "\n");

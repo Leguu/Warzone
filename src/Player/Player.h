@@ -1,9 +1,6 @@
 #ifndef WARZONE_PLAYER_H
 #define WARZONE_PLAYER_H
 
-class Player;
-class PlayerStrategy;
-
 #include "../Cards/Card.h"
 #include "../Map/Map.h"
 #include "../Orders/Order.h"
@@ -11,11 +8,6 @@ class PlayerStrategy;
 #include <memory>
 #include <utility>
 #include <vector>
-
-class InvalidCardException : public std::runtime_error {
-  public:
-  explicit InvalidCardException(const std::string &arg);
-};
 
 class PlayerStrategy {
   public:
@@ -31,18 +23,21 @@ class PlayerStrategy {
 
   virtual bool isDoneIssuing();
 
+  bool advanceOrderIssued = false;
+
+  bool cardOrderIssued = false;
+
+  virtual void resetTurn();
+
+  virtual void onAttack();
+
+  virtual vector<string> allowedCards();
+
   private:
-  virtual std::map<std::string, int> getCardNameMap() {
-    return {{"Bomb", 0},
-            {"Blockade", 1},
-            {"Airlift", 2},
-            {"NegotiateCard", 3}};
-  }
-
-  virtual void issueDeployOrder();
-
   virtual void issueAdvanceOrder() = 0;
 
+  protected:
+  virtual void issueDeployOrder();
   virtual void issueCardOrder();
 };
 
@@ -50,20 +45,12 @@ class DefaultPlayerStrategy : public PlayerStrategy {
   public:
   explicit DefaultPlayerStrategy(Player *pPlayer);
 
-  [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const override;
-
   [[nodiscard]] vector<Territory *> toDefend() const override;
 
   void issueOrder() override;
 
-  bool isDoneIssuing() override;
-
   private:
-  void issueDeployOrder() override;
-
   void issueAdvanceOrder() override;
-
-  void issueCardOrder() override;
 };
 
 class AggressivePlayerStrategy : public PlayerStrategy {
@@ -74,13 +61,9 @@ class AggressivePlayerStrategy : public PlayerStrategy {
 
   [[nodiscard]] vector<Territory *> toDefend() const override;
 
+  vector<string> allowedCards() override;
+
   private:
-  std::map<std::string, int> getCardNameMap() override {
-    return {
-            {"Bomb", 0},
-            {"Airlift", 2},
-    };
-  }
 
   int nextToAttack = 0;
 
@@ -95,6 +78,9 @@ class CheaterStrategy : public PlayerStrategy {
 
   void issueOrder() override;
 
+
+  [[nodiscard]] vector<Territory *> toDefend() const override;
+
   private:
   void issueDeployOrder() override;
 
@@ -107,11 +93,52 @@ class NeutralStrategy : public PlayerStrategy {
   public:
   explicit NeutralStrategy(Player *pPlayer);
 
+  [[nodiscard]] vector<std::pair<Territory *, Territory *>> toAttack() const override;
+  [[nodiscard]] vector<Territory *> toDefend() const override;
+
+  void onAttack() override;
+
+  private:
+  void issueAdvanceOrder() override;
+
+  public:
   inline bool isDoneIssuing() override { return true; }
   void issueOrder() override;
-
 };
 
+class HumanStrategy : public PlayerStrategy {
+  public:
+  explicit HumanStrategy(Player *p);
+  void issueOrder() override;
+  bool isDoneIssuing() override;
+
+  [[nodiscard]] vector<std::pair<Territory *, Territory *>> toAttack() const override;
+  [[nodiscard]] vector<Territory *> toDefend() const override;
+
+  void resetTurn() override;
+
+  private:
+  bool doneIssuing = false;
+  void issueDeployOrder() override;
+  void issueAdvanceOrder() override;
+  void issueCardOrder() override;
+};
+
+class BenevolentPlayer : public PlayerStrategy {
+  public:
+  explicit BenevolentPlayer(Player *pPlayer);
+
+  [[nodiscard]] std::vector<std::pair<Territory *, Territory *>> toAttack() const override;
+
+  [[nodiscard]] vector<Territory *> toDefend() const override;
+
+  vector<string> allowedCards() override;
+
+  private:
+
+  void issueDeployOrder() override;
+  void issueAdvanceOrder() override;
+};
 
 class Player {
   public:
@@ -125,11 +152,7 @@ class Player {
 
   int reinforcementsAfterDeploy = 50;
 
-  bool advanceOrderIssued = false;
-
-  bool cardOrderIssued = false;
-
-  int cardAwarded = false;
+  bool cardAwarded = false;
 
   vector<Player *> cannotAttack = {};
 
@@ -137,7 +160,7 @@ class Player {
 
   vector<Territory *> getAdjacentEnemyTerritories();
 
-  void issueOrder();
+  void issueOrder() const;
 
   friend std::ostream &operator<<(std::ostream &os, const Player &player);
 

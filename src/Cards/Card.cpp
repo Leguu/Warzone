@@ -14,8 +14,8 @@ using std::endl;
  */
 std::ostream &operator<<(std::ostream &os, const Hand &hand) {
   os << "You have " << hand.cards.size() << " cards in your hand." << endl;
-  for (auto &card : hand.cards) {
-	os << *card << endl;
+  for (auto &card: hand.cards) {
+    os << *card << endl;
   }
   return os;
 }
@@ -28,8 +28,8 @@ std::ostream &operator<<(std::ostream &os, const Hand &hand) {
  */
 std::ostream &operator<<(std::ostream &os, const Deck &deck) {
   os << "You have " << deck.cards.size() << " cards in your deck." << endl;
-  for (auto &card : deck.cards) {
-	os << *card << endl;
+  for (auto &card: deck.cards) {
+    os << *card << endl;
   }
   return os;
 }
@@ -45,12 +45,12 @@ void Hand::listHand() const { cout << *this << endl; }
  */
 void Hand::remove(Card *card) {
   int index = 0;
-  for (auto cardIteration : this->cards) {
-	if (cardIteration->name == card->name) {
-	  this->cards.erase(this->cards.begin() + index);
-	  return;
-	}
-	index++;
+  for (auto cardIteration: this->cards) {
+    if (cardIteration->name == card->name) {
+      this->cards.erase(this->cards.begin() + index);
+      return;
+    }
+    index++;
   }
 }
 
@@ -90,28 +90,29 @@ bool BombCard::play(Player *issuer) const {
   auto ge = GameEngine::instance();
   auto adjacentEnemyTerritories = issuer->getAdjacentEnemyTerritories();
   while (true) {
-	cout << "BombCard Adjacent enemy territories you can bomb: ";
-	for (auto adjacentEnemyTerritory : adjacentEnemyTerritories) {
-	  cout << "* " << *adjacentEnemyTerritory << " ";
-	}
-	cout << endl;
-	auto territory = ge->map->getInputTerritory(
-		"Please input the ID of the territory you will bomb.");
-	if (territory->getOwner() == issuer) {
-	  cout << "Error: Cannot bomb your own territory!" << endl << endl;
-	  continue;
-	}
-	auto adjacentTerritory =
-		std::find(adjacentEnemyTerritories.begin(),
-				  adjacentEnemyTerritories.end(), territory);
-	if (adjacentTerritory == adjacentEnemyTerritories.end()) {
-	  cout << "Error: Can only bomb adjacent enemy territories!" << endl
-		   << endl;
-	  continue;
-	}
-	cout << endl;
-	BombCard::execute(issuer, territory);
-	return true;
+    cout << "BombCard Adjacent enemy territories you can bomb: ";
+    for (auto adjacentEnemyTerritory: adjacentEnemyTerritories) {
+      cout << "* " << *adjacentEnemyTerritory << " ";
+    }
+    cout << endl;
+    auto territory = ge->map->getInputTerritory(
+            "Please input the ID of the territory you will bomb.");
+    if (territory->getOwner() == issuer) {
+      cout << "Error: Cannot bomb your own territory!" << endl
+           << endl;
+      continue;
+    }
+    auto adjacentTerritory =
+            std::find(adjacentEnemyTerritories.begin(),
+                      adjacentEnemyTerritories.end(), territory);
+    if (adjacentTerritory == adjacentEnemyTerritories.end()) {
+      cout << "Error: Can only bomb adjacent enemy territories!" << endl
+           << endl;
+      continue;
+    }
+    cout << endl;
+    BombCard::execute(issuer, territory);
+    return true;
   }
 }
 
@@ -152,20 +153,21 @@ NegotiateCard::~NegotiateCard() = default;
 bool BlockadeCard::play(Player *issuer) const {
   auto ge = GameEngine::instance();
   while (true) {
-	cout << "BlockadeCard Territories you own: " << endl;
-	for (Territory *playerTerritory : issuer->ownedTerritories) {
-	  cout << "Name: " << playerTerritory->getName()
-		   << ", ID : " << playerTerritory->getId() << endl;
-	}
-	auto territory = ge->map->getInputTerritory(
-		"Please input the ID of the territory you will Blockade.");
-	if (territory->getOwner() != issuer) {
-	  cout << "Error: Cannot blockade territory you don't own!" << endl << endl;
-	  continue;
-	}
-	cout << endl;
-	BlockadeCard::execute(issuer, territory);
-	return true;
+    cout << "BlockadeCard Territories you own: " << endl;
+    for (Territory *playerTerritory: issuer->ownedTerritories) {
+      cout << "Name: " << playerTerritory->getName()
+           << ", ID : " << playerTerritory->getId() << endl;
+    }
+    auto territory = ge->map->getInputTerritory(
+            "Please input the ID of the territory you will Blockade.");
+    if (territory->getOwner() != issuer) {
+      cout << "Error: Cannot blockade territory you don't own!" << endl
+           << endl;
+      continue;
+    }
+    cout << endl;
+    BlockadeCard::execute(issuer, territory);
+    return true;
   }
 }
 
@@ -176,7 +178,7 @@ bool BlockadeCard::play(Player *issuer) const {
  */
 void BlockadeCard::execute(Player *issuer, Territory *territory) {
   auto order = new BlockadeOrder(issuer, territory);
-    territory->setOwner(nullptr);
+  territory->setOwner(nullptr);
   issuer->orders->push(order);
 }
 
@@ -193,49 +195,49 @@ void Deck::put(Card *card) { this->cards.push_back(card); }
 bool AirliftCard::play(Player *issuer) const {
   auto ge = GameEngine::instance();
   while (true) {
-	cout << "AirliftCard Territories you own: " << endl;
-	for (Territory *territory : issuer->ownedTerritories) {
-	  cout << "Name: " << territory->getName()
-		   << ", ID : " << territory->getId() << endl;
-	}
-	cout << "Please input the ID of the territory you will airlift." << endl;
-	auto territoryOrigin = ge->map->getInputTerritory(false);
-	if (territoryOrigin->getOwner() != issuer) {
-	  cout << "Error: Cannot airlift from a territory you don't own!" << endl
-		   << endl;
-	  continue;
-	}
-	auto territoryTarget = ge->map->getInputTerritory(
-		"Please input the ID of the destination territory");
-	if (territoryTarget->getOwner() != issuer) {
-	  cout << "Error: Cannot airlift to a territory you don't own!" << endl
-		   << endl;
-	  continue;
-	}
-	int armiesSize;
-	while (true) {
-	  cout << "Number of soldiers on the chosen territory: "
-		   << territoryOrigin->getArmies() << endl;
-	  armiesSize = Utils::getInputInt("Please input the number of soldiers you "
-									  "wish to move or input -1 to exit");
-	  if (armiesSize == -1) {
-		throw Utils::CancelledInputException();
-	  }
-	  if (armiesSize < 0) {
-		cout << "Error: Please place a positive army size!" << endl;
-		continue;
-	  }
-	  if (armiesSize > territoryOrigin->getArmies()) {
-		cout << "Error: Number inputted is bigger than army size on this "
-				"territory"
-			 << endl;
-		continue;
-	  }
-	  break;
-	}
-	cout << endl;
-	AirliftCard::execute(issuer, armiesSize, territoryOrigin, territoryTarget);
-	return true;
+    cout << "AirliftCard Territories you own: " << endl;
+    for (Territory *territory: issuer->ownedTerritories) {
+      cout << "Name: " << territory->getName()
+           << ", ID : " << territory->getId() << endl;
+    }
+    cout << "Please input the ID of the territory you will airlift." << endl;
+    auto territoryOrigin = ge->map->getInputTerritory(false);
+    if (territoryOrigin->getOwner() != issuer) {
+      cout << "Error: Cannot airlift from a territory you don't own!" << endl
+           << endl;
+      continue;
+    }
+    auto territoryTarget = ge->map->getInputTerritory(
+            "Please input the ID of the destination territory");
+    if (territoryTarget->getOwner() != issuer) {
+      cout << "Error: Cannot airlift to a territory you don't own!" << endl
+           << endl;
+      continue;
+    }
+    int armiesSize;
+    while (true) {
+      cout << "Number of soldiers on the chosen territory: "
+           << territoryOrigin->getArmies() << endl;
+      armiesSize = Utils::getInputInt("Please input the number of soldiers you "
+                                      "wish to move or input -1 to exit");
+      if (armiesSize == -1) {
+        throw Utils::CancelledInputException();
+      }
+      if (armiesSize < 0) {
+        cout << "Error: Please place a positive army size!" << endl;
+        continue;
+      }
+      if (armiesSize > territoryOrigin->getArmies()) {
+        cout << "Error: Number inputted is bigger than army size on this "
+                "territory"
+             << endl;
+        continue;
+      }
+      break;
+    }
+    cout << endl;
+    AirliftCard::execute(issuer, armiesSize, territoryOrigin, territoryTarget);
+    return true;
   }
 }
 
@@ -247,10 +249,10 @@ bool AirliftCard::play(Player *issuer) const {
  * @param territoryTarget The territory you will airlift to
  */
 void AirliftCard::execute(Player *issuer, int armiesSize,
-						  Territory *territoryOrigin,
-						  Territory *territoryTarget) {
+                          Territory *territoryOrigin,
+                          Territory *territoryTarget) {
   auto order =
-	  new AirliftOrder(issuer, armiesSize, territoryOrigin, territoryTarget);
+          new AirliftOrder(issuer, armiesSize, territoryOrigin, territoryTarget);
   issuer->orders->push(order);
 }
 
@@ -259,12 +261,33 @@ void AirliftCard::execute(Player *issuer, int armiesSize,
  */
 Card *Hand::draw() {
   auto ge = GameEngine::instance();
-  auto card = ge->deck->draw();
-  if (card == nullptr) {
-	cout << "There are no more cards to draw in the deck!" << endl;
-	return nullptr;
+
+  auto allowedCards = player->strategy->allowedCards();
+  if (std::all_of(ge->deck->cards.begin(), ge->deck->cards.end(), [&allowedCards](Card *c) {
+        return std::find(allowedCards.begin(), allowedCards.end(), c->name) == allowedCards.end();
+      })) {
+    cout << "I can't draw anything, because all the cards are of a disallowed type." << endl;
+    return nullptr;
   }
+
+  Card *card;
+  while (true) {
+    card = ge->deck->draw();
+    if (card == nullptr) {
+      cout << "There are no more cards to draw in the deck!" << endl;
+      return nullptr;
+    }
+
+    if (std::find(allowedCards.begin(), allowedCards.end(), card->name) == allowedCards.end()) {
+      ge->deck->put(card);
+      continue;
+    }
+
+    break;
+  }
+
   this->add(card);
+
   return card;
 }
 
@@ -274,8 +297,8 @@ Card *Hand::draw() {
  */
 Hand::Hand(const Hand &hand) {
   std::vector<Card *> copyCards;
-  for (auto card : hand.cards) {
-	copyCards.push_back(card);
+  for (auto card: hand.cards) {
+    copyCards.push_back(card);
   }
   this->cards = copyCards;
 }
@@ -289,27 +312,27 @@ bool NegotiateCard::play(Player *issuer) const {
   std::string playerName;
   Player *target;
   while (true) {
-	cout << "NegotiateCard List of all players in the game:" << endl;
-	for (auto player : ge->players) {
-	  cout << "- " << player->name << endl;
-	}
-	playerName = Utils::getInputString(
-		"Please input the name of the Player you wish to negotiate with or "
-		"input \"cancel\" to cancel this card runGameLoop.");
-	if (Utils::isEqualLowercase(playerName, "cancel")) {
-	  return false;
-	}
-	target = ge->findPlayerByName(playerName);
-	if (!target) {
-	  cout << "Error: this player does not exist!" << endl;
-	  continue;
-	}
-	if (target == issuer) {
-	  cout << "Error: cannot negotiate with yourself!" << endl;
-	  continue;
-	}
-	NegotiateCard::execute(issuer, target);
-	return true;
+    cout << "NegotiateCard List of all players in the game:" << endl;
+    for (auto player: ge->players) {
+      cout << "- " << player->name << endl;
+    }
+    playerName = Utils::getInputString(
+            "Please input the name of the Player you wish to negotiate with or "
+            "input \"cancel\" to cancel this card runGameLoop.");
+    if (Utils::isEqualLowercase(playerName, "cancel")) {
+      return false;
+    }
+    target = ge->findPlayerByName(playerName);
+    if (!target) {
+      cout << "Error: this player does not exist!" << endl;
+      continue;
+    }
+    if (target == issuer) {
+      cout << "Error: cannot negotiate with yourself!" << endl;
+      continue;
+    }
+    NegotiateCard::execute(issuer, target);
+    return true;
   }
 }
 
@@ -329,7 +352,7 @@ void NegotiateCard::execute(Player *issuer, Player *target) {
  */
 Card *Deck::draw() {
   if (this->getCardsSize() == 0) {
-	return nullptr;
+    return nullptr;
   }
 
   unsigned int deckSize = this->getCardsSize();
@@ -352,8 +375,8 @@ unsigned long long Deck::getCardsSize() { return cards.size(); }
  */
 Deck::Deck(const Deck &deck) {
   std::vector<Card *> copyCards;
-  for (auto card : deck.cards) {
-	copyCards.push_back(card);
+  for (auto card: deck.cards) {
+    copyCards.push_back(card);
   }
   this->cards = copyCards;
 }
@@ -365,8 +388,8 @@ Deck::Deck(const Deck &deck) {
  */
 Hand &Hand::operator=(const Hand &hand) {
   std::vector<Card *> copyCards;
-  for (auto card : hand.cards) {
-	copyCards.push_back(card);
+  for (auto card: hand.cards) {
+    copyCards.push_back(card);
   }
   this->cards = copyCards;
   return *this;
@@ -379,8 +402,8 @@ Hand &Hand::operator=(const Hand &hand) {
  */
 Deck &Deck::operator=(const Deck &deck) {
   std::vector<Card *> copyCards;
-  for (auto card : deck.cards) {
-	copyCards.push_back(card);
+  for (auto card: deck.cards) {
+    copyCards.push_back(card);
   }
   this->cards = copyCards;
   return *this;
@@ -390,18 +413,18 @@ Deck &Deck::operator=(const Deck &deck) {
  * Hand destructor
  */
 Hand::~Hand() {
-  for (auto card : this->cards) {
-	delete (card);
+  for (auto card: this->cards) {
+    delete (card);
   }
 }
 
 Card *Hand::removeByName(const string &name) {
-  for (auto card : cards) {
-	for (const auto &alias : card->getAliases())
-	  if (Utils::isEqualLowercase(Utils::trim(name), alias)) {
-		remove(card);
-		return card;
-	  }
+  for (auto card: cards) {
+    for (const auto &alias: card->getAliases())
+      if (Utils::isEqualLowercase(Utils::trim(name), alias)) {
+        remove(card);
+        return card;
+      }
   }
   return nullptr;
 }
@@ -414,11 +437,11 @@ void Hand::play(const string &cardName) {
   auto ge = GameEngine::instance();
   auto card = removeByName(cardName);
   if (card != nullptr) {
-	card->play(player);
-	ge->deck->put(card);
+    card->play(player);
+    ge->deck->put(card);
   } else {
-	cout << "Could not find that card. Are you sure you have it in your hand?"
-		 << endl;
+    cout << "Could not find that card. Are you sure you have it in your hand?"
+         << endl;
   }
 }
 
@@ -433,11 +456,11 @@ void Hand::debugPlay(const string &name) {
   auto cardName = name == "NegotiateCard" ? name : "Negotiate";
   auto card = removeByName(cardName);
   if (card != nullptr) {
-	//	card->play(player);
-	ge->deck->put(card);
+    //	card->play(player);
+    ge->deck->put(card);
   } else {
-	cout << "Could not find that card. Are you sure you have it in your hand?"
-		 << endl;
+    cout << "Could not find that card. Are you sure you have it in your hand?"
+         << endl;
   }
 }
 void Hand::removeAll() {
@@ -448,15 +471,28 @@ void Hand::removeAll() {
     cards.pop_back();
   }
 }
+Card *Hand::removeRandomCard() {
+  if (cards.size() == 0) {
+    return nullptr;
+  }
+
+  srand(time(nullptr));
+  auto randomLocation = rand() % cards.size();
+
+  auto card = cards[randomLocation];
+  cards.erase(std::remove(cards.begin(), cards.end(), card), cards.end());
+
+  return card;
+}
 
 /**
  * Deck destructor
  */
 Deck::~Deck() {
   int counter = 0;
-  for (auto card : this->cards) {
-	delete (card);
-	this->cards[counter] = nullptr;
-	counter = counter + 1;
+  for (auto card: this->cards) {
+    delete (card);
+    this->cards[counter] = nullptr;
+    counter = counter + 1;
   }
 }
