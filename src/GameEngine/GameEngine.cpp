@@ -153,7 +153,7 @@ void GameEngine::issueOrdersPhase() {
         continue;
       }
 
-      cout << player->name << " is issuing an order: ";
+      cout << player->name << " is issuing an order: " << endl;
       player->issueOrder();
     }
   }
@@ -419,6 +419,8 @@ void GameEngine::tournamentMode(Command *command) {
         player->strategy = new AggressivePlayerStrategy(player);
       } else if (Utils::isEqualLowercase(arg, "cheater")) {
         player->strategy = new CheaterStrategy(player);
+      } else if (Utils::isEqualLowercase(arg, "benevolent")) {
+        player->strategy = new BenevolentPlayer(player);
       } else if (Utils::isEqualLowercase(arg, "human")) {
         player->strategy = new HumanStrategy(player);
       } else if (Utils::isEqualLowercase(arg, "neutral")) {
@@ -468,12 +470,12 @@ void GameEngine::tournamentMode(Command *command) {
 
   for (auto mapToPlayOn: mapsToPlayOn) {
     map = mapToPlayOn;
-    turnsGone = 0;
 
     std::fprintf(logFile, "%10s", map->name.c_str());
 
     for (int i = 0; i < gamesToRun; i += 1) {
       players = playersToPlay;
+      turnsGone = 0;
 
       for (auto player: players) {
         player->ownedTerritories.clear();

@@ -165,6 +165,10 @@ void AdvanceOrder::validate() {
   //						[&target](const Territory *t) { return *t == target;
   //})
 
+  if (armies <= 0) {
+    throw InvalidOrderException("Cannot advance less than or equal to 0 armies.");
+  }
+
   auto sourceIsAdjacent = std::find(source->getAdjTerritories().begin(), source->getAdjTerritories().end(), target) != source->getAdjTerritories().end();
 
   auto targetIsAdjacent = std::find(target->getAdjTerritories().begin(), target->getAdjTerritories().end(), source) != target->getAdjTerritories().end();
@@ -203,7 +207,9 @@ void AdvanceOrder::execute() {
     return;
   }
 
-  targetOwner->strategy->onAttack();
+  if (targetOwner) {
+    targetOwner->strategy->onAttack();
+  }
 
   // 1. deduct source armies
   source->setArmies(source->getArmies() - armies);
@@ -292,7 +298,9 @@ void BombOrder::execute() {
   validate();
   this->target->setArmies(this->target->getArmies() / 2);
   //If player was neutral and gets attacked, set it to aggressive
-  target->getOwner()->strategy->onAttack();
+  if (target->getOwner()) {
+    target->getOwner()->strategy->onAttack();
+  }
   this->Notify(this);
 }
 
