@@ -195,6 +195,7 @@ void GameEngine::reinforcementPhase() const {
 bool GameEngine::startupPhase() {
   const string commands =
           "Available commands:\n"
+          "Tournament -M <Map Name> <Map Name>... -P <Player Strat> <Player Strat>... -G <Number of Games> -D <Draw after number of turns>\n"
           "LoadMap <Map Name> - Load a map\n"
           "ValidateMap - Validate the map has been loaded successfully\n"
           "AddPlayer <Name> - Add a player\n"
