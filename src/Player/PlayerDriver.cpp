@@ -21,3 +21,31 @@ void testPlayers() {
 
   delete ge;
 }
+
+void testPlayerStrategies(){
+
+  auto ge = new GameEngine("../assets/Moon.map");
+
+  auto bob = new Player("Bob");
+
+  auto john = new Player("John");
+
+  bob->strategy = new AggressivePlayerStrategy(bob);
+  john->strategy = new BenevolentPlayer(john);
+
+
+  ge->map->findTerritory("Sea of Nectar")->setOwner(bob);
+  ge->map->findTerritory("Ocean of Storms")->setOwner(john);
+  ge->map->findTerritory("Sea of Clouds")->setOwner(bob);
+  ge->map->findTerritory("Marsh of Diseases")->setOwner(john);
+  ge->map->findTerritory("Harpalus")->setOwner(bob);
+  ge->map->findTerritory("Rhaeticus")->setOwner(john);
+
+
+  ge->players.push_back(bob);
+  ge->players.push_back(john);
+
+  ge->debugMode = true;
+  ge->mainGameLoop();
+  delete ge;
+}
