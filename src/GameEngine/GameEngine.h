@@ -35,6 +35,7 @@ class GameEngine : public ILoggable, public Subject {
                                         "WIN"};
 
   bool debugMode = false;
+  bool testDynamicStrategyFlag = false;
 
   vector<Player *> players = vector<Player *>();
   Deck *deck =

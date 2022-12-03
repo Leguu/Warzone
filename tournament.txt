@@ -1,0 +1,7 @@
+Running this command: `tournament -M moon houston -P Benevolent Aggressive Neutral -G 5 -D 500`
+
+Playing 5 with 500 maximum turns per game
+
+       Map |           Game 1 |           Game 2 |           Game 3 |           Game 4 |           Game 5
+      moon |         neutral2 |      aggressive1 |         neutral2 |         neutral2 |      aggressive1
+   houston |      aggressive1 |             Draw |      aggressive1 |             Draw |         neutral2
