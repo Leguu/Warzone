@@ -91,6 +91,27 @@ void GameEngine::mainGameLoop() {
 
     executeOrdersPhase();
 
+    if (this->testDynamicStrategyFlag) {
+      for (auto player: this->players) {
+        cout << "[Test] dynamically set new strategy:" << endl;
+        auto strategy = Utils::getInputString("Set strategy for " + player->name + " (human, aggressive, benevolent, neutral or cheater)");
+        if (Utils::isEqualLowercase(Utils::toLowercase(strategy), "human")) {
+          player->strategy = new HumanStrategy(player);
+        } else if (Utils::isEqualLowercase(Utils::toLowercase(strategy), "aggressive")) {
+          player->strategy = new AggressivePlayerStrategy(player);
+        } else if (Utils::isEqualLowercase(Utils::toLowercase(strategy), "benevolent")) {
+          player->strategy = new BenevolentPlayer(player);
+        } else if (Utils::isEqualLowercase(Utils::toLowercase(strategy), "neutral")) {
+          player->strategy = new NeutralStrategy(player);
+        } else if (Utils::isEqualLowercase(Utils::toLowercase(strategy), "cheater")) {
+          player->strategy = new CheaterStrategy(player);
+        } else {
+          cout << "Invalid strategy name" << endl;
+        }
+      }
+      this->testDynamicStrategyFlag = false;
+    }
+
     turnsGone += 1;
 
     if (players.size() == 1) {

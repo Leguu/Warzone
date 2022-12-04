@@ -15,7 +15,7 @@ int main() {
   while (true) {
     auto input =
             Utils::getInputString("What do you want to test? cards, map, orders, "
-                                  "players, logging, startup, mainloop, game "
+                                  "players, logging, startup, mainloop, strategy, game "
                                   "command. Type quit to quit");
 
     auto tokens = Utils::tokenizer(input, ' ');
@@ -36,6 +36,8 @@ int main() {
       testStartupPhase();
     } else if (Utils::isEqualLowercase(input, "mainloop")) {
       testMainGameLoop();
+    } else if (Utils::isEqualLowercase(input, "strategy")) {
+      testPlayerStrategies();
     } else if (Utils::isEqualLowercase(input, "game")) {
       auto ge = new GameEngine();
 

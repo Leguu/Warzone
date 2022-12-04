@@ -166,5 +166,6 @@ class Player {
 };
 
 void testPlayers();
+void testPlayerStrategies();
 
 #endif// WARZONE_PLAYER_H
