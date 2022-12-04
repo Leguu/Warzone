@@ -1,6 +1,0 @@
-Running this command: `tournament -M moon -P Benevolent Aggressive -G 2 -D 200`
-
-Playing 2 with 200 maximum turns per game
-
-       Map |           Game 1 |           Game 2
-      moon |      aggressive1 |      aggressive1
