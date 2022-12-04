@@ -91,6 +91,7 @@ class CheaterStrategy : public PlayerStrategy {
 class NeutralStrategy : public PlayerStrategy {
   public:
   explicit NeutralStrategy(Player *pPlayer);
+
   [[nodiscard]] vector<std::pair<Territory *, Territory *>> toAttack() const override;
   [[nodiscard]] vector<Territory *> toDefend() const override;
 

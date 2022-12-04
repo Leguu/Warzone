@@ -49,6 +49,7 @@ private:
   string effect;
 
   friend class CommandProcessor;
+  friend void testTournament();
   friend void testLoggingObserver();
   friend class FileCommandProcessorAdapter;
 };
@@ -87,6 +88,7 @@ private:
   virtual string getLine();
 
   vector<Command *> commands;
+  friend void testTournament();
   friend void testLoggingObserver();
   friend class FileCommandProcessorAdapter;
 };

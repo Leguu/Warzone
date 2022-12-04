@@ -31,14 +31,15 @@ vector<Territory *> Player::getAdjacentEnemyTerritories() {
  * @return A string containing a player's information
  */
 std::ostream &operator<<(std::ostream &os, const Player &player) {
-  os << player.name << endl;
-  return os;
+    os << player.name << endl;
+    return os;
 }
 
 /**
  * Player constructor
  * @param name The name of the player
  */
+
 Player::Player(string name) : name(std::move(name)), orders(new OrderList()) {
   this->hand = new Hand(this);
 }
@@ -192,6 +193,7 @@ void DefaultPlayerStrategy::issueOrder() {
 void CheaterStrategy::issueAdvanceOrder() {
   //do nothing
 }
+
 /**
  * CheaterStrategy constructor
  * @param pPlayer The player using this strategy
@@ -353,6 +355,7 @@ vector<std::pair<Territory *, Territory *>> BenevolentPlayer::toAttack() const {
             });
 
   return adjacentFriends;
+
 }
 
 /**
@@ -419,7 +422,6 @@ BenevolentPlayer::BenevolentPlayer(Player *pPlayer) : PlayerStrategy(pPlayer) {}
 vector<string> BenevolentPlayer::allowedCards() {
   return {"Airlift", "Negotiate", "Blockade"};
 }
-
 
 // ------------------ Aggressive strategy -------------------------
 

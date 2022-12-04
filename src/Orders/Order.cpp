@@ -206,7 +206,7 @@ void AdvanceOrder::execute() {
     target->setArmies(armies);
     return;
   }
-
+  
   if (targetOwner) {
     targetOwner->strategy->onAttack();
   }
@@ -247,6 +247,7 @@ void AdvanceOrder::execute() {
     std::cout << this->issuer->name + " wins territory " + target->getName()
               << std::endl;
   }
+  this->Notify(this);
 }
 
 /**

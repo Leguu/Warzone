@@ -9,14 +9,15 @@
 #include "Orders/OrdersDriver.cpp"
 #include "Player/PlayerDriver.cpp"
 #include "Utils/Utils.h"
+#include "GameEngine/TournamentDriver.cpp"
 
 int main() {
   auto log = new LogObserver();
   while (true) {
     auto input =
             Utils::getInputString("What do you want to test? cards, map, orders, "
-                                  "players, logging, startup, mainloop, strategy, game "
-                                  "command. Type quit to quit");
+                                  "players, logging, startup, mainloop, game, "
+                                  "command, testTournament, strategy. Type quit to quit");
 
     auto tokens = Utils::tokenizer(input, ' ');
 
@@ -45,7 +46,9 @@ int main() {
       ge->startupPhase();
 
       delete ge;
-    } else if (Utils::isEqualLowercase(tokens[0], "gf")) {
+    }else if(Utils::isEqualLowercase(input, "testTournament")){
+      testTournament();
+    }else if (Utils::isEqualLowercase(tokens[0], "gf")) {
       auto ge = new GameEngine();
       ge->commandProcessor = new FileCommandProcessorAdapter("../commands/" + input.substr(3) + ".cmd");
 
