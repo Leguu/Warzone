@@ -17,7 +17,7 @@ int main() {
     auto input =
             Utils::getInputString("What do you want to test? cards, map, orders, "
                                   "players, logging, startup, mainloop, game, "
-                                  "command, tournament. Type quit to quit");
+                                  "command, testTournament. Type quit to quit");
 
     auto tokens = Utils::tokenizer(input, ' ');
 
@@ -44,7 +44,7 @@ int main() {
       ge->startupPhase();
 
       delete ge;
-    }else if(Utils::isEqualLowercase(input, "tournament")){
+    }else if(Utils::isEqualLowercase(input, "testTournament")){
       testTournament();
     }else if (Utils::isEqualLowercase(tokens[0], "gf")) {
       auto ge = new GameEngine();
